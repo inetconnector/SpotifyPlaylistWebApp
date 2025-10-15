@@ -1,6 +1,134 @@
 @{
+    Layout = null;
     ViewData["Title"] = "Startseite";
 }
-<h1>Spotify Playlist Generator</h1>
-<p><a href="/Home/Login">🔐 Mit Spotify verbinden</a></p>
-<p><a href="/datenschutz.html" target="_blank">📄 Datenschutzerklärung</a></p>
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>@ViewData["Title"] – InetConnector Playlist Generator™ – nutzt die Spotify® Web APIs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: radial-gradient(1000px 600px at 20% 10%, rgba(16,185,129,0.25), transparent 60%), radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,0.25), transparent 60%), #0b0f17;
+            color: white;
+        }
+
+        .glass {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+
+        a {
+            color: #10b981;
+            text-decoration: underline;
+        }
+
+            a:hover {
+                color: #34d399;
+            }
+             
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 1rem;
+            font-size: 1.125rem;
+            font-weight: 500;
+            background-color: #10b981;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover {
+            background-color: #059669;
+        }
+    </style>
+
+</head>
+
+<body class="min-h-screen font-sans antialiased flex flex-col">
+
+<main class="flex-grow max-w-3xl mx-auto px-6 py-16">
+    <div class="glass rounded-3xl p-8 md:p-10 shadow-xl text-center leading-relaxed">
+
+        <div class="flex justify-center mb-6">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-500 grid place-items-center shadow-lg text-2xl">
+                🎧
+            </div>
+        </div>
+
+            <h1 class="text-3xl md:text-4xl font-bold mb-4">Playlist Generator für Spotify®</h1>
+
+        <p class="text-white/80 mb-8">
+            Willkommen! Mit diesem Tool kannst du deine <strong>Lieblingssongs</strong> automatisch
+            als Playlist speichern oder neue <strong>Empfehlungen</strong> generieren – direkt über die Spotify Web API.
+        </p>
+
+        <div class="mt-8 mb-8">
+            <a href="/Home/Login" class="btn">
+                🔐 Mit Spotify verbinden
+            </a>
+        </div>
+
+        <p class="text-white/70 text-sm max-w-lg mx-auto">
+            Nach dem Login gelangst du zu deinem <strong>Dashboard</strong>, wo du:
+        </p>
+
+        <ul class="list-disc list-inside text-left text-white/80 mt-3 max-w-md mx-auto text-sm space-y-1">
+            <li>🎲 Zufällige Lieblingssongs-Playlists erzeugen</li>
+            <li>📜 Original-Reihenfolge deiner Lieblingssongs klonen</li>
+            <li>✨ Empfohlene Songs basierend auf deinem Profil generieren</li>
+        </ul>
+
+        <!-- Spendenabschnitt -->
+        <div class="mt-12 glass rounded-2xl p-6 md:p-8 shadow-inner">
+            <h2 class="text-2xl font-semibold mb-3">🙏 Unterstütze das Projekt</h2>
+            <p class="text-white/80 mb-4">
+                Gefällt dir dieses Tool? Du kannst mich mit einer kleinen Spende unterstützen – danke für deinen Beitrag!
+            </p>
+            <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
+               target="_blank"
+               rel="noopener"
+               class="btn mb-6">
+                💚 Jetzt über PayPal spenden
+            </a>
+
+            <div class="flex flex-col items-center justify-center">
+                <img src="/QR-Code.png" alt="PayPal QR-Code"
+                     class="w-40 h-40 rounded-2xl border border-white/20 shadow-md"/>
+                <p class="text-sm text-white/70 mt-3">Scanne den QR-Code zum Spenden</p>
+            </div>
+        </div>
+         
+    </div>
+</main>
+
+<footer class="max-w-5xl mx-auto px-6 mt-10 pb-10 text-sm text-white/70">
+    <div class="glass rounded-2xl p-5 flex flex-col md:flex-row justify-between items-center gap-3">
+        <div class="flex flex-col md:flex-row items-center gap-3">
+            <span>© @DateTime.Now.Year InetConnector – Alle Rechte vorbehalten</span>
+            <span class="hidden md:inline">·</span>
+            <a href="/Home/Impressum" class="hover:text-white underline">Impressum</a>
+            <a href="/Home/Datenschutz" class="hover:text-white underline">Datenschutz</a>
+        </div>
+
+        <div class="flex items-center gap-3 mt-4 md:mt-0">
+            <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
+               target="_blank" rel="noopener"
+               class="hover:text-white underline">
+                💚 Spenden
+            </a>
+            <img src="/QR-Code.png" alt="PayPal QR-Code"
+                 class="w-10 h-10 rounded-md border border-white/20"/>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text;
+using Microsoft.AspNetCore.Mvc;
 using SpotifyAPI.Web;
 
 namespace SpotifyPlaylistWebApp.Controllers;
@@ -6,15 +7,25 @@ namespace SpotifyPlaylistWebApp.Controllers;
 public class HomeController : Controller
 {
     private static readonly string _clientId = "89d26c134b954a28b78b74cfb893b71b";
-    private static readonly string _redirectUri = "https://spotify.inetconnector.com/callback/";
+    private static readonly string _redirectUri = "https://playlists.inetconnector.com/callback/";
     private static string _verifier;
     private static string _accessToken;
 
-    public IActionResult Index()
-    {
-        return View();
-    }
+    // 🧠 Cooldown-Speicher: pro Benutzer + Aktion
+    private static readonly Dictionary<string, DateTime> _lastActions = new();
+    private static readonly TimeSpan CooldownDuration = TimeSpan.FromMinutes(4);
 
+    // ============================
+    // 🔸 Grundseiten
+    // ============================
+
+    public IActionResult Index() => View();
+    public IActionResult Impressum() => View();
+    public IActionResult Datenschutz() => View();
+
+    // ============================
+    // 🔸 Spotify Login Flow
+    // ============================
 
     public IActionResult Login()
     {
@@ -23,8 +34,7 @@ public class HomeController : Controller
         var loginRequest = new LoginRequest(
             new Uri(_redirectUri),
             _clientId,
-            LoginRequest.ResponseType.Code
-        )
+            LoginRequest.ResponseType.Code)
         {
             CodeChallenge = challenge,
             CodeChallengeMethod = "S256",
@@ -37,8 +47,7 @@ public class HomeController : Controller
             }
         };
 
-        var uri = loginRequest.ToUri();
-        return Redirect(uri.ToString());
+        return Redirect(loginRequest.ToUri().ToString());
     }
 
     [HttpGet("/callback")]
@@ -47,167 +56,232 @@ public class HomeController : Controller
         var tokenResponse = await new OAuthClient().RequestToken(
             new PKCETokenRequest(_clientId, code, new Uri(_redirectUri), _verifier)
         );
+
         _accessToken = tokenResponse.AccessToken;
         return RedirectToAction("Dashboard");
     }
 
+    // ============================
+    // 🔸 Dashboard
+    // ============================
 
     public async Task<IActionResult> Dashboard()
     {
-        if (_accessToken == null) return RedirectToAction("Index");
+        if (_accessToken == null)
+            return RedirectToAction("Index");
 
         var config = SpotifyClientConfig.CreateDefault().WithToken(_accessToken);
         var spotify = new SpotifyClient(config);
-
         var me = await spotify.UserProfile.Current();
+
         ViewBag.User = me.DisplayName;
         return View();
     }
-    public async Task<IActionResult> CreateFavorites()
+
+    // ============================
+    // 🔸 Playlist-Aktionen
+    // ============================
+
+    [HttpGet]
+    public IActionResult CreateFavoritesOrdered()
+        => StartPlaylistJob(false, false, "Lieblingssongs Original", "[Ordered]");
+
+    [HttpGet]
+    public IActionResult CreateFavoritesShuffled()
+        => StartPlaylistJob(true, false, "Lieblingssongs Shuffled", "[Shuffled]");
+
+    [HttpGet]
+    public IActionResult CreateFavoritesSimilar()
+        => StartPlaylistJob(false, true, "Lieblingssongs Similar", "[Similar]");
+
+    // ============================
+    // 🔸 Cooldown & Startlogik
+    // ============================
+
+    private IActionResult StartPlaylistJob(bool shuffled, bool similar, string namePrefix, string logTag)
     {
-        var config = SpotifyClientConfig.CreateDefault().WithToken(_accessToken);
+        if (_accessToken == null)
+            return Content(RenderMessage("⚠️ Bitte zuerst einloggen.", "warning"),
+                "text/html; charset=utf-8", Encoding.UTF8);
+
+        var userKey = $"{_accessToken}_{logTag}";
+
+        // ⏳ Cooldown-Prüfung
+        lock (_lastActions)
+        {
+            if (_lastActions.TryGetValue(userKey, out var last)
+                && DateTime.UtcNow - last < CooldownDuration)
+            {
+                var remaining = CooldownDuration - (DateTime.UtcNow - last);
+                var minutes = (int)remaining.TotalMinutes;
+                var seconds = remaining.Seconds;
+                return Content(RenderMessage(
+                    $"⏳ Bitte warte {minutes}:{seconds:D2} Minuten, bevor du diese Aktion erneut startest.", "warning"),
+                    "text/html; charset=utf-8", Encoding.UTF8);
+            }
+
+            _lastActions[userKey] = DateTime.UtcNow;
+        }
+
+        // 🧩 Startet Playlist-Erstellung im Hintergrund
+        Task.Run(async () =>
+        {
+            try
+            {
+                await GenerateFavoritesPlaylistAsync(_accessToken, shuffled, similar, namePrefix);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{logTag} Fehler: {ex.Message}");
+            }
+        });
+
+        return Content(RenderMessage("✅ Playlist-Erstellung gestartet.<br>Bitte in 1–2 Minuten in Spotify® prüfen."),
+            "text/html; charset=utf-8", Encoding.UTF8);
+    }
+
+    // ============================
+    // 🔸 Playlist-Logik
+    // ============================
+
+    private static async Task GenerateFavoritesPlaylistAsync(
+        string token, bool shuffled, bool similar, string namePrefix)
+    {
+        var config = SpotifyClientConfig.CreateDefault().WithToken(token);
         var spotify = new SpotifyClient(config);
         var me = await spotify.UserProfile.Current();
 
         var allTopTracks = new List<FullTrack>();
-        int offset = 0;
-        const int limit = 50;
+        var offset = 0;
+        const int pageSize = 50;
 
         while (true)
         {
             var req = new PersonalizationTopRequest
             {
                 TimeRangeParam = PersonalizationTopRequest.TimeRange.LongTerm,
-                Limit = limit,
+                Limit = pageSize,
                 Offset = offset
             };
-
             var batch = await spotify.Personalization.GetTopTracks(req);
-            if (batch.Items.Count == 0)
-                break;
+            if (batch.Items.Count == 0) break;
 
             allTopTracks.AddRange(batch.Items);
-            offset += limit;
-
-            if (batch.Items.Count < limit)
-                break;
+            offset += pageSize;
+            if (batch.Items.Count < pageSize) break;
         }
 
         if (allTopTracks.Count == 0)
-            return Content("⚠️ Keine Top-Tracks gefunden. Bitte Spotify-App häufiger benutzen oder neu einloggen (user-top-read-Token).");
-
-        var uris = allTopTracks.Select(t => t.Uri).ToList();
-
-        var playlist = await spotify.Playlists.Create(me.Id,
-            new PlaylistCreateRequest($"Lieblingssongs {DateTime.Now:yyyy-MM-dd}")
-            {
-                Public = false
-            });
-
-        for (int i = 0; i < uris.Count; i += 100)
         {
-            var batch = uris.Skip(i).Take(100).ToList();
-            await spotify.Playlists.AddItems(playlist.Id, new PlaylistAddItemsRequest(batch));
+            Console.WriteLine($"{namePrefix}: Keine Top-Tracks gefunden.");
+            return;
         }
 
-        return Content($"✅ Playlist '{playlist.Name}' erstellt mit {uris.Count} Songs.<br>" +
-                       $"<a href='{playlist.ExternalUrls["spotify"]}' target='_blank'>Öffnen in Spotify</a>",
-            "text/html");
-    }
+        List<string> uris;
 
-
-    //public async Task<IActionResult> CreateFavorites()
-    //{
-    //    var config = SpotifyClientConfig.CreateDefault().WithToken(_accessToken);
-    //    var spotify = new SpotifyClient(config);
-    //    var me = await spotify.UserProfile.Current();
-
-    //    var top = await spotify.Personalization.GetTopTracks(new PersonalizationTopRequest
-    //    {
-    //        TimeRangeParam = PersonalizationTopRequest.TimeRange.ShortTerm,
-    //        Limit = 50
-    //    });
-
-    //    var uris = top.Items.Select(t => t.Uri).ToList();
-    //    var playlist = await spotify.Playlists.Create(me.Id,
-    //        new PlaylistCreateRequest("Lieblingssongs " + DateTime.Now.ToString("yyyy-MM-dd"))
-    //        {
-    //            Public = false
-    //        });
-
-    //    await spotify.Playlists.AddItems(playlist.Id, new PlaylistAddItemsRequest(uris));
-    //    return Content(playlist.ExternalUrls["spotify"]);
-    //}
-
-    public async Task<IActionResult> CreateRecommendations()
-    {
-        var config = SpotifyClientConfig.CreateDefault().WithToken(_accessToken);
-        var spotify = new SpotifyClient(config);
-        var me = await spotify.UserProfile.Current();
-
-        // 1️⃣ Lieblingssongs abrufen
-        var top = await spotify.Personalization.GetTopTracks(new PersonalizationTopRequest
+        if (similar)
         {
-            TimeRangeParam = PersonalizationTopRequest.TimeRange.ShortTerm,
-            Limit = 10
-        });
-
-        var uris = new List<string>();
-
-        foreach (var t in top.Items)
-        {
-            if (t.Album == null) continue;
-
-            try
+            var similarUris = new List<string>();
+            foreach (var t in allTopTracks)
             {
-                // 2️⃣ Alle Tracks des Albums abrufen
-                var albumTracks = await spotify.Albums.GetTracks(t.Album.Id);
+                if (t.Artists == null || t.Artists.Count == 0) continue;
+                var artistId = t.Artists.First().Id;
+                var trackId = t.Id;
 
-                // 3️⃣ Original-Popularität abrufen
-                var originalTrack = await spotify.Tracks.Get(t.Id);
-                var originalPopularity = originalTrack.Popularity;
-
-                // 4️⃣ Alle Tracks dieses Albums (außer der Originale)
-                var candidates = new List<FullTrack>();
-                foreach (var at in albumTracks.Items)
+                try
                 {
-                    if (at.Id == t.Id) continue;
-                    var details = await spotify.Tracks.Get(at.Id);
-                    candidates.Add(details);
+                    var recRequest = new RecommendationsRequest { Limit = 10 };
+                    recRequest.SeedArtists.Add(artistId);
+                    recRequest.SeedTracks.Add(trackId);
+                    var recs = await spotify.Browse.GetRecommendations(recRequest);
+
+                    SimpleTrack? alt = null;
+                    var highestPopularity = -1;
+                    foreach (var st in recs.Tracks.Where(x => x.Artists.Any(a => a.Id == artistId) && x.Id != trackId))
+                        try
+                        {
+                            var full = await spotify.Tracks.Get(st.Id);
+                            if (full.Popularity > highestPopularity)
+                            {
+                                alt = st;
+                                highestPopularity = full.Popularity;
+                            }
+                        }
+                        catch { }
+
+                    if (alt != null)
+                        similarUris.Add(alt.Uri);
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Similar] Fehler bei {t.Name}: {ex.Message}");
+                }
+            }
+            uris = similarUris.Distinct().ToList();
+        }
+        else
+        {
+            var finalList = (shuffled
+                ? allTopTracks.OrderBy(_ => Guid.NewGuid()).ToList()
+                : allTopTracks.ToList());
 
-                // 5️⃣ Den ähnlich beliebten Song auswählen
-                var similar = candidates
-                    .OrderBy(x => Math.Abs(x.Popularity - originalPopularity))
-                    .FirstOrDefault();
-
-                if (similar != null)
-                    uris.Add(similar.Uri);
-            }
-            catch (APIException ex)
-            {
-                Console.WriteLine($"⚠️ Spotify API error for {t.Name}: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Fehler: {ex.Message}");
-            }
+            uris = finalList.Select(t => t.Uri).ToList();
         }
 
-        if (uris.Count == 0)
-            return Content("Keine ähnlichen Songs aus Alben gefunden.");
+        var playlistName = $"{namePrefix} {DateTime.Now:yyyy-MM-dd}";
+        var playlist = await spotify.Playlists.Create(me.Id,
+            new PlaylistCreateRequest(playlistName) { Public = false });
 
-        // 6️⃣ Playlist erstellen
-        var playlist = await spotify.Playlists.Create(me.Id, new PlaylistCreateRequest(
-            $"Ähnliche Album-Songs {DateTime.Now:yyyy-MM-dd}")
+        for (var i = 0; i < uris.Count; i += 100)
         {
-            Public = false
-        });
+            var chunk = uris.Skip(i).Take(100).ToList();
+            if (chunk.Count > 0)
+                await spotify.Playlists.AddItems(playlist.Id, new PlaylistAddItemsRequest(chunk));
+        }
 
-        await spotify.Playlists.AddItems(playlist.Id, new PlaylistAddItemsRequest(uris));
-
-        return Content($"✅ Playlist erstellt: <a href='{playlist.ExternalUrls["spotify"]}' target='_blank'>{playlist.ExternalUrls["spotify"]}</a>", "text/html");
+        Console.WriteLine($"✅ {playlistName} erstellt mit {uris.Count} Songs: {playlist.ExternalUrls["spotify"]}");
     }
 
+    // ============================
+    // 🔸 HTML für Rückmeldungen
+    // ============================
 
+    private static string RenderMessage(string message, string type = "success")
+    {
+        var color = type switch
+        {
+            "warning" => "#facc15",
+            "error" => "#ef4444",
+            _ => "#10b981"
+        };
+
+        return $@"
+        <!doctype html>
+        <html lang='de'>
+        <head>
+            <meta charset='utf-8'/>
+            <meta name='viewport' content='width=device-width, initial-scale=1'/>
+            <title>InetConnector Playlist Generator™</title>
+            <script src='https://cdn.tailwindcss.com'></script>
+            <style>
+                body {{
+                    background: #0b0f17;
+                    color: white;
+                    font-family: system-ui, sans-serif;
+                }}
+                .glass {{
+                    background: rgba(255,255,255,0.08);
+                    backdrop-filter: blur(12px);
+                    border: 1px solid rgba(255,255,255,0.12);
+                }}
+            </style>
+        </head>
+        <body class='min-h-screen flex items-center justify-center'>
+            <div class='glass p-8 rounded-3xl shadow-xl text-center max-w-lg'>
+                <h1 class='text-2xl font-bold mb-4' style='color:{color};'>{message}</h1>
+                <a href='/Home/Dashboard' class='px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white no-underline'>Zurück zum Dashboard</a>
+            </div>
+        </body>
+        </html>";
+    }
 }

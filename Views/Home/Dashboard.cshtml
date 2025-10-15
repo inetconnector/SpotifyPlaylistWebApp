@@ -1,6 +1,267 @@
 @{
-    ViewData["Title"] = "Dashboard";
+    Layout = null;
+    var user = ViewBag.User as string ?? "Spotify User";
 }
-<h2>Willkommen, @ViewBag.User!</h2>
-<p><a href="/Home/CreateFavorites">🎵 Lieblingssongs → Playlist</a></p>
-<p><a href="/Home/CreateRecommendations">✨ Empfehlungen → Playlist</a></p>
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Dashboard – InetConnector Playlist Generator™ – nutzt die Spotify® Web APIs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            background: radial-gradient(1000px 600px at 20% 10%, rgba(16,185,129,0.25), transparent 60%), radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,0.25), transparent 60%), #0b0f17;
+            color: white;
+            font-family: system-ui, sans-serif;
+        }
+
+        .glass {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+
+        a {
+            color: #10b981;
+            text-decoration: underline;
+        }
+
+            a:hover {
+                color: #34d399;
+            }
+
+        /* === Buttons kompakt und elegant === */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 0.9rem 1.5rem;
+            border-radius: 0.9rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            text-decoration: none;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 0 10px rgba(0,0,0,0.25);
+            transition: all 0.25s ease;
+        }
+
+            .btn:hover {
+                background: rgba(255,255,255,0.15);
+                transform: translateY(-2px) scale(1.03);
+                box-shadow: 0 0 15px rgba(255,255,255,0.15);
+            }
+
+            .btn span.icon {
+                font-size: 1.3rem;
+            }
+
+        /* Fade-in Animation */
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .delay-1 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-2 {
+            animation-delay: 0.4s;
+        }
+
+        .delay-3 {
+            animation-delay: 0.6s;
+        }
+
+        /* Share Buttons */
+        .share-btn {
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+            .share-btn:hover {
+                transform: scale(1.15);
+            }
+
+        .wa {
+            background-color: #25D366;
+        }
+
+        .tg {
+            background-color: #0088cc;
+        }
+
+        .x {
+            background-color: #000;
+        }
+
+        .fb {
+            background-color: #1877F2;
+        }
+
+        .rd {
+            background-color: #FF4500;
+        }
+
+        .li {
+            background-color: #0A66C2;
+        }
+
+        .em {
+            background-color: #6B7280;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+    <main class="flex-grow max-w-4xl mx-auto px-6 py-16">
+        <div class="glass rounded-3xl p-8 md:p-10 shadow-xl text-center">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2">Willkommen, @user 👋</h1>
+            <p class="text-white/70 mb-8">Erstelle automatisch deine Spotify-Playlists mit nur einem Klick.</p>
+
+            <!-- Hauptaktionen -->
+            <div class="flex flex-wrap justify-center gap-5 mt-6">
+                <a href="/Home/CreateFavoritesShuffled" class="btn fade-in delay-1">
+                    <span class="icon">🎲</span> <span>Zufällige Playlist</span>
+                </a>
+                <a href="/Home/CreateFavoritesOrdered" class="btn fade-in delay-2">
+                    <span class="icon">📜</span> <span>Original-Reihenfolge</span>
+                </a>
+                <a href="/Home/CreateFavoritesSimilar" class="btn fade-in delay-3">
+                    <span class="icon">✨</span> <span>Ähnliche Songs</span>
+                </a>
+            </div>
+
+            <p class="mt-10 text-white/70 text-sm">
+                Jede Aktion erstellt eine neue Playlist in deinem Spotify-Konto.<br>
+                Die Erstellung erfolgt im Hintergrund und dauert wenige Sekunden.
+            </p>
+
+            <hr class="my-10 border-white/20" />
+
+            <!-- Spendenblock -->
+            <div class="flex flex-col items-center">
+                <h2 class="text-2xl font-semibold mb-3">💚 Unterstütze das Projekt</h2>
+                <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
+                   target="_blank" rel="noopener"
+                   class="btn mb-4 text-lg px-8 py-4">
+                    💸 Jetzt über PayPal spenden
+                </a>
+                <img src="/QR-Code.png" alt="PayPal QR-Code"
+                     class="w-36 h-36 rounded-2xl border border-white/20 shadow-md" />
+                <p class="text-white/60 text-sm mt-3">Scanne den QR-Code zum Spenden</p>
+            </div>
+
+            <hr class="my-10 border-white/20" />
+
+            <!-- Teilen-Bereich -->
+            <div class="text-center">
+                <h2 class="text-2xl font-semibold mb-3">🔗 Teile dieses Tool</h2>
+                <p class="text-white/70 text-sm mb-4">Hilf anderen, ihre Spotify-Playlists zu optimieren!</p>
+
+                <div class="flex flex-wrap justify-center gap-3">
+                    <a href="https://wa.me/?text=🎧%20Schau%20dir%20den%20InetConnector%20Playlist%20Generator™%20für%20Spotify®%20an:%20https://playlists.inetconnector.com"
+                       target="_blank" class="share-btn wa" title="WhatsApp">🟢</a>
+                    <a href="https://t.me/share/url?url=https://playlists.inetconnector.com&text=🎶%20InetConnector%20Playlist%20Generator™%20für%20Spotify®"
+                       target="_blank" class="share-btn tg" title="Telegram">📨</a>
+                    <a href="https://x.com/intent/tweet?text=🎧%20InetConnector%20Playlist%20Generator™%20für%20Spotify®!%20https://playlists.inetconnector.com"
+                       target="_blank" class="share-btn x" title="X (Twitter)">𝕏</a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=https://playlists.inetconnector.com"
+                       target="_blank" class="share-btn fb" title="Facebook">📘</a>
+                    <a href="https://www.reddit.com/submit?url=https://playlists.inetconnector.com&title=InetConnector%20Playlist%20Generator™%20für%20Spotify®"
+                       target="_blank" class="share-btn rd" title="Reddit">👽</a>
+                    <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://playlists.inetconnector.com"
+                       target="_blank" class="share-btn li" title="LinkedIn">💼</a>
+                    <a href="mailto:?subject=InetConnector%20Playlist%20Generator™%20für%20Spotify®&body=Hey,%20probier%20mal%20den%20InetConnector%20Playlist%20Generator™%20für%20Spotify®:%20https://playlists.inetconnector.com"
+                       class="share-btn em" title="E-Mail">✉️</a>
+                </div>
+            </div>
+
+            <div class="mt-10 text-sm text-white/70">
+                <a href="/Home/Impressum" class="hover:text-white underline">Impressum</a> ·
+                <a href="/Home/Datenschutz" class="hover:text-white underline">Datenschutzerklärung</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="max-w-5xl mx-auto px-6 mt-10 pb-10 text-sm text-white/70">
+        <div class="glass rounded-2xl p-5 flex flex-col md:flex-row justify-between items-center gap-3">
+            <div>© @DateTime.Now.Year InetConnector – Alle Rechte vorbehalten</div>
+            <div class="flex items-center gap-3">
+                <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
+                   target="_blank" rel="noopener" class="hover:text-white underline">💚 Spenden</a>
+                <img src="/QR-Code.png" alt="PayPal QR-Code"
+                     class="w-9 h-9 rounded-md border border-white/20" />
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cooldown Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const cooldownMinutes = 4;
+            const buttons = document.querySelectorAll(".btn");
+            buttons.forEach(btn => {
+                if (!btn.href || !btn.href.includes("/Home/CreateFavorites")) return;
+                const key = "cooldown_" + btn.href;
+                const applyCooldown = (remaining) => {
+                    btn.disabled = true;
+                    btn.style.opacity = "0.5";
+                    const original = btn.innerHTML;
+                    let secs = Math.floor(remaining);
+                    const timer = setInterval(() => {
+                        if (secs > 0) {
+                            const m = Math.floor(secs / 60);
+                            const s = (secs % 60).toString().padStart(2, "0");
+                            btn.innerHTML = `⏳ (${m}:${s})`;
+                            secs--;
+                        } else {
+                            clearInterval(timer);
+                            btn.disabled = false;
+                            btn.style.opacity = "1";
+                            btn.innerHTML = original;
+                            localStorage.removeItem(key);
+                        }
+                    }, 1000);
+                };
+                const last = parseInt(localStorage.getItem(key) || "0");
+                const diff = (Date.now() - last) / 1000;
+                if (diff < cooldownMinutes * 60) applyCooldown(cooldownMinutes * 60 - diff);
+                btn.addEventListener("click", e => {
+                    if (btn.disabled) { e.preventDefault(); return; }
+                    localStorage.setItem(key, Date.now().toString());
+                    applyCooldown(cooldownMinutes * 60);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
