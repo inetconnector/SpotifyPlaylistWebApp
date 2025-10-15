@@ -1,29 +1,55 @@
 @{
-Layout = null;
+    Layout = null;
+    ViewData["Title"] = "Datenschutzerklärung";
 }
 <!doctype html>
 <html lang="de">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>Datenschutzerklärung – InetConnector Playlist Generator™ – nutzt die Spotify® Web APIs</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Datenschutzerklärung – InetConnector Playlist Generator™</title>
+
+    <meta name="description" content="Datenschutzerklärung des InetConnector Playlist Generator™. Erfahre, wie deine Spotify-Daten sicher, temporär und DSGVO-konform verarbeitet werden." />
+    <meta name="keywords" content="Datenschutz, DSGVO, Spotify, Playlist Generator, InetConnector, personenbezogene Daten, Datenschutzrichtlinie Spotify App, Datenschutz Musik Tools" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://playlists.inetconnector.com/Home/Datenschutz" />
+
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <style>
-        :root {
-            color-scheme: light dark;
+    <!-- ✅ Strukturierte Daten für Google -->
+    <script type="application/ld+json">
+        {
+          "@@context": "https://schema.org",
+          "@@type": "WebApplication",
+          "name": "InetConnector Playlist Generator für Spotify",
+          "url": "https://playlists.inetconnector.com/",
+          "description": "Erstelle automatisch Spotify-Playlists aus deinen Lieblingssongs – sicher, DSGVO-konform und kostenlos.",
+          "applicationCategory": "MusicApplication",
+          "operatingSystem": "Web",
+          "creator": {
+            "@@type": "Organization",
+            "name": "InetConnector",
+            "url": "https://inetconnector.com"
+          },
+          "offers": {
+            "@@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+          }
         }
+    </script>
 
+    <style>
         body {
             background: radial-gradient(1000px 600px at 20% 10%, rgba(16,185,129,0.25), transparent 60%), radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,0.25), transparent 60%), #0b0f17;
             color: white;
+            font-family: system-ui, sans-serif;
         }
 
         .glass {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255,255,255,0.08);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255,255,255,0.12);
         }
 
         a {
@@ -38,113 +64,135 @@ Layout = null;
 </head>
 
 <body class="min-h-screen font-sans antialiased">
-<header class="max-w-5xl mx-auto px-6 pt-10">
-    <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl bg-emerald-500 grid place-items-center shadow-lg">
-            🛡️
+    <header class="max-w-5xl mx-auto px-6 pt-10">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-500 grid place-items-center shadow-lg">
+                🛡️
+            </div>
+            <div>
+                <div class="text-sm uppercase tracking-wider text-white/70">Datenschutz</div>
+                <h1 class="text-3xl md:text-4xl font-bold mt-1">InetConnector Spotify Tools</h1>
+            </div>
         </div>
-        <div>
-            <div class="text-sm uppercase tracking-wider text-white/70">Datenschutz</div>
-            <h1 class="text-3xl md:text-4xl font-bold mt-1">InetConnector Spotify Tools</h1>
-        </div>
-    </div>
-</header>
+    </header>
 
-<main class="max-w-4xl mx-auto px-6 py-14">
-    <div class="glass rounded-3xl p-8 md:p-10 shadow-xl leading-relaxed text-white/90">
+    <main class="max-w-4xl mx-auto px-6 py-14">
+        <div class="glass rounded-3xl p-8 md:p-10 shadow-xl leading-relaxed text-white/90">
 
-        <h1 class="text-3xl md:text-4xl font-bold mb-4">Datenschutzerklärung</h1>
-        <p><strong>Letzte Aktualisierung:</strong> Oktober 2025</p>
+            <h1 class="text-3xl md:text-4xl font-bold mb-4">Datenschutzerklärung</h1>
+            <p><strong>Letzte Aktualisierung:</strong> Oktober 2025</p>
 
-        <p class="mt-6">
+            <p class="mt-6">
                 Diese Anwendung („<strong>Playlist Generator für Spotify®</strong>“) nutzt die
-            <strong>Spotify Web API</strong>, um personalisierte Playlists zu erstellen.
-            Dabei wird dein Spotify-Konto temporär verbunden, um auf deine Lieblingssongs und Künstler zuzugreifen.
-        </p>
+                <strong>Spotify Web API</strong>, um personalisierte Playlists zu erstellen.
+                Dabei wird dein Spotify-Konto temporär verbunden, um auf deine Lieblingssongs und Künstler zuzugreifen.
+            </p>
 
-        <h2 class="text-2xl font-semibold mt-10 mb-2">Welche Daten werden verwendet?</h2>
-        <ul class="list-disc list-inside space-y-1">
-            <li>Dein Spotify-Benutzername und deine öffentliche Nutzer-ID</li>
-            <li>Deine Top-Tracks („Lieblingssongs“)</li>
-            <li>Empfohlene Songs, die Spotify anhand deiner Hörgewohnheiten generiert</li>
-        </ul>
+            <h2 class="text-2xl font-semibold mt-10 mb-2">Welche Daten werden verwendet?</h2>
+            <ul class="list-disc list-inside space-y-1">
+                <li>Dein Spotify-Benutzername und deine öffentliche Nutzer-ID</li>
+                <li>Deine Top-Tracks („Lieblingssongs“)</li>
+                <li>Empfohlene Songs, die Spotify anhand deiner Hörgewohnheiten generiert</li>
+            </ul>
 
-        <h2 class="text-2xl font-semibold mt-10 mb-2">Wofür werden die Daten genutzt?</h2>
-        <p>
-            Die Daten werden ausschließlich verwendet, um Spotify-Playlists für dich zu generieren.
-            Es erfolgt keine dauerhafte Speicherung, Auswertung oder Weitergabe an Dritte.
-            Nach Beendigung der Sitzung werden keine personenbezogenen Daten auf dem Server gespeichert.
-        </p>
+            <h2 class="text-2xl font-semibold mt-10 mb-2">Wofür werden die Daten genutzt?</h2>
+            <p>
+                Die Daten werden ausschließlich verwendet, um Spotify-Playlists für dich zu generieren.
+                Es erfolgt keine dauerhafte Speicherung, Auswertung oder Weitergabe an Dritte.
+                Nach Beendigung der Sitzung werden keine personenbezogenen Daten auf dem Server gespeichert.
+            </p>
 
-        <h2 class="text-2xl font-semibold mt-10 mb-2">Widerruf des Zugriffs</h2>
-        <p>
-            Du kannst den Zugriff jederzeit über dein
-            <a href="https://www.spotify.com/account/apps/" target="_blank" rel="noopener">Spotify-Konto</a>
-            widerrufen.
-        </p>
+            <h2 class="text-2xl font-semibold mt-10 mb-2">Widerruf des Zugriffs</h2>
+            <p>
+                Du kannst den Zugriff jederzeit über dein
+                <a href="https://www.spotify.com/account/apps/" target="_blank" rel="noopener">Spotify-Konto</a>
+                widerrufen.
+            </p>
 
-        <h2 class="text-2xl font-semibold mt-10 mb-2">Verantwortlich</h2>
-        <p>
-            Verantwortlich für den Betrieb dieser Anwendung ist der Betreiber der Domain
-            <strong>playlists.inetconnector.com</strong>. Bei Fragen oder Anliegen zum Datenschutz kannst du dich
-            an den im Impressum genannten Kontakt wenden.
-        </p>
+            <h2 class="text-2xl font-semibold mt-10 mb-2">Spenden über PayPal</h2>
+            <p>
+                Für freiwillige Spenden wird der Dienst PayPal genutzt
+                (PayPal (Europe) S.à r.l. et Cie, S.C.A., Luxemburg).
+                Beim Klicken auf den Spendenlink oder QR-Code wirst du auf die PayPal-Webseite weitergeleitet.
+                Es gelten die Datenschutzbestimmungen von PayPal:
+                <a href="https://www.paypal.com/de/webapps/mpp/ua/privacy-full"
+                   target="_blank" rel="noopener">www.paypal.com/privacy</a>.
+            </p>
 
-        <h2 class="text-2xl font-semibold mt-10 mb-2">Rechtliches</h2>
-        <p>
-            Diese App steht in keiner offiziellen Verbindung zu Spotify AB.
-            Spotify ist eine eingetragene Marke der Spotify AB, Stockholm, Schweden.
-        </p>
+            <h2 class="text-2xl font-semibold mt-10 mb-2">Verantwortlich</h2>
+            <p>
+                Verantwortlich für den Betrieb dieser Anwendung ist der Betreiber der Domain
+                <strong>playlists.inetconnector.com</strong>.<br />
+                Bei Fragen oder Anliegen zum Datenschutz kannst du dich
+                an den im Impressum genannten Kontakt wenden.
+            </p>
 
-        <hr class="my-10 border-white/20"/>
+            <h2 class="text-2xl font-semibold mt-10 mb-2">Rechtliches</h2>
+            <p>
+                Diese App steht in keiner offiziellen Verbindung zu Spotify AB.
+                Spotify ist eine eingetragene Marke der Spotify AB, Stockholm, Schweden.
+            </p>
 
-        <h2 class="text-2xl font-semibold mb-2">Allgemeine Hinweise (DSGVO)</h2>
-        <p>
-            Verantwortlich im Sinne der Datenschutzgesetze:
-        </p>
-        <p class="mt-2">
-            <strong>Daniel Frede</strong><br>
-            Bismarckstr. 6<br>
-            97209 Veitshöchheim<br>
-            E-Mail: <a href="mailto:info@inetconnector.com">info@inetconnector.com</a>
-        </p>
+            <hr class="my-10 border-white/20" />
 
-        <p class="mt-6">
-            Beim Besuch dieser Website werden lediglich die technisch notwendigen Daten (IP-Adresse,
-            Browsertyp, Uhrzeit) verarbeitet. Diese dienen ausschließlich der Sicherstellung des Betriebs
-            und werden nicht mit anderen Datenquellen zusammengeführt.
-        </p>
+            <h2 class="text-2xl font-semibold mb-2">Allgemeine Hinweise (DSGVO)</h2>
+            <p>
+                Verantwortlich im Sinne der Datenschutzgesetze:
+            </p>
+            <p class="mt-2">
+                <strong>Daniel Frede</strong><br>
+                Bismarckstr. 6<br>
+                97209 Veitshöchheim<br>
+                E-Mail: info(at)inetconnector.com
+            </p>
 
-        <p class="mt-4">
-            Es werden keine Cookies, keine Tracking-Tools und keine externen Analyse-Dienste verwendet.
-            Die Anwendung verwendet ausschließlich die Spotify Web API. Alle Tokens werden nach Ende
-            der Sitzung gelöscht.
-        </p>
+            <p class="mt-6">
+                Beim Besuch dieser Website werden lediglich die technisch notwendigen Daten
+                (IP-Adresse, Browsertyp, Uhrzeit) verarbeitet. Diese dienen ausschließlich
+                der Sicherstellung des Betriebs und werden nicht mit anderen Datenquellen zusammengeführt.
+            </p>
 
-        <p class="mt-4">
-            Du hast gemäß Art. 15 ff. DSGVO jederzeit das Recht auf Auskunft, Berichtigung, Löschung,
-            Einschränkung der Verarbeitung und Datenübertragbarkeit deiner personenbezogenen Daten.
-        </p>
+            <p class="mt-4">
+                Es werden keine Cookies, keine Tracking-Tools und keine externen Analyse-Dienste verwendet.
+                Die Anwendung verwendet ausschließlich die Spotify Web API.
+                Alle Tokens werden nach Ende der Sitzung gelöscht.
+            </p>
 
-        <p class="mt-6 text-sm text-white/70">
-            Stand: 15. Oktober 2025
-        </p>
+            <p class="mt-4">
+                Du hast gemäß Art. 15 ff. DSGVO jederzeit das Recht auf Auskunft, Berichtigung, Löschung,
+                Einschränkung der Verarbeitung und Datenübertragbarkeit deiner personenbezogenen Daten.
+            </p>
 
-        <a href="/Home/Dashboard"
-           class="inline-block mt-10 text-emerald-400 hover:text-emerald-300 underline">
-            ← Zurück
-        </a>
-    </div>
-</main>
+            <!-- Optional: Google Analytics (DSGVO-konform, vorbereitet) -->
+            <!--
+            <h2 class="text-2xl font-semibold mt-10 mb-2">Google Analytics (optional)</h2>
+            <p>
+                Diese Website kann optional Google Analytics 4 verwenden. Dabei werden IP-Adressen anonymisiert,
+                bevor sie an Google-Server gesendet werden (IP-Anonymisierung). Die Daten dienen ausschließlich
+                der statistischen Auswertung. Du kannst die Erfassung in den Browsereinstellungen deaktivieren.
+            </p>
+            -->
 
-<footer class="max-w-5xl mx-auto px-6 mt-10 pb-10 text-sm text-white/70">
-    <div class="glass rounded-2xl p-5 flex flex-col md:flex-row justify-between items-center gap-3">
-        <div>© @DateTime.Now.Year InetConnector – Alle Rechte vorbehalten</div>
-        <div class="flex gap-4">
-            <a href="/Home/Impressum" class="hover:text-white underline">Impressum</a>
-            <a href="/Home/Datenschutz" class="hover:text-white underline">Datenschutz</a>
+            <p class="mt-6 text-sm text-white/70">
+                Stand: 15. Oktober 2025
+            </p>
+
+            <hr class="my-10 border-white/20" />
+
+            <!-- 🔗 Interne Linkstruktur -->
+            <div class="text-sm text-center text-white/70 space-x-3">
+                <a href="/" class="underline hover:text-white">Startseite</a> ·
+                <a href="/Home/Dashboard" class="underline hover:text-white">Dashboard</a> ·
+                <a href="/Home/Impressum" class="underline hover:text-white">Impressum</a>
+            </div>
         </div>
-    </div>
-</footer>
+    </main>
+
+    <footer class="max-w-5xl mx-auto px-6 mt-10 pb-10 text-sm text-white/70">
+        <div class="glass rounded-2xl p-5 flex flex-col md:flex-row justify-between items-center gap-3">
+            <div>© @DateTime.Now.Year InetConnector – Alle Rechte vorbehalten</div>
+            <a href="/Home/Impressum" class="hover:text-white underline">Impressum</a>
+        </div>
+    </footer>
 </body>
 </html>

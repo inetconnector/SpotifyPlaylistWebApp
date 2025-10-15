@@ -5,8 +5,8 @@
 <!doctype html>
 <html lang="de">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <title>Dashboard – InetConnector Playlist Generator™ – nutzt die Spotify® Web APIs</title>
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -32,14 +32,17 @@
                 color: #34d399;
             }
 
-        /* === Buttons kompakt und elegant === */
+        /* === Buttons === */
         .btn {
-            display: inline-flex;
+            position: relative;
+            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 0.75rem;
-            padding: 0.9rem 1.5rem;
-            border-radius: 0.9rem;
+            gap: 0.4rem;
+            width: 9rem;
+            height: 8rem;
+            border-radius: 1rem;
             font-size: 1.1rem;
             font-weight: 600;
             color: white;
@@ -53,13 +56,52 @@
 
             .btn:hover {
                 background: rgba(255,255,255,0.15);
-                transform: translateY(-2px) scale(1.03);
-                box-shadow: 0 0 15px rgba(255,255,255,0.15);
+                transform: translateY(-3px) scale(1.03);
+                box-shadow: 0 0 20px rgba(255,255,255,0.15);
             }
 
             .btn span.icon {
-                font-size: 1.3rem;
+                font-size: 1.5rem;
             }
+
+            .btn small {
+                color: rgba(255,255,255,0.6);
+                font-size: 0.8rem;
+                font-weight: 400;
+            }
+
+            /* === Tooltip Styling === */
+            .btn[data-tip]:hover::after {
+                content: attr(data-tip);
+                position: absolute;
+                bottom: -2.6rem;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.75);
+                color: #fff;
+                padding: 0.4rem 0.8rem;
+                border-radius: 0.5rem;
+                font-size: 0.75rem;
+                white-space: nowrap;
+                pointer-events: none;
+                opacity: 0;
+                animation: tooltipFade 0.25s ease forwards;
+            }
+
+        @@keyframes tooltipFade {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+
+
+        }
 
         /* Fade-in Animation */
         @@keyframes fadeInUp {
@@ -72,9 +114,6 @@
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
-
-
         }
 
         .fade-in {
@@ -142,95 +181,128 @@
 
 <body class="min-h-screen flex flex-col">
 
-    <main class="flex-grow max-w-4xl mx-auto px-6 py-16">
-        <div class="glass rounded-3xl p-8 md:p-10 shadow-xl text-center">
-            <h1 class="text-3xl md:text-4xl font-bold mb-2">Willkommen, @user 👋</h1>
-            <p class="text-white/70 mb-8">Erstelle automatisch deine Spotify-Playlists mit nur einem Klick.</p>
+<main class="flex-grow max-w-4xl mx-auto px-6 py-16">
+    <div class="glass rounded-3xl p-8 md:p-10 shadow-xl text-center">
+        <h1 class="text-3xl md:text-4xl font-bold mb-2">Willkommen, @user 👋</h1>
+        <p class="text-white/70 mb-8">Erstelle automatisch deine Spotify-Playlists mit nur einem Klick.</p>
 
-            <!-- Hauptaktionen -->
-            <div class="flex flex-wrap justify-center gap-5 mt-6">
-                <a href="/Home/CreateFavoritesShuffled" class="btn fade-in delay-1">
-                    <span class="icon">🎲</span> <span>Zufällige Playlist</span>
+        <!-- Hauptaktionen -->
+        <div class="flex flex-wrap justify-center gap-5 mt-6">
+            <a href="/Home/CreateTopMix" class="btn fade-in delay-1"
+               data-tip="Erstellt eine zufällige Playlist aus deinen meistgehörten Songs.">
+                <span class="icon">🎧</span>
+                <span>Top-Mix</span>
+                <small>meistgehörte Songs</small>
+            </a>
+
+            <a href="/Home/CreateTopList" class="btn fade-in delay-2"
+               data-tip="Erstellt deine meistgehörten Songs in der Originalreihenfolge.">
+                <span class="icon">📈</span>
+                <span>Top-Liste</span>
+                <small>meistgehörte Songs</small>
+            </a>
+
+            <a href="/Home/CreateFavMix" class="btn fade-in delay-3"
+               data-tip="Erstellt eine zufällige Playlist aus deinen gespeicherten Lieblingssongs.">
+                <span class="icon">💖</span>
+                <span>Favoriten-Mix</span>
+                <small>gespeicherte Songs</small>
+            </a>
+
+            <a href="/Home/CreateFavList" class="btn fade-in delay-3"
+               data-tip="Erstellt deine gespeicherten Lieblingssongs in Originalreihenfolge.">
+                <span class="icon">📜</span>
+                <span>Favoriten-Liste</span>
+                <small>gespeicherte Songs</small>
+            </a>
+        </div>
+
+        <p class="mt-10 text-white/70 text-sm">
+            Jede Aktion erstellt eine neue Playlist in deinem Spotify-Konto.<br>
+            Die Erstellung erfolgt im Hintergrund und dauert wenige Sekunden.
+        </p>
+
+        <hr class="my-10 border-white/20"/>
+
+        <!-- Spendenblock -->
+        <div class="flex flex-col items-center">
+            <h2 class="text-2xl font-semibold mb-3">💚 Unterstütze das Projekt</h2>
+            <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
+               target="_blank" rel="noopener"
+               class="btn mb-4 text-lg px-8 py-4 w-auto h-auto">
+                💸 Jetzt über PayPal spenden
+            </a>
+            <img src="/QR-Code.png" alt="PayPal QR-Code"
+                 class="w-36 h-36 rounded-2xl border border-white/20 shadow-md"/>
+            <p class="text-white/60 text-sm mt-3">Scanne den QR-Code zum Spenden</p>
+        </div>
+
+        <hr class="my-10 border-white/20"/>
+
+        <!-- Teilen -->
+        <div class="text-center">
+            <h2 class="text-2xl font-semibold mb-3">🔗 Teile dieses Tool</h2>
+            <p class="text-white/70 text-sm mb-4">Hilf anderen, ihre Spotify-Playlists zu optimieren!</p>
+            <div class="flex flex-wrap justify-center gap-3">
+                <a href="https://wa.me/?text=🎧%20InetConnector%20Playlist%20Generator™%20https://playlists.inetconnector.com"
+                   target="_blank" class="share-btn wa" title="WhatsApp">
+                    🟢
                 </a>
-                <a href="/Home/CreateFavoritesOrdered" class="btn fade-in delay-2">
-                    <span class="icon">📜</span> <span>Original-Reihenfolge</span>
+                <a href="https://t.me/share/url?url=https://playlists.inetconnector.com"
+                   target="_blank" class="share-btn tg" title="Telegram">
+                    📨
                 </a>
-                <a href="/Home/CreateFavoritesSimilar" class="btn fade-in delay-3">
-                    <span class="icon">✨</span> <span>Ähnliche Songs</span>
+                <a href="https://x.com/intent/tweet?text=🎧%20InetConnector%20Playlist%20Generator™%20https://playlists.inetconnector.com"
+                   target="_blank" class="share-btn x" title="X (Twitter)">
+                    𝕏
                 </a>
-            </div>
-
-            <p class="mt-10 text-white/70 text-sm">
-                Jede Aktion erstellt eine neue Playlist in deinem Spotify-Konto.<br>
-                Die Erstellung erfolgt im Hintergrund und dauert wenige Sekunden.
-            </p>
-
-            <hr class="my-10 border-white/20" />
-
-            <!-- Spendenblock -->
-            <div class="flex flex-col items-center">
-                <h2 class="text-2xl font-semibold mb-3">💚 Unterstütze das Projekt</h2>
-                <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
-                   target="_blank" rel="noopener"
-                   class="btn mb-4 text-lg px-8 py-4">
-                    💸 Jetzt über PayPal spenden
+                <a href="https://www.facebook.com/sharer/sharer.php?u=https://playlists.inetconnector.com"
+                   target="_blank" class="share-btn fb" title="Facebook">
+                    📘
                 </a>
-                <img src="/QR-Code.png" alt="PayPal QR-Code"
-                     class="w-36 h-36 rounded-2xl border border-white/20 shadow-md" />
-                <p class="text-white/60 text-sm mt-3">Scanne den QR-Code zum Spenden</p>
-            </div>
-
-            <hr class="my-10 border-white/20" />
-
-            <!-- Teilen-Bereich -->
-            <div class="text-center">
-                <h2 class="text-2xl font-semibold mb-3">🔗 Teile dieses Tool</h2>
-                <p class="text-white/70 text-sm mb-4">Hilf anderen, ihre Spotify-Playlists zu optimieren!</p>
-
-                <div class="flex flex-wrap justify-center gap-3">
-                    <a href="https://wa.me/?text=🎧%20Schau%20dir%20den%20InetConnector%20Playlist%20Generator™%20für%20Spotify®%20an:%20https://playlists.inetconnector.com"
-                       target="_blank" class="share-btn wa" title="WhatsApp">🟢</a>
-                    <a href="https://t.me/share/url?url=https://playlists.inetconnector.com&text=🎶%20InetConnector%20Playlist%20Generator™%20für%20Spotify®"
-                       target="_blank" class="share-btn tg" title="Telegram">📨</a>
-                    <a href="https://x.com/intent/tweet?text=🎧%20InetConnector%20Playlist%20Generator™%20für%20Spotify®!%20https://playlists.inetconnector.com"
-                       target="_blank" class="share-btn x" title="X (Twitter)">𝕏</a>
-                    <a href="https://www.facebook.com/sharer/sharer.php?u=https://playlists.inetconnector.com"
-                       target="_blank" class="share-btn fb" title="Facebook">📘</a>
-                    <a href="https://www.reddit.com/submit?url=https://playlists.inetconnector.com&title=InetConnector%20Playlist%20Generator™%20für%20Spotify®"
-                       target="_blank" class="share-btn rd" title="Reddit">👽</a>
-                    <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://playlists.inetconnector.com"
-                       target="_blank" class="share-btn li" title="LinkedIn">💼</a>
-                    <a href="mailto:?subject=InetConnector%20Playlist%20Generator™%20für%20Spotify®&body=Hey,%20probier%20mal%20den%20InetConnector%20Playlist%20Generator™%20für%20Spotify®:%20https://playlists.inetconnector.com"
-                       class="share-btn em" title="E-Mail">✉️</a>
-                </div>
-            </div>
-
-            <div class="mt-10 text-sm text-white/70">
-                <a href="/Home/Impressum" class="hover:text-white underline">Impressum</a> ·
-                <a href="/Home/Datenschutz" class="hover:text-white underline">Datenschutzerklärung</a>
+                <a href="https://www.reddit.com/submit?url=https://playlists.inetconnector.com"
+                   target="_blank" class="share-btn rd" title="Reddit">
+                    👽
+                </a>
+                <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://playlists.inetconnector.com"
+                   target="_blank" class="share-btn li" title="LinkedIn">
+                    💼
+                </a>
+                <a href="mailto:?subject=InetConnector%20Playlist%20Generator™&body=Hey,%20probier%20mal%20den%20InetConnector%20Playlist%20Generator™:%20https://playlists.inetconnector.com"
+                   class="share-btn em" title="E-Mail">
+                    ✉️
+                </a>
             </div>
         </div>
-    </main>
 
-    <footer class="max-w-5xl mx-auto px-6 mt-10 pb-10 text-sm text-white/70">
-        <div class="glass rounded-2xl p-5 flex flex-col md:flex-row justify-between items-center gap-3">
-            <div>© @DateTime.Now.Year InetConnector – Alle Rechte vorbehalten</div>
-            <div class="flex items-center gap-3">
-                <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
-                   target="_blank" rel="noopener" class="hover:text-white underline">💚 Spenden</a>
-                <img src="/QR-Code.png" alt="PayPal QR-Code"
-                     class="w-9 h-9 rounded-md border border-white/20" />
-            </div>
+        <div class="mt-10 text-sm text-white/70">
+            <a href="/Home/Impressum" class="hover:text-white underline">Impressum</a> ·
+            <a href="/Home/Datenschutz" class="hover:text-white underline">Datenschutzerklärung</a>
         </div>
-    </footer>
+    </div>
+</main>
 
-    <!-- Cooldown Script -->
-    <script>
+<footer class="max-w-5xl mx-auto px-6 mt-10 pb-10 text-sm text-white/70">
+    <div class="glass rounded-2xl p-5 flex flex-col md:flex-row justify-between items-center gap-3">
+        <div>© @DateTime.Now.Year InetConnector – Alle Rechte vorbehalten</div>
+        <div class="flex items-center gap-3">
+            <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
+               target="_blank" rel="noopener" class="hover:text-white underline">
+                💚 Spenden
+            </a>
+            <img src="/QR-Code.png" alt="PayPal QR-Code"
+                 class="w-9 h-9 rounded-md border border-white/20"/>
+        </div>
+    </div>
+</footer>
+
+<!-- Cooldown Script -->
+<script>
         document.addEventListener("DOMContentLoaded", () => {
             const cooldownMinutes = 4;
             const buttons = document.querySelectorAll(".btn");
             buttons.forEach(btn => {
-                if (!btn.href || !btn.href.includes("/Home/CreateFavorites")) return;
+                if (!btn.href || !btn.href.includes("/Home/Create")) return;
                 const key = "cooldown_" + btn.href;
                 const applyCooldown = (remaining) => {
                     btn.disabled = true;
@@ -263,5 +335,6 @@
             });
         });
     </script>
+
 </body>
 </html>
