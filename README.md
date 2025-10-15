@@ -1,6 +1,13 @@
 # 🎵 InetConnector Playlist Generator™
 
+[![Visit InetConnector Playlist Generator](https://img.shields.io/badge/🌐%20Visit%20App-playlists.inetconnector.com-brightgreen?style=for-the-badge)](https://playlists.inetconnector.com)
+
 ![Logo](inetconnector.png)
+
+A modern web-based generator for creating personalized Spotify playlists.  
+All data is processed **temporarily**, **securely**, and **GDPR-compliantly**.
+
+---
 
 A modern web-based generator for creating personalized Spotify playlists.  
 All data is processed **temporarily**, **securely**, and **GDPR-compliantly**.
