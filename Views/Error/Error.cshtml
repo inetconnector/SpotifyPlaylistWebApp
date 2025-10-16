@@ -1,0 +1,83 @@
+@model SpotifyPlaylistWebApp.Controllers.ErrorViewModel
+@{
+    Layout = null;
+}
+
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Fehler – InetConnector Playlist Generator™</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: radial-gradient(800px 600px at 20% 10%, rgba(16,185,129,0.25), transparent 60%), radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,0.25), transparent 60%), #0b0f17;
+            color: white;
+            font-family: system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .glass {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 1.5rem;
+            box-shadow: 0 0 25px rgba(0,0,0,0.5);
+            max-width: 600px;
+            width: 90%;
+            padding: 2.5rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            color: #f87171;
+        }
+
+        pre {
+            text-align: left;
+            background: rgba(255,255,255,0.05);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            max-height: 200px;
+            font-size: 0.8rem;
+            color: #fcd34d;
+        }
+
+        a {
+            color: #10b981;
+            text-decoration: underline;
+        }
+
+            a:hover {
+                color: #34d399;
+            }
+    </style>
+</head>
+<body>
+    <div class="glass">
+        <h1>🚨 Ein Fehler ist aufgetreten</h1>
+        <p class="mb-4">Pfad: <strong>@Model.Path</strong></p>
+        <p class="mb-6">@Model.Message</p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.StackTrace))
+        {
+            <details class="mb-4">
+                <summary class="cursor-pointer text-white/70 hover:text-white">Details anzeigen</summary>
+                <pre>@Model.StackTrace</pre>
+            </details>
+        }
+
+        <a href="/Home/Dashboard" class="inline-block mt-3 px-6 py-3 bg-emerald-500 rounded-xl text-white hover:bg-emerald-600 no-underline">
+            ⬅️ Zurück zum Dashboard
+        </a>
+    </div>
+</body>
+</html>

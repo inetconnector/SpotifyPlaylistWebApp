@@ -6,14 +6,23 @@ namespace SpotifyPlaylistWebApp.Controllers;
 
 public class HomeController : Controller
 {
-    private static readonly string _clientId = "89d26c134b954a28b78b74cfb893b71b";
-    private static readonly string _redirectUri = "https://playlists.inetconnector.com/callback/";
-    private static string _verifier = string.Empty;
-    private static string _accessToken = string.Empty;
+    // === Spotify App-Konfiguration ===
+    private const string ClientId = "89d26c134b954a28b78b74cfb893b71b";
+    private const string RedirectUri = "https://playlists.inetconnector.com/callback/";
 
-    // 🔒 Cooldown-Speicher pro Benutzer und Aktion
+    // === Session Keys ===
+    private const string SessionTokenKey = "SpotifyAccessToken";
+    private const string SessionVerifierKey = "SpotifyVerifier";
+
+    // === Cooldown (4 Minuten) ===
     private static readonly Dictionary<string, DateTime> _lastActions = new();
     private static readonly TimeSpan CooldownDuration = TimeSpan.FromMinutes(4);
+    private readonly ILogger<HomeController> _logger;
+
+    public HomeController(ILogger<HomeController> logger)
+    {
+        _logger = logger;
+    }
 
     // ============================
     // 🔸 Grundseiten
@@ -40,11 +49,12 @@ public class HomeController : Controller
 
     public IActionResult Login()
     {
-        (_verifier, var challenge) = PKCEUtil.GenerateCodes();
+        var (verifier, challenge) = PKCEUtil.GenerateCodes();
+        HttpContext.Session.SetString(SessionVerifierKey, verifier);
 
         var loginRequest = new LoginRequest(
-            new Uri(_redirectUri),
-            _clientId,
+            new Uri(RedirectUri),
+            ClientId,
             LoginRequest.ResponseType.Code)
         {
             CodeChallenge = challenge,
@@ -53,7 +63,7 @@ public class HomeController : Controller
             {
                 Scopes.UserReadPrivate,
                 Scopes.UserTopRead,
-                Scopes.UserLibraryRead, // 🔹 für gespeicherte Songs
+                Scopes.UserLibraryRead, // für gespeicherte Songs
                 Scopes.PlaylistModifyPrivate,
                 Scopes.PlaylistModifyPublic
             }
@@ -68,12 +78,27 @@ public class HomeController : Controller
         if (string.IsNullOrWhiteSpace(code))
             return Content("Fehler: Kein Spotify-Code erhalten.");
 
-        var tokenResponse = await new OAuthClient().RequestToken(
-            new PKCETokenRequest(_clientId, code, new Uri(_redirectUri), _verifier)
-        );
+        try
+        {
+            var verifier = HttpContext.Session.GetString(SessionVerifierKey);
+            if (string.IsNullOrEmpty(verifier))
+                return RedirectToAction("Login");
 
-        _accessToken = tokenResponse.AccessToken ?? string.Empty;
-        return RedirectToAction("Dashboard");
+            var tokenResponse = await new OAuthClient().RequestToken(
+                new PKCETokenRequest(ClientId, code, new Uri(RedirectUri), verifier)
+            );
+
+            if (string.IsNullOrEmpty(tokenResponse.AccessToken))
+                return Content("Fehler: Kein Token erhalten.");
+
+            HttpContext.Session.SetString(SessionTokenKey, tokenResponse.AccessToken);
+            return RedirectToAction("Dashboard");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Spotify Callback fehlgeschlagen");
+            return Content("Fehler beim Token-Austausch mit Spotify.");
+        }
     }
 
     // ============================
@@ -82,61 +107,74 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Dashboard()
     {
-        if (string.IsNullOrWhiteSpace(_accessToken))
-            return RedirectToAction("Index");
+        var token = HttpContext.Session.GetString(SessionTokenKey);
+        if (string.IsNullOrEmpty(token))
+            return RedirectToAction("Login");
 
-        var config = SpotifyClientConfig.CreateDefault().WithToken(_accessToken);
-        var spotify = new SpotifyClient(config);
-        var me = await spotify.UserProfile.Current();
-
-        ViewBag.User = me.DisplayName ?? "Spotify User";
-        return View();
+        try
+        {
+            var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token));
+            var me = await spotify.UserProfile.Current();
+            ViewBag.User = me.DisplayName ?? "Spotify User";
+            return View();
+        }
+        catch (APIUnauthorizedException)
+        {
+            // Token abgelaufen → zurück zum Login
+            return RedirectToAction("Login");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Dashboard-Fehler");
+            return View("Error", new { Message = "Fehler beim Laden des Dashboards." });
+        }
     }
 
     // ============================
     // 🔸 Playlist-Aktionen
     // ============================
 
-    // 🎧 Top-Mix (meistgehörte Songs, zufällig)
     [HttpGet]
     public IActionResult CreateTopMix()
     {
-        return StartPlaylistJob(true, false, "Top-Mix", "[TopMix]", false);
+        return StartPlaylistJob(GetToken(), true, false, "Top-Mix", "[TopMix]", false);
     }
 
-    // 📈 Top-Liste (meistgehörte Songs, geordnet)
     [HttpGet]
     public IActionResult CreateTopList()
     {
-        return StartPlaylistJob(false, false, "Top-Liste", "[TopList]", false);
+        return StartPlaylistJob(GetToken(), false, false, "Top-Liste", "[TopList]", false);
     }
 
-    // 💖 Favoriten-Mix (gespeicherte Songs, zufällig)
     [HttpGet]
     public IActionResult CreateFavMix()
     {
-        return StartPlaylistJob(true, false, "Favoriten-Mix", "[FavMix]", true);
+        return StartPlaylistJob(GetToken(), true, false, "Favoriten-Mix", "[FavMix]", true);
     }
 
-    // 📜 Favoriten-Liste (gespeicherte Songs, geordnet)
     [HttpGet]
     public IActionResult CreateFavList()
     {
-        return StartPlaylistJob(false, false, "Favoriten-Liste", "[FavList]", true);
+        return StartPlaylistJob(GetToken(), false, false, "Favoriten-Liste", "[FavList]", true);
     }
 
     // ============================
     // 🔸 Cooldown & Startlogik
     // ============================
 
-    private IActionResult StartPlaylistJob(bool shuffled, bool similar, string namePrefix, string logTag,
-        bool useLikedSongs)
+    private string GetToken()
     {
-        if (string.IsNullOrWhiteSpace(_accessToken))
+        return HttpContext.Session.GetString(SessionTokenKey) ?? string.Empty;
+    }
+
+    private IActionResult StartPlaylistJob(
+        string token, bool shuffled, bool similar, string namePrefix, string logTag, bool useLikedSongs)
+    {
+        if (string.IsNullOrWhiteSpace(token))
             return Content(RenderMessage("⚠️ Bitte zuerst einloggen.", "warning"),
                 "text/html; charset=utf-8", Encoding.UTF8);
 
-        var userKey = $"{_accessToken}_{logTag}";
+        var userKey = $"{token}_{logTag}";
 
         lock (_lastActions)
         {
@@ -155,12 +193,12 @@ public class HomeController : Controller
             _lastActions[userKey] = DateTime.UtcNow;
         }
 
-        // 🧩 Hintergrund-Task starten
+        // 🧩 Playlist-Erstellung asynchron starten
         Task.Run(async () =>
         {
             try
             {
-                await GeneratePlaylistAsync(_accessToken, shuffled, similar, namePrefix, useLikedSongs);
+                await GeneratePlaylistAsync(token, shuffled, similar, namePrefix, useLikedSongs);
             }
             catch (Exception ex)
             {
@@ -236,8 +274,8 @@ public class HomeController : Controller
             : allTracks.ToList();
 
         var uris = finalList.Select(t => t.Uri).ToList();
-
         var playlistName = $"{namePrefix} {DateTime.Now:yyyy-MM-dd}";
+
         var playlist = await spotify.Playlists.Create(me.Id,
             new PlaylistCreateRequest(playlistName) { Public = false });
 
@@ -256,7 +294,7 @@ public class HomeController : Controller
     }
 
     // ============================
-    // 🔸 HTML für Rückmeldungen
+    // 🔸 HTML-Rückmeldungen
     // ============================
 
     private static string RenderMessage(string message, string type = "success")
