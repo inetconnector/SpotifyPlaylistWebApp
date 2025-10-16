@@ -1,6 +1,6 @@
 @{
     Layout = null;
-    var user = ViewBag.User as string ?? "Spotify User";
+    var user = ViewBag?.User as string ?? "Spotify User";
 }
 <!doctype html>
 <html lang="de">
@@ -100,10 +100,7 @@
             }
         }
 
-
-        }
-
-        /* Fade-in Animation */
+        /* === Fade-in Animation === */
         @@keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -132,7 +129,7 @@
             animation-delay: 0.6s;
         }
 
-        /* Share Buttons */
+        /* === Share Buttons === */
         .share-btn {
             width: 2.75rem;
             height: 2.75rem;
@@ -232,8 +229,12 @@
                class="btn mb-4 text-lg px-8 py-4 w-auto h-auto">
                 💸 Jetzt über PayPal spenden
             </a>
-            <img src="/QR-Code.png" alt="PayPal QR-Code"
-                 class="w-36 h-36 rounded-2xl border border-white/20 shadow-md"/>
+            <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
+               target="_blank" rel="noopener"
+               class="inline-block transition-transform hover:scale-105">
+                <img src="/QR-Code.png" alt="PayPal QR-Code"
+                     class="w-36 h-36 rounded-2xl border border-white/20 shadow-md hover:border-emerald-400 hover:shadow-emerald-400/20 transition-all"/>
+            </a>
             <p class="text-white/60 text-sm mt-3">Scanne den QR-Code zum Spenden</p>
         </div>
 
@@ -290,20 +291,21 @@
                target="_blank" rel="noopener" class="hover:text-white underline">
                 💚 Spenden
             </a>
-            <img src="/QR-Code.png" alt="PayPal QR-Code"
-                 class="w-9 h-9 rounded-md border border-white/20"/>
         </div>
     </div>
 </footer>
 
-<!-- Cooldown Script -->
-<script>
+    <!-- Cooldown + Spenden-Popup Script -->
+    <script>
         document.addEventListener("DOMContentLoaded", () => {
+
+            // === Cooldown-System ===
             const cooldownMinutes = 4;
             const buttons = document.querySelectorAll(".btn");
             buttons.forEach(btn => {
                 if (!btn.href || !btn.href.includes("/Home/Create")) return;
                 const key = "cooldown_" + btn.href;
+
                 const applyCooldown = (remaining) => {
                     btn.disabled = true;
                     btn.style.opacity = "0.5";
@@ -324,15 +326,72 @@
                         }
                     }, 1000);
                 };
+
                 const last = parseInt(localStorage.getItem(key) || "0");
                 const diff = (Date.now() - last) / 1000;
-                if (diff < cooldownMinutes * 60) applyCooldown(cooldownMinutes * 60 - diff);
+                if (diff < cooldownMinutes * 60)
+                    applyCooldown(cooldownMinutes * 60 - diff);
+
                 btn.addEventListener("click", e => {
                     if (btn.disabled) { e.preventDefault(); return; }
                     localStorage.setItem(key, Date.now().toString());
                     applyCooldown(cooldownMinutes * 60);
                 });
             });
+
+            // === Spenden-Popup nach 4 Aktionen ===
+            const clicked = JSON.parse(localStorage.getItem("clickedButtons") || "[]");
+            const totalButtons = 4;
+
+            buttons.forEach(btn => {
+                if (!btn.href || !btn.href.includes("/Home/Create")) return;
+                btn.addEventListener("click", () => {
+                    if (!clicked.includes(btn.href)) {
+                        clicked.push(btn.href);
+                        localStorage.setItem("clickedButtons", JSON.stringify(clicked));
+                    }
+
+                    if (clicked.length >= totalButtons && !localStorage.getItem("donationPromptShown")) {
+                        showDonationPrompt();
+                        localStorage.setItem("donationPromptShown", "true");
+                    }
+                });
+            });
+
+            function showDonationPrompt() {
+                const overlay = document.createElement("div");
+                overlay.style.position = "fixed";
+                overlay.style.inset = "0";
+                overlay.style.background = "rgba(0,0,0,0.7)";
+                overlay.style.display = "flex";
+                overlay.style.justifyContent = "center";
+                overlay.style.alignItems = "center";
+                overlay.style.zIndex = "10000";
+
+                const box = document.createElement("div");
+                box.className = "glass p-8 rounded-3xl text-center shadow-xl";
+                box.style.maxWidth = "400px";
+                box.innerHTML = `
+                    <h2 class="text-2xl font-bold mb-3">💚 Bitte eine kleine Spende</h2>
+                    <p class="text-white/70 mb-5">Dies zu realisieren war nicht einfach!<br>
+                    Wenn dir dieses Tool gefällt, unterstütze mich gerne auf PayPal.</p>
+                    <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
+                       target="_blank" rel="noopener"
+                       class="inline-block px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold">
+                       💸 Jetzt spenden
+                    </a>
+                    <div class="mt-5">
+                        <button id="closePrompt" class="text-sm text-white/60 hover:text-white underline">Später</button>
+                    </div>
+                `;
+                overlay.appendChild(box);
+                document.body.appendChild(overlay);
+
+                document.getElementById("closePrompt").addEventListener("click", () => {
+                    overlay.remove();
+                });
+            }
+
         });
     </script>
 

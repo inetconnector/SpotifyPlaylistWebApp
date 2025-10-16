@@ -6,8 +6,8 @@
 <!doctype html>
 <html lang="de">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <title>Fehler – InetConnector Playlist Generator™</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -62,22 +62,22 @@
     </style>
 </head>
 <body>
-    <div class="glass">
-        <h1>🚨 Ein Fehler ist aufgetreten</h1>
-        <p class="mb-4">Pfad: <strong>@Model.Path</strong></p>
-        <p class="mb-6">@Model.Message</p>
+<div class="glass">
+    <h1>🚨 Ein Fehler ist aufgetreten</h1>
+    <p class="mb-4">Pfad: <strong>@Model.Path</strong></p>
+    <p class="mb-6">@Model.Message</p>
 
-        @if (!string.IsNullOrWhiteSpace(Model.StackTrace))
-        {
-            <details class="mb-4">
-                <summary class="cursor-pointer text-white/70 hover:text-white">Details anzeigen</summary>
-                <pre>@Model.StackTrace</pre>
-            </details>
-        }
+    @if (!string.IsNullOrWhiteSpace(Model.StackTrace))
+    {
+        <details class="mb-4">
+            <summary class="cursor-pointer text-white/70 hover:text-white">Details anzeigen</summary>
+            <pre>@Model.StackTrace</pre>
+        </details>
+    }
 
-        <a href="/Home/Dashboard" class="inline-block mt-3 px-6 py-3 bg-emerald-500 rounded-xl text-white hover:bg-emerald-600 no-underline">
-            ⬅️ Zurück zum Dashboard
-        </a>
-    </div>
+    <a href="/Home/Dashboard" class="inline-block mt-3 px-6 py-3 bg-emerald-500 rounded-xl text-white hover:bg-emerald-600 no-underline">
+        ⬅️ Zurück zum Dashboard
+    </a>
+</div>
 </body>
 </html>
