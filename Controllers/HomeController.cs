@@ -97,18 +97,10 @@ public class HomeController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Spotify Callback fehlgeschlagen");
-            return RedirectToAction("Error", "Home",
+            return RedirectToAction("Index", "Error",
                 new { message = "Fehler beim Token-Austausch mit Spotify." });
         }
-    }
-
-    [HttpGet]
-    [Route("Home/Error")]
-    public IActionResult Error(string? message = null)
-    {
-        ViewBag.Message = message ?? "Ein unerwarteter Fehler ist aufgetreten.";
-        return View("Error");
-    }
+    } 
 
     // ============================
     // 🔸 Dashboard
@@ -141,7 +133,7 @@ public class HomeController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Dashboard-Fehler");
-            return RedirectToAction("Error", "Home",
+            return RedirectToAction("Index", "Error",
                 new { message = "Fehler beim Laden des Dashboards." });
         }
     }
@@ -343,5 +335,4 @@ body {{
 </body>
 </html>";
     }
-     
 }
