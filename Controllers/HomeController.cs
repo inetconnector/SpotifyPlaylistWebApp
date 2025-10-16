@@ -119,8 +119,17 @@ public class HomeController : Controller
 
             var spotify = new SpotifyClient(config);
 
-            var me = await spotify.UserProfile.Current();
-            ViewBag.User = me?.DisplayName ?? "Spotify User";
+            try
+            {
+                var me = await spotify.UserProfile.Current();
+                ViewBag.User = me?.DisplayName ?? "Spotify User";
+            }
+            catch (APIException apiEx)
+            {
+                _logger.LogError(apiEx, "Spotify API-Fehler beim Laden des Benutzerprofils.");
+                throw new Exception($"Spotify API-Fehler: {apiEx.Message}", apiEx);
+            }
+             
             return View();
         }
         catch (APIUnauthorizedException)
