@@ -97,8 +97,7 @@ public class HomeController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Spotify Callback fehlgeschlagen");
-            return RedirectToAction("Index", "Error",
-                new { message = "Fehler beim Token-Austausch mit Spotify." });
+            throw;
         }
     } 
 
@@ -133,8 +132,7 @@ public class HomeController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Dashboard-Fehler");
-            return RedirectToAction("Index", "Error",
-                new { message = "Fehler beim Laden des Dashboards." });
+            throw;
         }
     }
 
