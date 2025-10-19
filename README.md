@@ -6,7 +6,7 @@
 > ⚠️ **Access note:**  
 > Due to Spotify API policy changes, this demo is available **only for invited testers**.  
 > If you would like to try it, please send an email to  
-> **📧 inetconnector@outlook.com**  
+> **📧 info@inetconnector.com**  
 > with your Spotify account email address.  
 >  
 > Your Spotify email will be added to the test app’s allow-list, and you’ll then be able to log in and create playlists.
