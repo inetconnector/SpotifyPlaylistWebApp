@@ -1,23 +1,36 @@
-# 🎧 Spotify Playlist Web App – README
+# 🎧 Spotify Playlist Web App – README (v3.3)
 
-## Overview
-This **ASP.NET Core web application** connects to the **Spotify Web API** to automatically create, clone, and organize playlists based on your listening history, liked songs, and personalized recommendations.
+## 🌐 Live Demo
+👉 **[https://playlists.inetconnector.com](https://playlists.inetconnector.com)**  
 
-It uses **OAuth2 PKCE authentication** for secure login and interacts with Spotify’s API to access user data such as top tracks, saved songs, and generated recommendations — all without storing any sensitive credentials server-side.
+> ⚠️ **Access note:**  
+> Due to Spotify API policy changes, this demo is available **only for invited testers**.  
+> If you would like to try it, please send an email to  
+> **📧 inetconnector@outlook.com**  
+> with your Spotify account email address.  
+>  
+> Your Spotify email will be added to the test app’s allow-list, and you’ll then be able to log in and create playlists.
 
 ---
 
-## 🚀 Main Features (Dashboard Buttons)
+## 🧩 Overview
+This **ASP.NET Core web application** connects to the **Spotify Web API** to automatically create, clone, and organize playlists based on your listening history, liked songs, and personalized recommendations.  
+
+The app uses **OAuth 2.0 PKCE authentication** for secure, client-side authorization — no secrets or credentials are stored on the server.
+
+---
+
+## 🚀 Dashboard Features
 
 | Icon | Action | Description |
 |------|---------|-------------|
-| 📜 | **Clone Liked Songs** | Creates a playlist that clones all your liked (saved) Spotify songs. |
-| 🎶 | **Create Alternative Favorites** | Builds a playlist of *alternative songs* by the same artists or albums as your liked tracks — with strict duplicate filtering. |
-| ✨ | **Create Recommendations** | Generates a fresh playlist using Spotify’s **Recommendations API**, seeded from your top songs and automatically adjusted to your current language/market. |
-| 🔀 | **Shuffle Liked Songs** | Produces a randomized “Liked Mix” of your saved tracks. |
-| 📈 | **Most-Listened Songs** | Creates a playlist of your top-played tracks (long-term history). |
+| 📜 | **Clone Liked Songs** | Copies all your liked Spotify songs into a new playlist. |
+| 🎶 | **Alternative Favorites** | Creates a playlist with alternative tracks by the same artists or albums (no duplicates). |
+| ✨ | **Recommendations** | Builds a discovery playlist from Spotify’s recommendation engine, seeded from your top tracks. |
+| 🔀 | **Shuffle Liked Songs** | Creates a randomized “Liked Mix”. |
+| 📈 | **Most-Listened Songs** | Lists your most-played tracks (long-term history). |
 
-All button texts, tooltips, and messages are fully localized via  
+All button texts and tooltips are localized through  
 `SharedResource.en.resx` and `SharedResource.de.resx`.
 
 ---
@@ -26,11 +39,11 @@ All button texts, tooltips, and messages are fully localized via
 
 - **Framework:** ASP.NET Core MVC (.NET 8)  
 - **Language:** C#  
-- **API:** Spotify Web API (via `SpotifyAPI.Web`)  
-- **Authentication:** OAuth2 PKCE Flow  
-- **Frontend:** Razor Pages + TailwindCSS (via CDN)  
-- **Localization:** .NET IStringLocalizer with culture cookies  
-- **Session:** Stores access token (in-memory or distributed session)  
+- **API:** [Spotify Web API](https://developer.spotify.com/documentation/web-api) via `SpotifyAPI.Web`  
+- **Authentication:** OAuth 2.0 PKCE Flow  
+- **Frontend:** Razor Views + TailwindCSS (CDN)  
+- **Localization:** IStringLocalizer (.resx files)  
+- **Session:** In-memory access-token storage  
 
 ---
 
@@ -38,72 +51,68 @@ All button texts, tooltips, and messages are fully localized via
 
 ```
 Controllers/
-  HomeController.cs          # All Spotify playlist generation logic
+  HomeController.cs
 Views/
-  Home/Dashboard.cshtml      # Dashboard with main feature buttons
+  Home/Dashboard.cshtml
   Shared/LanguageSwitcher.cshtml
 Resources/
-  SharedResource.en.resx     # English UI texts
-  SharedResource.de.resx     # German UI texts
+  SharedResource.en.resx
+  SharedResource.de.resx
 wwwroot/
-  css/, js/, images/         # Static assets (QR code, styling)
+  css/, js/, images/
 ```
 
 ---
 
-## 🔄 Data Flow
+## 🧭 Data Flow
 
-1. User clicks **Login with Spotify**.  
-2. OAuth2 PKCE handshake completes → access token saved in session.  
-3. Dashboard displays all available playlist actions.  
-4. User clicks a feature (e.g., “Create Recommendations”).  
-5. The app calls the Spotify Web API asynchronously in the background.  
-6. A new private playlist is created in the user’s Spotify account.
-
----
-
-## 🎵 Intelligent Playlist Generation
-
-### 1️⃣ `GeneratePlaylistAsync()`
-- Fetches **top tracks** or **liked tracks** (depending on action).  
-- Handles pagination and rate limits automatically.  
-- Creates playlists with batching (max 100 tracks per call).  
-
-### 2️⃣ `GenerateAlternativeFavoritesAsync()`
-- For each liked track, tries to find:
-  - Another song from the same **album**, or  
-  - A **top track by the same artist** (in the user’s market).  
-- Ensures **no duplicate URIs** in the output playlist.  
-
-### 3️⃣ `GenerateRecommendationsAsync()`
-- Uses up to **5 random seeds** from the user’s top tracks.  
-- Derives the **Spotify market automatically** from browser language (e.g., `de-DE → DE`, `en-US → US`).  
-- Calls Spotify’s **Recommendations endpoint** to build a fresh discovery playlist.
+1. User logs in with Spotify (OAuth 2 PKCE).  
+2. The authorization code is exchanged for an access token.  
+3. Token is stored in session memory.  
+4. User triggers playlist creation.  
+5. Spotify Web API is called asynchronously.  
+6. The resulting playlist appears in the user’s Spotify library.
 
 ---
 
-## 🎧 Filtering and Cleanup
+## 🛠️ Spotify Developer Setup (for your own deployment)
 
-The app automatically excludes **audiobooks** and **podcasts** to prevent unwanted content:
-```csharp
-if (type.Contains("audiobook") || type.Contains("podcast"))
-    return false;
-```
+If you want to run your own instance of this app (e.g. locally or on your domain),  
+you need to create a **Spotify Developer App** with **your own Redirect URI**.
 
----
+### 1️⃣ Create your app
+1. Go to [https://developer.spotify.com/dashboard](https://developer.spotify.com/dashboard)  
+2. Log in with your Spotify account.  
+3. Click **“Create App”** → enter:
+   - **App name:** `SpotifyPlaylistWebApp`
+   - **Description:** `Personal playlist generator`
+   - **Redirect URI(s):**
+     ```
+     https://localhost:5001/callback/
+     https://yourdomain.com/callback/
+     ```
+     *(replace `yourdomain.com` with your own site)*  
+4. Click **Save**
 
-## 🧩 Additional Features
+### 2️⃣ Get your Client ID
+After saving, copy the **Client ID** shown in the app dashboard.  
+You don’t need a Client Secret (PKCE flow does not require it).
 
-- **Cooldown System:** Prevents API abuse by enforcing a short delay (4 minutes) between consecutive playlist generations per user.  
-- **Automatic Localization:** UI switches between English and German via culture cookie.  
-- **Donation Prompt:** After several uses, a subtle donation popup encourages voluntary support.  
-- **Session Management:** Spotify tokens expire gracefully — if invalid, user is redirected to login.
+### 3️⃣ Register your Redirect URI
+In the same Spotify Developer page → **Edit Settings → Redirect URIs**  
+Add the URI that matches your environment:
 
----
+| Environment | Example Redirect URI |
+|--------------|----------------------|
+| Local development | `https://localhost:5001/callback/` |
+| Your deployment | `https://yourdomain.com/callback/` |
+| InetConnector (demo) | `https://playlists.inetconnector.com/callback/` *(only for invited testers)* |
 
-## 🛠️ Configuration
+Click **Add** and **Save**.
 
-### `appsettings.json` (local development)
+### 4️⃣ Configure the app
+
+#### Option A – `appsettings.json`
 ```json
 {
   "Spotify": {
@@ -113,45 +122,63 @@ if (type.Contains("audiobook") || type.Contains("podcast"))
 }
 ```
 
-### Environment Variables (for deployment)
+#### Option B – Environment variables
 ```bash
-export SPOTIFY_CLIENT_ID="your_client_id"
-export SPOTIFY_REDIRECT_URI="https://playlists.inetconnector.com/callback/"
+setx SPOTIFY_CLIENT_ID "your_spotify_client_id"
+setx SPOTIFY_REDIRECT_URI "https://yourdomain.com/callback/"
 ```
-
-Ensure that the **redirect URI** is also registered in your Spotify Developer Dashboard.
 
 ---
 
-## 💻 Running Locally
+## 💻 Run Locally
 
 ```bash
 dotnet restore
 dotnet run
 ```
 
-Then open your browser at:  
-👉 **https://localhost:5001**
+Then open [https://localhost:5001](https://localhost:5001) in your browser  
+and log in with Spotify (you must be listed as a tester in your app settings).
 
 ---
 
-## 🧾 Recent Updates
+## 🎵 Playlist Logic Overview
 
-### v3.0 – October 2025
-- Added **automatic market detection** (`CultureInfo → Spotify Market`)  
-- Fixed SpotifyAPI.Web property changes for `RecommendationsRequest`  
-- Added strict duplicate filtering in `AlternativeFavorites`  
-- Enhanced error reporting for API failures (`APIException` logging)  
-- Consolidated all actions under unified **HomeController.cs**  
-- Improved Tailwind dashboard with clean tooltips and animation effects  
+| Method | Description |
+|---------|-------------|
+| `GeneratePlaylistAsync()` | Creates playlists from liked or top tracks, handling pagination & rate limits. |
+| `GenerateAlternativeFavoritesAsync()` | Finds similar songs from same albums/artists — removes duplicates. |
+| `GenerateRecommendationsAsync()` | Uses up to 5 seed tracks for Spotify’s recommendations; market auto-detected from UI culture. |
 
 ---
 
-## 🧠 Future Enhancements
-- “Smart Clone” that merges liked songs + recommendations  
-- Auto-refresh tokens for long-lived sessions  
-- UI dark/light theme toggle  
-- Optional inclusion of public playlists in seed generation  
+## 🎧 Content Filtering
+
+Audiobooks and podcasts are automatically excluded:
+```csharp
+if (type.Contains("audiobook") || type.Contains("podcast"))
+    return false;
+```
+
+---
+
+## 🧩 Additional Features
+
+- 4-minute **cooldown** per user to avoid API spam  
+- **Automatic localization** (English / German)  
+- **Donation prompt** after repeated use  
+- **Robust error logging** with Spotify API responses  
+
+---
+
+## 🧾 Recent Updates (v3.3 – Oct 2025)
+
+- Added **Spotify Developer Setup** section  
+- Clarified **Redirect URI examples** (InetConnector vs. self-hosted)  
+- Added **access invitation notice** for the public demo  
+- Integrated automatic **market detection**  
+- Fixed `RecommendationsRequest` syntax for current SDK  
+- Improved duplicate filtering and logging  
 
 ---
 
