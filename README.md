@@ -1,4 +1,4 @@
-# 🎧 Spotify Playlist Web App – README (v3.3)
+# 🎧  Playlist Web App for Spotify®– README (v3.3)
 
 ## 🌐 Live Demo
 👉 **[https://playlists.inetconnector.com](https://playlists.inetconnector.com)**  
