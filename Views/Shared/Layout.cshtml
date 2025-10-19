@@ -1,0 +1,26 @@
+@using System.Globalization
+@using Microsoft.Extensions.Localization
+@using SpotifyPlaylistWebApp
+@inject IStringLocalizer<SharedResource> L
+<!DOCTYPE html>
+<html lang="@CultureInfo.CurrentUICulture.TwoLetterISOLanguageName">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>@ViewData["Title"] - Playlist Generator for Spotify®</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
+    <style>
+        body { background: radial-gradient(circle at top left, #0f2027, #203a43, #2c5364); color: #fff; font-family: system-ui, sans-serif; margin: 0; }
+        main { max-width: 1000px; margin: 0 auto; padding: 80px 20px 40px; }
+        header { position: fixed; top: 10px; right: 20px; z-index: 100; }
+    </style>
+</head>
+<body>
+<header>
+    <partial name="LanguageSwitcher"/>
+</header>
+<main role="main" class="pb-3">
+    @RenderBody()
+</main>
+</body>
+</html>

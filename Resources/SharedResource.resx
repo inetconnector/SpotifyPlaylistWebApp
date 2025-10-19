@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>2.0</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+
+	<!-- Attr.cshtml -->
+	<data name="Attr_Dashboard_E_Mail" xml:space="preserve"><value>Email</value></data>
+	<data name="Attr_Dashboard_Erstellt_deine_gespeicherten_Lieblingssongs_in_O" xml:space="preserve"><value>Creates your saved favorite songs in the original order.</value></data>
+	<data name="Attr_Dashboard_Erstellt_deine_meistgeh_rten_Songs_in_der_Origin" xml:space="preserve"><value>Creates your most listened songs in the original order.</value></data>
+	<data name="Attr_Dashboard_Erstellt_eine_zuf_llige_Playlist_aus_deinen_gesp" xml:space="preserve"><value>Creates a random playlist from your saved favorite songs.</value></data>
+	<data name="Attr_Dashboard_Erstellt_eine_zuf_llige_Playlist_aus_deinen_meis" xml:space="preserve"><value>Creates a random playlist from your most listened songs.</value></data>
+	<data name="Attr_Dashboard_Facebook" xml:space="preserve"><value>Facebook</value></data>
+	<data name="Attr_Dashboard_LinkedIn" xml:space="preserve"><value>LinkedIn</value></data>
+	<data name="Attr_Dashboard_PayPal_QR_Code" xml:space="preserve"><value>PayPal QR Code</value></data>
+	<data name="Attr_Dashboard_Reddit" xml:space="preserve"><value>Reddit</value></data>
+	<data name="Attr_Dashboard_Telegram" xml:space="preserve"><value>Telegram</value></data>
+	<data name="Attr_Dashboard_WhatsApp" xml:space="preserve"><value>WhatsApp</value></data>
+	<data name="Attr_Dashboard_X_Twitter" xml:space="preserve"><value>X (Twitter)</value></data>
+	<data name="Attr_Index_PayPal_QR_Code" xml:space="preserve"><value>PayPal QR Code</value></data>
+	<data name="Attr_Index_Sitemap" xml:space="preserve"><value>Sitemap</value></data>
+
+	<!-- Dashboard.cshtml -->
+	<data name="Dashboard_Bitte_eine_kleine_Spende" xml:space="preserve"><value>💚 Please make a small donation</value></data>
+	<data name="Dashboard_Dashboard_InetConnector_Playlist_Generator_nutzt" xml:space="preserve"><value>Dashboard – InetConnector Playlist Generator™ – uses the Spotify® Web APIs</value></data>
+	<data name="Dashboard_Datenschutzerkl_rung" xml:space="preserve"><value>Privacy Policy</value></data>
+	<data name="Dashboard_Die_Erstellung_erfolgt_im_Hintergrund_und_dauert" xml:space="preserve"><value>The creation takes place in the background and only takes a few seconds.</value></data>
+	<data name="Dashboard_Dies_zu_realisieren_war_nicht_einfach" xml:space="preserve"><value>Making this work was not easy!</value></data>
+	<data name="Dashboard_Erstelle_automatisch_deine_Spotify_Playlists_mit" xml:space="preserve"><value>Automatically create your Spotify playlists with just one click.</value></data>
+	<data name="Dashboard_Favoriten_Liste" xml:space="preserve"><value>Favorites List</value></data>
+	<data name="Dashboard_Favoriten_Mix" xml:space="preserve"><value>Favorites Mix</value></data>
+	<data name="Dashboard_Hilf_anderen_ihre_Spotify_Playlists_zu_optimiere" xml:space="preserve"><value>Help others optimize their Spotify playlists!</value></data>
+	<data name="Dashboard_Impressum" xml:space="preserve"><value>Imprint</value></data>
+	<data name="Dashboard_Jede_Aktion_erstellt_eine_neue_Playlist_in_deine" xml:space="preserve"><value>Each action creates a new playlist in your Spotify account.</value></data>
+	<data name="Dashboard_Jetzt_ber_PayPal_spenden" xml:space="preserve"><value>💸 Donate now via PayPal</value></data>
+	<data name="Dashboard_Jetzt_spenden" xml:space="preserve"><value>💸 Donate now</value></data>
+	<data name="Dashboard_Scanne_den_QR_Code_zum_Spenden" xml:space="preserve"><value>Scan the QR code to donate</value></data>
+	<data name="Dashboard_Sp_ter" xml:space="preserve"><value>Later</value></data>
+	<data name="Dashboard_Spenden" xml:space="preserve"><value>💚 Donate</value></data>
+	<data name="Dashboard_Teile_dieses_Tool" xml:space="preserve"><value>🔗 Share this tool</value></data>
+	<data name="Dashboard_Text" xml:space="preserve"><value>🎧</value></data>
+	<data name="Dashboard_Top_Liste" xml:space="preserve"><value>Top List</value></data>
+	<data name="Dashboard_Top_Mix" xml:space="preserve"><value>Top Mix</value></data>
+	<data name="Dashboard_Unterst_tze_das_Projekt" xml:space="preserve"><value>💚 Support the project</value></data>
+	<data name="Dashboard_Wenn_dir_dieses_Tool_gef_llt_unterst_tze_mich_ge" xml:space="preserve"><value>If you like this tool, feel free to support me on PayPal.</value></data>
+	<data name="Dashboard_gespeicherte_Songs" xml:space="preserve"><value>saved songs</value></data>
+	<data name="Dashboard_meistgeh_rte_Songs" xml:space="preserve"><value>most listened songs</value></data>
+
+	<!-- Datenschutz.cshtml -->
+	<data name="Datenschutz_97209_Veitsh_chheim" xml:space="preserve"><value>97209 Veitshöchheim</value></data>
+	<data name="Datenschutz_Allgemeine_Hinweise_DSGVO" xml:space="preserve"><value>General information (GDPR)</value></data>
+	<data name="Datenschutz_Bei_Fragen_oder_Anliegen_zum_Datenschutz_kannst_" xml:space="preserve"><value>If you have any questions or concerns regarding data protection, please contact the address listed in the imprint.</value></data>
+	<data name="Datenschutz_Beim_Besuch_dieser_Website_werden_lediglich_die_" xml:space="preserve"><value>When visiting this website, only technically necessary data (IP address, browser type, time) are processed. These are used solely to ensure proper operation and are not merged with other data sources.</value></data>
+	<data name="Datenschutz_Bismarckstr_6" xml:space="preserve"><value>Bismarckstr. 6</value></data>
+	<data name="Datenschutz_Daniel_Frede" xml:space="preserve"><value>Daniel Frede</value></data>
+	<data name="Datenschutz_Dashboard" xml:space="preserve"><value>Dashboard</value></data>
+	<data name="Datenschutz_Datenschutz" xml:space="preserve"><value>Privacy</value></data>
+	<data name="Datenschutz_Datenschutzerkl_rung" xml:space="preserve"><value>Privacy Policy</value></data>
+	<data name="Datenschutz_Datenschutzerkl_rung_InetConnector_Playlist_Gene" xml:space="preserve"><value>Privacy Policy – InetConnector Playlist Generator™</value></data>
+	<data name="Datenschutz_Dein_Spotify_Benutzername_und_deine_ffentliche_N" xml:space="preserve"><value>Your Spotify username and your public user ID</value></data>
+	<data name="Datenschutz_Deine_Top_Tracks_Lieblingssongs" xml:space="preserve"><value>Your top tracks (“favorite songs”)</value></data>
+	<data name="Datenschutz_Die_Daten_werden_ausschlie_lich_verwendet_um_Spo" xml:space="preserve"><value>The data are used exclusively to generate Spotify playlists for you. No permanent storage, analysis, or transfer to third parties takes place. After the session ends, no personal data are stored on the server.</value></data>
+	<data name="Datenschutz_Diese_Anwendung" xml:space="preserve"><value>This application (“</value></data>
+	<data name="Datenschutz_Diese_App_steht_in_keiner_offiziellen_Verbindung" xml:space="preserve"><value>This app is not officially affiliated with Spotify AB. Spotify is a registered trademark of Spotify AB, Stockholm, Sweden.</value></data>
+	<data name="Datenschutz_Diese_Website_kann_optional_Google_Analytics_4_v" xml:space="preserve"><value>This website may optionally use Google Analytics 4. IP addresses are anonymized before being sent to Google servers (IP anonymization). The data are used only for statistical analysis. You can disable collection in your browser settings.</value></data>
+	<data name="Datenschutz_Du_hast_gem_Art_15_ff_DSGVO_jederzeit_das_Recht_" xml:space="preserve"><value>In accordance with Art. 15 et seq. GDPR, you have the right at any time to access, rectify, delete, restrict processing, and request data portability of your personal data.</value></data>
+	<data name="Datenschutz_Du_kannst_den_Zugriff_jederzeit_ber_dein" xml:space="preserve"><value>You can revoke access at any time via your</value></data>
+	<data name="Datenschutz_E_Mail_info_at_inetconnector_com" xml:space="preserve"><value>Email: info(at)inetconnector.com</value></data>
+	<data name="Datenschutz_Empfohlene_Songs_die_Spotify_anhand_deiner_H_rge" xml:space="preserve"><value>Recommended songs generated by Spotify based on your listening habits</value></data>
+	<data name="Datenschutz_Es_werden_keine_Cookies_keine_Tracking_Tools_und" xml:space="preserve"><value>No cookies, tracking tools, or external analytics services are used. The application uses only the Spotify Web API. All tokens are deleted after the session ends.</value></data>
+	<data name="Datenschutz_F_r_freiwillige_Spenden_wird_der_Dienst_PayPal_g" xml:space="preserve"><value>For voluntary donations, the PayPal service is used (PayPal (Europe) S.à r.l. et Cie, S.C.A., Luxembourg). When clicking on the donation link or QR code, you are redirected to the PayPal website. PayPal’s privacy policy applies:</value></data>
+	<data name="Datenschutz_Google_Analytics_optional" xml:space="preserve"><value>Google Analytics (optional)</value></data>
+	<data name="Datenschutz_Impressum" xml:space="preserve"><value>Imprint</value></data>
+	<data name="Datenschutz_InetConnector_Spotify_Tools" xml:space="preserve"><value>InetConnector Spotify Tools</value></data>
+	<data name="Datenschutz_Letzte_Aktualisierung" xml:space="preserve"><value>Last updated:</value></data>
+	<data name="Datenschutz_Oktober_2025" xml:space="preserve"><value>October 2025</value></data>
+	<data name="Datenschutz_Playlist_Generator_f_r_Spotify" xml:space="preserve"><value>Playlist Generator for Spotify®</value></data>
+	<data name="Datenschutz_Rechtliches" xml:space="preserve"><value>Legal</value></data>
+	<data name="Datenschutz_Spenden_ber_PayPal" xml:space="preserve"><value>Donations via PayPal</value></data>
+	<data name="Datenschutz_Spotify_Konto" xml:space="preserve"><value>Spotify account</value></data>
+	<data name="Datenschutz_Spotify_Web_API" xml:space="preserve"><value>Spotify Web API</value></data>
+	<data name="Datenschutz_Stand_15_Oktober_2025" xml:space="preserve"><value>Status: October 15, 2025</value></data>
+	<data name="Datenschutz_Startseite" xml:space="preserve"><value>Home</value></data>
+	<data name="Datenschutz_Text" xml:space="preserve"><value>🛡️</value></data>
+	<data name="Datenschutz_Verantwortlich" xml:space="preserve"><value>Responsible</value></data>
+	<data name="Datenschutz_Verantwortlich_f_r_den_Betrieb_dieser_Anwendung_" xml:space="preserve"><value>The operator of the domain is responsible for running this application</value></data>
+	<data name="Datenschutz_Verantwortlich_im_Sinne_der_Datenschutzgesetze" xml:space="preserve"><value>Responsible within the meaning of data protection laws:</value></data>
+	<data name="Datenschutz_Welche_Daten_werden_verwendet" xml:space="preserve"><value>Which data are used?</value></data>
+	<data name="Datenschutz_Widerruf_des_Zugriffs" xml:space="preserve"><value>Revocation of access</value></data>
+	<data name="Datenschutz_Wof_r_werden_die_Daten_genutzt" xml:space="preserve"><value>For what are the data used?</value></data>
+	<data name="Datenschutz_nutzt_die" xml:space="preserve"><value>”) uses the</value></data>
+	<data name="Datenschutz_playlists_inetconnector_com" xml:space="preserve"><value>playlists.inetconnector.com</value></data>
+	<data name="Datenschutz_um_personalisierte_Playlists_zu_erstellen_Dabei_" xml:space="preserve"><value>to create personalized playlists. Your Spotify account is temporarily connected to access your favorite songs and artists.</value></data>
+	<data name="Datenschutz_widerrufen" xml:space="preserve"><value>revoked.</value></data>
+	<data name="Datenschutz_www_paypal_com_privacy" xml:space="preserve"><value>www.paypal.com/privacy</value></data>
+
+	<!-- Error.cshtml -->
+	<data name="Error_Details_anzeigen" xml:space="preserve"><value>Show details</value></data>
+	<data name="Error_Ein_Fehler_ist_aufgetreten" xml:space="preserve"><value>🚨 An error has occurred</value></data>
+	<data name="Error_Fehler_InetConnector_Playlist_Generator" xml:space="preserve"><value>Error – InetConnector Playlist Generator™</value></data>
+	<data name="Error_Pfad" xml:space="preserve"><value>Path:</value></data>
+	<data name="Error_Zur_ck_zum_Dashboard" xml:space="preserve"><value>⬅️ Back to Dashboard</value></data>
+
+	<!-- Impressum.cshtml -->
+	<data name="Impressum_97209_Veitsh_chheim" xml:space="preserve"><value>97209 Veitshöchheim</value></data>
+	<data name="Impressum_Angaben_gem_5_TMG_18_Abs_2_MStV" xml:space="preserve"><value>Information according to §5 TMG &amp; §18 para. 2 MStV:</value></data>
+	<data name="Impressum_Bismarckstrasse_6e" xml:space="preserve"><value>Bismarckstrasse 6e</value></data>
+	<data name="Impressum_Daniel_Frede" xml:space="preserve"><value>Daniel Frede</value></data>
+	<data name="Impressum_Daniel_Frede_Veitsh_chheim_bei_W_rzburg" xml:space="preserve"><value>Daniel Frede, Veitshöchheim near Würzburg</value></data>
+	<data name="Impressum_Datenschutzerkl_rung" xml:space="preserve"><value>Privacy Policy</value></data>
+	<data name="Impressum_Deutschland" xml:space="preserve"><value>Germany</value></data>
+	<data name="Impressum_Die_Inhalte_unserer_Seiten_wurden_mit_gr_ter_Sor" xml:space="preserve">
+  <value>
+The contents of our pages have been created with the utmost care. However, we cannot guarantee the accuracy, completeness, or timeliness of the content.  
+As a service provider, we are responsible for our own content on these pages in accordance with Section 7 (1) of the German Telemedia Act (TMG) under general law.
+  </value>
+</data>
+
+	<data name="Impressum_Die_durch_die_Seitenbetreiber_erstellten_Inhalte" xml:space="preserve">
+  <value>
+The content and works created by the site operators on these pages are subject to German copyright law.  
+Third-party contributions are marked as such. Duplication, processing, distribution, or any form of use beyond the scope of copyright law requires the written consent of the respective author or creator.
+  </value>
+</data>
+	<data name="Impressum_E_Mail_kontakt_at_inetconnector_com" xml:space="preserve"><value>Email: kontakt(at)inetconnector.com</value></data>
+	<data name="Impressum_Haftung_f_r_Inhalte" xml:space="preserve"><value>Liability for Content</value></data>
+	<data name="Impressum_Haftung_f_r_Links" xml:space="preserve"><value>Liability for Links</value></data>
+	<data name="Impressum_Impressum" xml:space="preserve"><value>Imprint</value></data>
+	<data name="Impressum_Impressum_InetConnector_Playlist_Generator" xml:space="preserve"><value>Imprint – InetConnector Playlist Generator™</value></data>
+	<data name="Impressum_InetConnector_com" xml:space="preserve"><value>InetConnector.com</value></data>
+	<data name="Impressum_Unser_Angebot_enth_lt_Links_zu_externen_Websites" xml:space="preserve"><value>Our offer contains links to external third-party websites over whose content we have no control. Therefore, we cannot assume any liability for this external content. The respective provider or operator of the linked pages is always responsible for the content of those pages.</value></data>
+	<data name="Impressum_Urheberrecht" xml:space="preserve"><value>Copyright</value></data>
+	<data name="Impressum_Verantwortlich_f_r_den_Inhalt" xml:space="preserve"><value>Responsible for the content</value></data>
+	<data name="Impressum_Zur_Datenschutzerkl_rung" xml:space="preserve"><value>To the Privacy Policy</value></data>
+
+	<!-- Index.cshtml -->
+	<data name="Index_Datenschutz" xml:space="preserve"><value>Privacy</value></data>
+	<data name="Index_Der_Dienst_wird_von" xml:space="preserve"><value>The service is operated by</value></data>
+	<data name="Index_Empfehlungen_basierend_auf_deinem_H_rverhalten" xml:space="preserve"><value>✨ Recommendations based on your listening habits</value></data>
+	<data name="Index_Gef_llt_dir_dieses_Tool_Unterst_tze_die_Weiteren" xml:space="preserve"><value>Do you like this tool? Support further development with a small donation. Every contribution helps keep the Playlist Generator free and ad-free.</value></data>
+	<data name="Index_Impressum" xml:space="preserve"><value>Imprint</value></data>
+	<data name="Index_InetConnector" xml:space="preserve"><value>InetConnector</value></data>
+	<data name="Index_Jetzt_ber_PayPal_spenden" xml:space="preserve"><value>💸 Donate now via PayPal</value></data>
+	<data name="Index_Lieblingssongs" xml:space="preserve"><value>Favorite songs</value></data>
+	<data name="Index_Lieblingssongs_in_Originalreihenfolge_klonen" xml:space="preserve"><value>📜 Clone favorite songs in original order</value></data>
+	<data name="Index_Mit_Spotify_verbinden" xml:space="preserve"><value>🔐 Connect with Spotify</value></data>
+	<data name="Index_Mit_diesem_kostenlosen_Online_Tool_kannst_du_aut" xml:space="preserve"><value>With this free online tool, you can automatically create Spotify playlists from your</value></data>
+	<data name="Index_Nach_dem_Login_mit_deinem_Spotify_Konto_greift_d" xml:space="preserve"><value>After logging in with your Spotify account, the app securely accesses your listening data via the Spotify Web API and automatically creates playlists according to your choice. You can decide whether to save your most listened songs, your saved favorites, or recommended tracks in a new order.</value></data>
+	<data name="Index_Playlist_Generator_f_r_Spotify_Lieblingssongs_au" xml:space="preserve"><value>Playlist Generator for Spotify® – automatically save your favorite songs</value></data>
+	<data name="Index_Scanne_den_QR_Code_zum_Spenden" xml:space="preserve"><value>Scan the QR code to donate</value></data>
+	<data name="Index_Spenden" xml:space="preserve"><value>💚 Donate</value></data>
+	<data name="Index_Spotify_Playlist_Generator_by_InetConnector_Lieb" xml:space="preserve"><value>Spotify Playlist Generator™ by InetConnector – automatically save &amp; create playlists</value></data>
+	<data name="Index_Text" xml:space="preserve"><value>🎧</value></data>
+	<data name="Index_Unterst_tze_das_Projekt" xml:space="preserve"><value>💚 Support the project</value></data>
+	<data name="Index_Was_dieses_Tool_kann" xml:space="preserve"><value>What this tool can do</value></data>
+	<data name="Index_Wie_funktioniert_der_Spotify_Playlist_Generator" xml:space="preserve"><value>How does the Spotify Playlist Generator work?</value></data>
+	<data name="Index_Zuf_llige_Playlists_aus_Lieblingssongs_generiere" xml:space="preserve"><value>🎲 Generate random playlists from favorite songs</value></data>
+	<data name="Index_betrieben_und_nutzt_ausschlie_lich_offizielle_Sp" xml:space="preserve"><value>operated and uses only official Spotify interfaces – no risk, no ads, no hidden costs.</value></data>
+	<data name="Index_erstellen_direkt_ber_die_offizielle_Spotify_Web_" xml:space="preserve"><value>create – directly via the official Spotify Web API.</value></data>
+	<data name="Index_meistgeh_rten_Tracks" xml:space="preserve"><value>most listened tracks</value></data>
+	<data name="Index_oder" xml:space="preserve"><value>or</value></data>
+
+	<!-- Shared.cshtml -->
+	<data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+	<data name="Dashboard" xml:space="preserve"><value>Dashboard</value></data>
+	<data name="English" xml:space="preserve"><value>English</value></data>
+	<data name="German" xml:space="preserve"><value>German</value></data>
+	<data name="Imprint" xml:space="preserve"><value>Imprint</value></data>
+	<data name="Language" xml:space="preserve"><value>Language</value></data>
+	<data name="Login" xml:space="preserve"><value>Login</value></data>
+	<data name="Logout" xml:space="preserve"><value>Logout</value></data>
+	<data name="Privacy" xml:space="preserve"><value>Privacy</value></data>
+	<data name="Save" xml:space="preserve"><value>Save</value></data>
+	<data name="Search" xml:space="preserve"><value>Search</value></data>
+	<data name="Welcome" xml:space="preserve"><value>Welcome</value></data>
+
+	<data name="Btn_Liked_Clone" xml:space="preserve">
+  <value>Clone Liked Songs</value>
+</data>
+	<data name="Desc_Liked_Clone" xml:space="preserve">
+  <value>Creates a playlist with your saved songs.</value>
+</data>
+	<data name="Btn_Alternative_Favorites" xml:space="preserve">
+  <value>Create Alternative Favorites</value>
+</data>
+	<data name="Desc_Alternative_Favorites" xml:space="preserve">
+  <value>Generates similar songs from the same artists, without duplicates.</value>
+</data>
+	<data name="Btn_Recommendations" xml:space="preserve">
+  <value>Create Recommendations</value>
+</data>
+	<data name="Desc_Recommendations" xml:space="preserve">
+  <value>Generates suggestions based on your liked songs.</value>
+</data>
+	<data name="Btn_Liked_Shuffle" xml:space="preserve">
+  <value>Shuffle Liked Songs</value>
+</data>
+	<data name="Desc_Liked_Shuffle" xml:space="preserve">
+  <value>Creates a randomized mix of your liked songs.</value>
+</data>
+	<data name="Btn_Most_Listened" xml:space="preserve">
+  <value>Most-Listened Songs</value>
+</data>
+	<data name="Desc_Most_Listened" xml:space="preserve">
+  <value>Creates a playlist with your most-listened songs.</value>
+</data>
+<data name="Playlist_AlternativeFavorites" xml:space="preserve">
+  <value>Alternative Favorite Songs</value>
+</data>
+</root>

@@ -1,111 +1,97 @@
-# 🎵 InetConnector Playlist Generator™
+# Spotify Playlist Web App – Consolidated README
 
-[![Visit InetConnector Playlist Generator](https://img.shields.io/badge/🌐%20Visit%20App-playlists.inetconnector.com-brightgreen?style=for-the-badge)](https://playlists.inetconnector.com)
+# Spotify Playlist Web App
 
-![Logo](inetconnector.png)
+## Overview
+This ASP.NET Core web application connects to the **Spotify Web API** to automatically generate, clone, and organize playlists based on a user's listening behavior and saved tracks.
 
-A modern web-based generator for creating personalized Spotify playlists.  
-All data is processed **temporarily**, **securely**, and **GDPR-compliantly**.
-
----
-
-[![Visit InetConnector Playlist Generator](https://img.shields.io/badge/🌐%20Visit%20App-playlists.inetconnector.com-brightgreen?style=for-the-badge)](https://playlists.inetconnector.com)
-
+The app uses OAuth2 PKCE authentication and communicates with Spotify's API to access private data such as top tracks, saved tracks, and recommendations.
 
 ---
 
-## 🚀 Features
+## Main Features (Dashboard Buttons)
 
-- 🔗 Connect with your Spotify account (OAuth login)
-- 🧠 Smart playlist generation based on favorite songs, genres, and moods
-- ⚡ Temporary data processing — no permanent storage
-- 🌐 Fully responsive web interface using Tailwind CSS
-- 🔒 GDPR-compliant data usage (see [Privacy Policy](https://playlists.inetconnector.com/Home/Datenschutz))
+| Icon | Action | Description |
+|------|---------|-------------|
+| 📜 | **Clone Liked Songs** | Creates a playlist containing all your saved Spotify songs. |
+| 🎶 | **Create Alternative Favorites** | Generates a new playlist with alternative tracks from the same artists, avoiding duplicates. |
+| ✨ | **Create Recommendations** | Uses Spotify recommendations to suggest new songs based on your profile. |
+| 🔀 | **Shuffle Liked Songs** | Builds a randomized mix of your liked songs. |
+| 📈 | **Most-Listened Songs** | Lists your most frequently played tracks. |
+
+All text and tooltips are localized through `SharedResource.de.resx` and `SharedResource.en.resx`.
 
 ---
 
-## 🧩 Project Structure
+## Technical Details
 
-```bash
-SpotifyPlaylistWebAppFull/
-├── Controllers/
-├── Models/
-├── Views/
-│   ├── Home/
-│   └── Shared/
-├── wwwroot/
-│   ├── css/
-│   ├── js/
-│   ├── images/
-│   └── favicon.ico
-├── appsettings.json
-├── Program.cs
-├── Startup.cs
-└── README.md
+- **Framework:** ASP.NET Core MVC (C#)  
+- **API:** Spotify Web API via `SpotifyAPI.Web` NuGet package  
+- **Authentication:** OAuth2 PKCE Flow  
+- **Localization:** Built-in .NET localization middleware with culture cookies  
+- **Frontend:** Razor Views with Tailwind-inspired utility classes  
+
+### File Structure (Key Components)
+```
+Controllers/
+  HomeController.cs          # Contains all playlist generation actions
+Views/
+  Home/Dashboard.cshtml      # Displays all dashboard buttons
+  Shared/LanguageSwitcher.cshtml
+Resources/
+  SharedResource.de.resx     # German localization
+  SharedResource.en.resx     # English localization
+wwwroot/
+  css/, js/, icons/          # Static assets
 ```
 
+### Data Flow
+1. User logs in with Spotify (OAuth2 PKCE).  
+2. Access token stored in session.  
+3. User triggers an action via a dashboard button.  
+4. Controller calls Spotify Web API.  
+5. A new playlist is created in the user's account.  
+
 ---
 
-## ⚙️ Installation & Usage
+## Audiobook & Podcast Filter
 
-### 1️⃣ Download the Project
-```bash
-git clone https://github.com/<your-username>/SpotifyPlaylistWebAppFull.git
-cd SpotifyPlaylistWebAppFull
+A helper function `IsPlayableMusicTrack()` was added to exclude **audiobooks** and **podcasts** from all playlists:
+```csharp
+if (type.Contains("audiobook") || type.Contains("podcast"))
+    return false;
 ```
+This prevents unwanted tracks (e.g., audiobook chapters) from appearing in generated playlists.
 
-Or download as ZIP:  
-[⬇️ Download ZIP](https://github.com/<your-username>/SpotifyPlaylistWebAppFull/archive/refs/heads/main.zip)
+---
 
-### 2️⃣ Install Dependencies
-Make sure you have **.NET 8 SDK** installed.
+## Recent Changes (Clean Buttons Update)
 
-```bash
-dotnet restore
-```
+### v2.5 – October 2025
+- Consolidated to five intuitive dashboard actions  
+- Added multilingual button texts (English + German)  
+- Added `CreateAlternativeFavorites()` action  
+- Integrated audiobook/podcast filter in all playlist generators  
+- Cleaned up tooltips, icons, and button order  
 
-### 3️⃣ Run the Web App
+---
+
+## Requirements
+
+- .NET 8.0 SDK or newer  
+- Spotify Developer Account  
+- Client ID configured in `appsettings.json` or environment variables  
+- Redirect URI configured in Spotify Dashboard
+
+Run locally via:
 ```bash
 dotnet run
 ```
 
-Then open your browser and go to:
-```
-http://localhost:5000
-```
-
 ---
 
-## 🧠 Privacy
-
-The app uses the Spotify API only temporarily during your session.  
-No user data or listening history is permanently stored or shared with third parties.
-
-Details: [View Privacy Policy](https://playlists.inetconnector.com/Home/Datenschutz)
+## License
+© 2025 InetConnector / Daniel Frede.  
+Licensed for personal and educational use. Redistribution requires permission.
 
 ---
-
-## 🖼️ Preview
-
-![App Preview](wwwroot/images/preview.png)
-
----
-
-## 💡 License
-
-This project is licensed under the **MIT License**.  
-See the [`LICENSE`](LICENSE) file for details.
-
----
-
-## 👨‍💻 Author
-
-**Daniel Frede**  
-🌐 [inetconnector.com](https://inetconnector.com)  
-📧 support@inetconnector.com
-
----
-
-## ⭐ Support
-
-If you like this project, please leave a **star** ⭐ on GitHub!

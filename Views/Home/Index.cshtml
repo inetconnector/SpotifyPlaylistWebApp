@@ -1,14 +1,19 @@
+@using System.Globalization
+@using Microsoft.Extensions.Localization
+@using SpotifyPlaylistWebApp
+@await Html.PartialAsync("LanguageSwitcher")
+@inject IStringLocalizer<SharedResource> L
 @{
-    Layout = null;
+    Layout = "Layout";
     ViewData["Title"] = "Startseite";
 }
 <!doctype html>
-<html lang="de">
+<html lang="@CultureInfo.CurrentUICulture.Name">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-    <title>Spotify Playlist Generator™ by InetConnector – Lieblingssongs automatisch speichern & Playlists erstellen</title>
+    <title>@L["Index_Spotify_Playlist_Generator_by_InetConnector_Lieb"]</title>
 
     <!-- 🔹 SEO Meta -->
     <meta name="description" content="Erstelle automatisch Spotify-Playlists aus deinen Lieblingssongs oder meistgehörten Tracks. Kostenlos, sicher und direkt über die Spotify Web API. Entwickelt von InetConnector."/>
@@ -36,7 +41,7 @@
     <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
 
     <!-- 🔹 Sitemap -->
-    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml"/>
+    <link rel="sitemap" type="application/xml" title="@L["Attr_Index_Sitemap"]" href="/sitemap.xml"/>
 
     <!-- 🔹 Schema.org JSON-LD -->
     <script type="application/ld+json">
@@ -107,66 +112,67 @@
     </style>
 </head>
 
-<body class="min-h-screen flex flex-col font-sans antialiased">
+<body style="padding-top: 54px" class="min-h-screen flex flex-col font-sans antialiased">
 
 <main class="flex-grow max-w-3xl mx-auto px-6 py-16">
     <div class="glass rounded-3xl p-8 md:p-10 shadow-xl text-center leading-relaxed">
 
         <div class="flex justify-center mb-6">
-            <div class="w-14 h-14 rounded-2xl bg-emerald-500 grid place-items-center shadow-lg text-2xl">🎧</div>
+            <div class="w-14 h-14 rounded-2xl bg-emerald-500 grid place-items-center shadow-lg text-2xl">@L["Index_Text"]</div>
         </div>
 
         <!-- SEO-Hauptüberschrift -->
         <h1 class="text-3xl md:text-4xl font-bold mb-4">
-            Spotify Playlist Generator™ – Lieblingssongs automatisch speichern
+            @L["Index_Playlist_Generator_f_r_Spotify_Lieblingssongs_au"]
         </h1>
 
         <p class="text-white/80 mb-6">
-            Mit diesem kostenlosen Online-Tool kannst du automatisch Spotify-Playlists aus deinen
-            <strong>Lieblingssongs</strong> oder <strong>meistgehörten Tracks</strong> erstellen – direkt über die offizielle Spotify Web API.
+            @L["Index_Mit_diesem_kostenlosen_Online_Tool_kannst_du_aut"]
+            <strong>@L["Index_Lieblingssongs"]</strong> @L["Index_oder"] <strong>@L["Index_meistgeh_rten_Tracks"]</strong> @L["Index_erstellen_direkt_ber_die_offizielle_Spotify_Web_"]
         </p>
 
         <div class="mt-8 mb-8">
-            <a href="/Home/Login" class="btn">🔐 Mit Spotify verbinden</a>
+            <a href="/Home/Login" class="btn">@L["Index_Mit_Spotify_verbinden"]</a>
         </div>
 
         <section class="text-white/70 text-sm max-w-lg mx-auto">
-            <h2 class="text-xl font-semibold mb-2">Was dieses Tool kann</h2>
+            <h2 class="text-xl font-semibold mb-2">@L["Index_Was_dieses_Tool_kann"]</h2>
             <ul class="list-disc list-inside text-left text-white/80 mt-2 space-y-1">
-                <li>🎲 Zufällige Playlists aus Lieblingssongs generieren</li>
-                <li>📜 Lieblingssongs in Originalreihenfolge klonen</li>
-                <li>✨ Empfehlungen basierend auf deinem Hörverhalten</li>
+                <li>@L["Index_Zuf_llige_Playlists_aus_Lieblingssongs_generiere"]</li>
+                <li>@L["Index_Lieblingssongs_in_Originalreihenfolge_klonen"]</li>
+                <li>@L["Index_Empfehlungen_basierend_auf_deinem_H_rverhalten"]</li>
             </ul>
         </section>
 
         <!-- SEO-Zusatzabschnitt -->
         <section class="mt-10 text-white/80 text-sm leading-relaxed">
-            <h2 class="text-xl font-semibold mb-3">Wie funktioniert der Spotify Playlist Generator?</h2>
-            <p>Nach dem Login mit deinem Spotify-Konto greift die Anwendung sicher über die Spotify Web API auf deine Hördaten zu und erstellt automatisch Playlists nach deinem Wunsch. Du kannst entscheiden, ob du deine meistgehörten Songs, deine gespeicherten Lieblingssongs oder empfohlene Titel in neuer Reihenfolge speichern möchtest.</p>
-            <p class="mt-3">Der Dienst wird von <strong>InetConnector</strong> betrieben und nutzt ausschließlich offizielle Spotify-Schnittstellen – kein Risiko, keine Werbung, keine versteckten Kosten.</p>
+            <h2 class="text-xl font-semibold mb-3">@L["Index_Wie_funktioniert_der_Spotify_Playlist_Generator"]</h2>
+            <p>@L["Index_Nach_dem_Login_mit_deinem_Spotify_Konto_greift_d"]</p>
+            <p class="mt-3">
+                @L["Index_Der_Dienst_wird_von"] <strong>@L["Index_InetConnector"]</strong> @L["Index_betrieben_und_nutzt_ausschlie_lich_offizielle_Sp"]
+            </p>
         </section>
 
         <!-- Spendenabschnitt -->
         <div class="mt-12 glass rounded-2xl p-6 md:p-8 shadow-inner">
-            <h2 class="text-2xl font-semibold mb-3">💚 Unterstütze das Projekt</h2>
+            <h2 class="text-2xl font-semibold mb-3">@L["Index_Unterst_tze_das_Projekt"]</h2>
             <p class="text-white/80 mb-4">
-                Gefällt dir dieses Tool? Unterstütze die Weiterentwicklung mit einer kleinen Spende.
-                Jeder Beitrag hilft, den Playlist Generator weiter kostenlos und werbefrei zu halten.
+                @L["Index_Gef_llt_dir_dieses_Tool_Unterst_tze_die_Weiteren"]
             </p>
             <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
                target="_blank" rel="noopener" class="btn mb-6">
-                💸 Jetzt über PayPal spenden
+                @L["Index_Jetzt_ber_PayPal_spenden"]
             </a>
             <div class="flex flex-col items-center justify-center">
 
                 <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
                    target="_blank" rel="noopener"
                    class="inline-block transition-transform hover:scale-105">
-                    <img src="/QR-Code.png" alt="PayPal QR-Code"
+                    <img src="/QR-Code.png" alt="@L["Attr_Index_PayPal_QR_Code"]"
                          class="w-36 h-36 rounded-2xl border border-white/20 shadow-md hover:border-emerald-400 hover:shadow-emerald-400/20 transition-all"/>
                 </a>
 
-                <p class="text-sm text-white/70 mt-3">Scanne den QR-Code zum Spenden</p>
+                <p class="text-sm text-white/70 mt-3">@L["Index_Scanne_den_QR_Code_zum_Spenden"]</p>
             </div>
         </div>
     </div>
@@ -176,14 +182,14 @@
     <div class="glass rounded-2xl p-5 flex flex-col md:flex-row justify-between items-center gap-3">
         <div class="flex flex-col md:flex-row items-center gap-3">
             <span>© @DateTime.Now.Year InetConnector – Alle Rechte vorbehalten</span>
-            <span class="hidden md:inline">·</span>
-            <a href="/Home/Impressum" class="hover:text-white underline">Impressum</a>
-            <a href="/Home/Datenschutz" class="hover:text-white underline">Datenschutz</a>
+            <span class="hidden md:inline">@L["Index_Text"]</span>
+            <a href="/Home/Impressum" class="hover:text-white underline">@L["Index_Impressum"]</a>
+            <a href="/Home/Datenschutz" class="hover:text-white underline">@L["Index_Datenschutz"]</a>
         </div>
 
         <div class="flex items-center gap-3 mt-4 md:mt-0">
             <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G" target="_blank" rel="noopener" class="hover:text-white underline">
-                💚 Spenden
+                @L["Index_Spenden"]
             </a>
         </div>
     </div>

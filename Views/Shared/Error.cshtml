@@ -1,3 +1,6 @@
+@inject IStringLocalizer<SharedResource> L
+@using Microsoft.Extensions.Localization
+@using SpotifyPlaylistWebApp
 @model SpotifyPlaylistWebApp.Controllers.ErrorViewModel
 @{
     Layout = null;
@@ -8,7 +11,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>Fehler – InetConnector Playlist Generator™</title>
+    <title>@L["Error_Fehler_InetConnector_Playlist_Generator"]</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -62,21 +65,24 @@
     </style>
 </head>
 <body>
+@await Html.PartialAsync("LanguageSwitcher")
 <div class="glass">
-    <h1>🚨 Ein Fehler ist aufgetreten</h1>
-    <p class="mb-4">Pfad: <strong>@Model.Path</strong></p>
+    <h1>@L["Error_Ein_Fehler_ist_aufgetreten"]</h1>
+    <p class="mb-4">
+        @L["Error_Pfad"] <strong>@Model.Path</strong>
+    </p>
     <p class="mb-6">@Model.Message</p>
 
     @if (!string.IsNullOrWhiteSpace(Model.StackTrace))
     {
         <details class="mb-4">
-            <summary class="cursor-pointer text-white/70 hover:text-white">Details anzeigen</summary>
+            <summary class="cursor-pointer text-white/70 hover:text-white">@L["Error_Details_anzeigen"]</summary>
             <pre>@Model.StackTrace</pre>
         </details>
     }
 
     <a href="/Home/Dashboard" class="inline-block mt-3 px-6 py-3 bg-emerald-500 rounded-xl text-white hover:bg-emerald-600 no-underline">
-        ⬅️ Zurück zum Dashboard
+        @L["Error_Zur_ck_zum_Dashboard"]
     </a>
 </div>
 </body>

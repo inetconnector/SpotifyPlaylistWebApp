@@ -1,5 +1,9 @@
+@using Microsoft.Extensions.Localization
+@using SpotifyPlaylistWebApp
+@await Html.PartialAsync("LanguageSwitcher")
+@inject IStringLocalizer<SharedResource> L
 @{
-    Layout = null;
+    Layout = "Layout";
     ViewData["Title"] = "Impressum";
 }
 <!doctype html>
@@ -7,7 +11,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>Impressum – InetConnector Playlist Generator™</title>
+    <title>@L["Impressum_Impressum_InetConnector_Playlist_Generator"]</title>
 
     <meta name="description" content="Impressum des InetConnector Playlist Generator™. Rechtliche Angaben nach §5 TMG und §18 Abs. 2 MStV."/>
     <meta name="robots" content="index, follow"/>
@@ -41,48 +45,42 @@
 <body class="min-h-screen flex flex-col">
 <main class="flex-grow max-w-3xl mx-auto px-6 py-16">
     <div class="glass rounded-3xl p-8 md:p-10 shadow-xl leading-relaxed">
-        <h1 class="text-3xl font-bold mb-6">Impressum</h1>
+        <h1 class="text-3xl font-bold mb-6">@L["Impressum_Impressum"]</h1>
 
         <p>
-            <strong>Angaben gemäß §5 TMG & §18 Abs. 2 MStV:</strong>
+            <strong>@L["Impressum_Angaben_gem_5_TMG_18_Abs_2_MStV"]</strong>
         </p>
         <p class="mt-2">
-            InetConnector.com<br/>
-            Daniel Frede<br/>
-            Bismarckstrasse 6e<br/>
-            97209 Veitshöchheim<br/>
-            Deutschland<br/>
-            E-Mail: kontakt(at)inetconnector.com
+            @L["Impressum_InetConnector_com"]<br/>
+            @L["Impressum_Daniel_Frede"]<br/>
+            @L["Impressum_Bismarckstrasse_6e"]<br/>
+            @L["Impressum_97209_Veitsh_chheim"]<br/>
+            @L["Impressum_Deutschland"]<br/>
+            @L["Impressum_E_Mail_kontakt_at_inetconnector_com"]
         </p>
 
-        <h2 class="text-2xl font-semibold mt-8 mb-3">Verantwortlich für den Inhalt</h2>
-        <p>Daniel Frede, Veitshöchheim bei Würzburg</p>
+        <h2 class="text-2xl font-semibold mt-8 mb-3">@L["Impressum_Verantwortlich_f_r_den_Inhalt"]</h2>
+        <p>@L["Impressum_Daniel_Frede_Veitsh_chheim_bei_W_rzburg"]</p>
 
-        <h2 class="text-2xl font-semibold mt-8 mb-3">Haftung für Inhalte</h2>
+        <h2 class="text-2xl font-semibold mt-8 mb-3">@L["Impressum_Haftung_f_r_Inhalte"]</h2>
         <p>
-            Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität
-            der Inhalte können wir jedoch keine Gewähr übernehmen. Als Diensteanbieter sind wir gemäß §7 Abs.1 TMG für eigene
-            Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich.
+            @L["Impressum_Die_Inhalte_unserer_Seiten_wurden_mit_gr_ter_Sor"]
         </p>
 
-        <h2 class="text-2xl font-semibold mt-8 mb-3">Haftung für Links</h2>
+        <h2 class="text-2xl font-semibold mt-8 mb-3">@L["Impressum_Haftung_f_r_Links"]</h2>
         <p>
-            Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben.
-            Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten
-            ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.
+            @L["Impressum_Unser_Angebot_enth_lt_Links_zu_externen_Websites"]
         </p>
 
-        <h2 class="text-2xl font-semibold mt-8 mb-3">Urheberrecht</h2>
+        <h2 class="text-2xl font-semibold mt-8 mb-3">@L["Impressum_Urheberrecht"]</h2>
         <p>
-            Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht.
-            Beiträge Dritter sind als solche gekennzeichnet. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der
-            Verwertung außerhalb der Grenzen des Urheberrechts bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.
+            @L["Impressum_Die_durch_die_Seitenbetreiber_erstellten_Inhalte"]
         </p>
 
         <hr class="my-8 border-white/20"/>
 
         <div class="text-sm text-white/70">
-            <a href="/Home/Datenschutz" class="underline hover:text-white">Zur Datenschutzerklärung</a>
+            <a href="/Home/Datenschutz" class="underline hover:text-white">@L["Impressum_Zur_Datenschutzerkl_rung"]</a>
         </div>
     </div>
 </main>
@@ -90,7 +88,7 @@
 <footer class="max-w-5xl mx-auto px-6 mt-10 pb-10 text-sm text-white/70">
     <div class="glass rounded-2xl p-5 flex flex-col md:flex-row justify-between items-center gap-3">
         <div>© @DateTime.Now.Year InetConnector – Alle Rechte vorbehalten</div>
-        <a href="/Home/Datenschutz" class="hover:text-white underline">Datenschutzerklärung</a>
+        <a href="/Home/Datenschutz" class="hover:text-white underline">@L["Impressum_Datenschutzerkl_rung"]</a>
     </div>
 </footer>
 </body>
