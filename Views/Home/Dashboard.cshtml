@@ -288,98 +288,42 @@
 </footer>
 
 <!-- Cooldown + Spenden-Popup Script (unverändert beibehalten) -->
+
+
 <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            // === Cooldown-System ===
-            const cooldownMinutes = 4;
-            const buttons = document.querySelectorAll(".btn");
-            buttons.forEach(btn => {
-                if (!btn.href || !btn.href.includes("/Home/Create")) return;
-                const key = "cooldown_" + btn.href;
-
-                const applyCooldown = (remaining) => {
-                    btn.disabled = true;
-                    btn.style.opacity = "0.5";
-                    const original = btn.innerHTML;
-                    let secs = Math.floor(remaining);
-                    const timer = setInterval(() => {
-                        if (secs > 0) {
-                            const m = Math.floor(secs / 60);
-                            const s = (secs % 60).toString().padStart(2, "0");
-                            btn.innerHTML = `⏳ (${m}:${s})`;
-                            secs--;
-                        } else {
-                            clearInterval(timer);
-                            btn.disabled = false;
-                            btn.style.opacity = "1";
-                            btn.innerHTML = original;
-                            localStorage.removeItem(key);
-                        }
-                    }, 1000);
-                };
-
-                const last = parseInt(localStorage.getItem(key) || "0");
-                const diff = (Date.now() - last) / 1000;
-                if (diff < cooldownMinutes * 60)
-                    applyCooldown(cooldownMinutes * 60 - diff);
-
-                btn.addEventListener("click", e => {
-                    if (btn.disabled) { e.preventDefault(); return; }
-                    localStorage.setItem(key, Date.now().toString());
-                    applyCooldown(cooldownMinutes * 60);
-                });
-            });
-
-            // === Spenden-Popup nach 4 Aktionen ===
-            const clicked = JSON.parse(localStorage.getItem("clickedButtons") || "[]");
-            const totalButtons = 4;
-
-            buttons.forEach(btn => {
-                if (!btn.href || !btn.href.includes("/Home/Create")) return;
-                btn.addEventListener("click", () => {
-                    if (!clicked.includes(btn.href)) {
-                        clicked.push(btn.href);
-                        localStorage.setItem("clickedButtons", JSON.stringify(clicked));
-                    }
-                    if (clicked.length >= totalButtons && !localStorage.getItem("donationPromptShown")) {
-                        showDonationPrompt();
-                        localStorage.setItem("donationPromptShown", "true");
-                    }
-                });
-            });
-
-            function showDonationPrompt() {
-                const overlay = document.createElement("div");
-                overlay.style.position = "fixed";
-                overlay.style.inset = "0";
-                overlay.style.background = "rgba(0,0,0,0.7)";
-                overlay.style.display = "flex";
-                overlay.style.justifyContent = "center";
-                overlay.style.alignItems = "center";
-                overlay.style.zIndex = "10000";
-
-                const box = document.createElement("div");
-                box.className = "glass p-8 rounded-3xl text-center shadow-xl";
-                box.style.maxWidth = "400px";
-                box.innerHTML = `
-                    <h2 class="text-2xl font-bold mb-3">@L["Dashboard_Bitte_eine_kleine_Spende"]</h2>
-                    <p class="text-white/70 mb-5">@L["Dashboard_Dies_zu_realisieren_war_nicht_einfach"]<br>
-                    @L["Dashboard_Wenn_dir_dieses_Tool_gef_llt_unterst_tze_mich_ge"]</p>
-                    <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
-                       target="_blank" rel="noopener"
-                       class="inline-block px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold">
-                       @L["Dashboard_Jetzt_spenden"]
-                    </a>
-                    <div class="mt-5">
-                        <button id="closePrompt" class="text-sm text-white/60 hover:text-white underline">@L["Dashboard_Sp_ter"]</button>
-                    </div>
-                `;
-                overlay.appendChild(box);
-                document.body.appendChild(overlay);
-                document.getElementById("closePrompt").addEventListener("click", () => overlay.remove());
-            }
-        });
-    </script>
-
+document.addEventListener('DOMContentLoaded', () => {
+  const buttons = document.querySelectorAll('a.btn');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (btn.classList.contains('disabled')) return;
+      const url = btn.getAttribute('href');
+      const label = btn.querySelector('span:last-child');
+      const orig = label ? label.textContent : '';
+      btn.classList.add('opacity-50','pointer-events-none','disabled');
+      if (label) label.textContent = '⏳';
+      
+      try {
+        const res = await fetch(url);
+        const text = await res.text();
+        // show result below button
+        let msg = document.createElement('div');
+        msg.innerHTML = text;
+        msg.className = 'text-sm text-green-400 mt-2';
+        btn.insertAdjacentElement('afterend', msg);
+      } catch (err) {
+        console.error(err);
+        alert('Fehler beim Starten: ' + err);
+      } finally {
+        setTimeout(() => {
+          btn.classList.remove('opacity-50','pointer-events-none','disabled');
+          if (label) label.textContent = orig;
+        }, 240000); // 4 Minuten Cooldown
+      }
+    });
+  });
+});
+</script>
 </body>
+
 </html>

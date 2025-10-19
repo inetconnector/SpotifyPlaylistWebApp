@@ -184,7 +184,7 @@ public class HomeController : Controller
     // === Alias für CloneLikedSongs (gleiche Funktion wie CreateFavList)
     [HttpGet]
     public IActionResult CloneLikedSongs() =>
-        StartPlaylistJob(GetToken(), "Favoriten-Liste", "[FavList]", true, false);
+        StartLikedCloneJob(GetToken());
 
     // === Empfehlungen (neue Logik mit Spotify-Empfehlungen)
     [HttpGet]
@@ -266,6 +266,66 @@ public class HomeController : Controller
             return Error($"Fehler beim Starten von {namePrefix}: {ex.Message}");
         }
     }
+    private IActionResult StartLikedCloneJob(string token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            return Warn("⚠️ Bitte zuerst einloggen.");
+        try
+        {
+            var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token));
+            return RunJob(async () =>
+            {
+                var me = await spotify.UserProfile.Current();
+                using var scope = _logger.BeginScope(new Dictionary<string, object?>
+                {
+                    ["UserId"] = me.Id,
+                    ["Action"] = "[LikedClone]"
+                });
+
+                // 1) Hole alle geliketen Tracks
+                var liked = await spotify.Library.GetTracks(new LibraryTracksRequest { Limit = 50 });
+                var tracks = new List<string>();
+                while (true)
+                {
+                    tracks.AddRange(liked.Items.Where(i => i.Track != null).Select(i => i.Track.Uri));
+                    if (string.IsNullOrEmpty(liked.Next)) break;
+                    liked = await spotify.NextPage(liked);
+                    await Task.Delay(ApiDelay);
+                }
+
+                // 2) Neue Playlist anlegen "Lieblingssongs YYYY-MM-DD"
+                var today = DateTime.UtcNow.ToString("yyyy-MM-dd");
+                var playlistName = $"Lieblingssongs {today}";
+                var newPl = await spotify.Playlists.Create(me.Id, new PlaylistCreateRequest(playlistName)
+                {
+                    Public = false,
+                    Description = "Kopie der 'Liked Songs'"
+                });
+
+                // 3) In Blöcken hinzufügen
+                for (int i = 0; i < tracks.Count; i += 100)
+                {
+                    var chunk = tracks.Skip(i).Take(100).ToList();
+                    if (chunk.Count == 0) break;
+                    await spotify.Playlists.AddItems(newPl.Id, new PlaylistAddItemsRequest(chunk));
+                    await Task.Delay(ApiDelay);
+                }
+            },
+            async () =>
+            {
+                var me = await new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token)).UserProfile.Current();
+                return $"{me.Id}_[LikedClone]";
+            },
+            "Lieblingssongs",
+            "[LikedClone]");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{Action} konnte nicht gestartet werden.", "Lieblingssongs");
+            return Error($"Fehler beim Starten von Lieblingssongs: {ex.Message}");
+        }
+    }
+
 
     private IActionResult StartAlternativeFavoritesJob(string token)
     {

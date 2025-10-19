@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <root>
 	<resheader name="resmimetype">
 		<value>text/microsoft-resx</value>
@@ -13,7 +13,7 @@
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
 
-	<!-- Attr.cshtml -->
+	
 	<data name="Attr_Dashboard_E_Mail" xml:space="preserve"><value>Email</value></data>
 	<data name="Attr_Dashboard_Erstellt_deine_gespeicherten_Lieblingssongs_in_O" xml:space="preserve"><value>Creates your saved favorite songs in the original order.</value></data>
 	<data name="Attr_Dashboard_Erstellt_deine_meistgeh_rten_Songs_in_der_Origin" xml:space="preserve"><value>Creates your most listened songs in the original order.</value></data>
@@ -29,7 +29,7 @@
 	<data name="Attr_Index_PayPal_QR_Code" xml:space="preserve"><value>PayPal QR Code</value></data>
 	<data name="Attr_Index_Sitemap" xml:space="preserve"><value>Sitemap</value></data>
 
-	<!-- Dashboard.cshtml -->
+	
 	<data name="Dashboard_Bitte_eine_kleine_Spende" xml:space="preserve"><value>💚 Please make a small donation</value></data>
 	<data name="Dashboard_Dashboard_InetConnector_Playlist_Generator_nutzt" xml:space="preserve"><value>Dashboard – InetConnector Playlist Generator™ – uses the Spotify® Web APIs</value></data>
 	<data name="Dashboard_Datenschutzerkl_rung" xml:space="preserve"><value>Privacy Policy</value></data>
@@ -55,7 +55,7 @@
 	<data name="Dashboard_gespeicherte_Songs" xml:space="preserve"><value>saved songs</value></data>
 	<data name="Dashboard_meistgeh_rte_Songs" xml:space="preserve"><value>most listened songs</value></data>
 
-	<!-- Datenschutz.cshtml -->
+	
 	<data name="Datenschutz_97209_Veitsh_chheim" xml:space="preserve"><value>97209 Veitshöchheim</value></data>
 	<data name="Datenschutz_Allgemeine_Hinweise_DSGVO" xml:space="preserve"><value>General information (GDPR)</value></data>
 	<data name="Datenschutz_Bei_Fragen_oder_Anliegen_zum_Datenschutz_kannst_" xml:space="preserve"><value>If you have any questions or concerns regarding data protection, please contact the address listed in the imprint.</value></data>
@@ -103,14 +103,14 @@
 	<data name="Datenschutz_widerrufen" xml:space="preserve"><value>revoked.</value></data>
 	<data name="Datenschutz_www_paypal_com_privacy" xml:space="preserve"><value>www.paypal.com/privacy</value></data>
 
-	<!-- Error.cshtml -->
+	
 	<data name="Error_Details_anzeigen" xml:space="preserve"><value>Show details</value></data>
 	<data name="Error_Ein_Fehler_ist_aufgetreten" xml:space="preserve"><value>🚨 An error has occurred</value></data>
 	<data name="Error_Fehler_InetConnector_Playlist_Generator" xml:space="preserve"><value>Error – InetConnector Playlist Generator™</value></data>
 	<data name="Error_Pfad" xml:space="preserve"><value>Path:</value></data>
 	<data name="Error_Zur_ck_zum_Dashboard" xml:space="preserve"><value>⬅️ Back to Dashboard</value></data>
 
-	<!-- Impressum.cshtml -->
+	
 	<data name="Impressum_97209_Veitsh_chheim" xml:space="preserve"><value>97209 Veitshöchheim</value></data>
 	<data name="Impressum_Angaben_gem_5_TMG_18_Abs_2_MStV" xml:space="preserve"><value>Information according to §5 TMG &amp; §18 para. 2 MStV:</value></data>
 	<data name="Impressum_Bismarckstrasse_6e" xml:space="preserve"><value>Bismarckstrasse 6e</value></data>
@@ -142,7 +142,7 @@ Third-party contributions are marked as such. Duplication, processing, distribut
 		<data name="Impressum_Verantwortlich_f_r_den_Inhalt" xml:space="preserve"><value>Responsible for the content</value></data>
 		<data name="Impressum_Zur_Datenschutzerkl_rung" xml:space="preserve"><value>To the Privacy Policy</value></data>
 
-		<!-- Index.cshtml -->
+		
 		<data name="Index_Datenschutz" xml:space="preserve"><value>Privacy</value></data>
 		<data name="Index_Der_Dienst_wird_von" xml:space="preserve"><value>The service is operated by</value></data>
 		<data name="Index_Empfehlungen_basierend_auf_deinem_H_rverhalten" xml:space="preserve"><value>✨ Recommendations based on your listening habits</value></data>
@@ -169,7 +169,7 @@ Third-party contributions are marked as such. Duplication, processing, distribut
 		<data name="Index_meistgeh_rten_Tracks" xml:space="preserve"><value>most listened tracks</value></data>
 		<data name="Index_oder" xml:space="preserve"><value>or</value></data>
 
-		<!-- Shared.cshtml -->
+		
 		<data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
 		<data name="Dashboard" xml:space="preserve"><value>Dashboard</value></data>
 		<data name="English" xml:space="preserve"><value>English</value></data>
@@ -216,4 +216,4 @@ Third-party contributions are marked as such. Duplication, processing, distribut
 	<data name="Playlist_AlternativeFavorites" xml:space="preserve">
   <value>Alternative Favorite Songs</value>
 </data>
-</root>
+<data name="Playlist_LikedSongs" xml:space="preserve"><value>Liked Songs</value></data></root>
