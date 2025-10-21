@@ -212,4 +212,37 @@ public class HomePlexController : Controller
     { 
         return RedirectToAction("SpotifyToPlex");;
     }
+
+    // ==============================================================
+    // 🔸 AJAX: Show playlist contents (title, artist)
+    // ==============================================================
+    [HttpGet("GetPlaylistTracks")]
+    public async Task<IActionResult> GetPlaylistTracks([FromServices] PlexService plex, string playlistId)
+    {
+        try
+        {
+            var spotifyToken = HttpContext.Session.GetString("SpotifyAccessToken");
+            if (string.IsNullOrEmpty(spotifyToken))
+                return Json(new { success = false, message = "Spotify token missing." });
+
+            var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault(spotifyToken));
+            var tracks = await spotify.Playlists.GetItems(playlistId);
+
+            var list = tracks.Items
+                .OfType<PlaylistTrack<IPlayableItem>>()
+                .Select(t => new
+                {
+                    title = (t.Track as FullTrack)?.Name ?? "",
+                    artist = string.Join(", ", (t.Track as FullTrack)?.Artists.Select(a => a.Name) ?? new List<string>())
+                }).ToList();
+
+            return Json(new { success = true, tracks = list });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("[GetPlaylistTracks] " + ex.Message);
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
 }

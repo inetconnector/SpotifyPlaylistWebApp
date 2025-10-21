@@ -67,38 +67,71 @@
                 <label for="playlistSelect" class="block text-sm text-gray-400 mb-2">
                     @L["SpotifyToPlex_SelectPlaylist"]
                 </label>
-                <select id="playlistSelect" name="playlistId"
-                        class="bg-gray-800 border border-gray-700 rounded-lg p-2 w-full focus:ring-2 focus:ring-orange-500">
-                    @foreach (var (id, name) in playlists)
-                    {
-                        <option value="@id">@name</option>
-                    }
-                </select>
+
+                <div class="flex space-x-2">
+                    <select id="playlistSelect" name="playlistId"
+                            class="flex-1 bg-gray-800 border border-gray-700 rounded-lg p-2 w-full focus:ring-2 focus:ring-orange-500">
+                        @foreach (var (id, name) in playlists)
+                        {
+                            <option value="@id">@name</option>
+                        }
+                    </select>
+
+                    <!-- Help / Info button -->
+                    <button type="button" id="btnShowPlaylist"
+                            class="px-3 bg-orange-500 hover:brightness-110 rounded-lg text-white font-bold text-lg shadow-lg"
+                            title="@L["Playlist anzeigen"]">
+                        ?
+                    </button>
+                </div>
             </div>
 
+            <!-- Playlist exportieren -->
             <form method="post" asp-action="ExportOne" asp-controller="HomePlex" class="mb-3">
                 <input type="hidden" name="playlistName" id="selectedPlaylistName" />
                 <input type="hidden" name="playlistId" id="selectedPlaylistId" />
                 <button type="submit"
-                        class="w-full py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-semibold rounded-lg hover:brightness-110 transition">
+                        class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-orange-500
+                               text-black font-semibold rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)]
+                               hover:brightness-110 active:translate-y-[1px] transition-all duration-150">
                     📤 @L["PlexActions_ExportPlaylists"]
                 </button>
             </form>
 
+            <!-- Alle exportieren -->
             <form method="post" asp-action="ExportAll" asp-controller="HomePlex" class="mb-3">
                 <button type="submit"
-                        class="w-full py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold rounded-lg hover:brightness-110 transition">
+                        class="w-full py-3.5 bg-gradient-to-r from-orange-500 to-red-600
+                               text-white font-semibold rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)]
+                               hover:brightness-110 active:translate-y-[1px] transition-all duration-150">
                     🔁 @L["SpotifyToPlex_ExportAll"]
                 </button>
             </form>
 
+            <!-- Disconnect -->
             <form method="post" asp-action="DisconnectPlex" asp-controller="HomePlex">
                 <button type="submit"
-                        class="w-full py-2 bg-gradient-to-r from-gray-600 to-gray-800 text-white font-semibold rounded-lg hover:brightness-110 transition">
+                        class="w-full py-3.5 bg-gradient-to-r from-gray-600 to-gray-800
+                               text-white font-semibold rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)]
+                               hover:brightness-110 active:translate-y-[1px] transition-all duration-150">
                     🗑️ @L["PlexActions_Disconnect"]
                 </button>
             </form>
         }
+    </div>
+
+    <!-- ================================
+         MODAL: Playlist Inhalt
+    ================================== -->
+    <div id="playlistModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+        <div class="bg-gray-900 p-6 rounded-2xl shadow-2xl max-w-lg w-full text-left text-white">
+            <h2 class="text-xl font-semibold mb-3">@L["Playlist_Inhalt"]</h2>
+            <div id="playlistTracks" class="max-h-96 overflow-y-auto space-y-1 text-sm text-gray-300 mb-4"></div>
+            <button id="closeModal"
+                    class="w-full py-2 bg-gradient-to-r from-gray-700 to-gray-800 rounded-lg hover:brightness-110">
+                OK
+            </button>
+        </div>
     </div>
 
     <script>
@@ -114,13 +147,42 @@
                     idInput.value = opt.value;
                 });
 
-                // Set default on load
+                // Default setzen
                 if (select.options.length > 0) {
                     const opt = select.options[0];
                     nameInput.value = opt.text;
                     idInput.value = opt.value;
                 }
             }
+
+            // Playlist anzeigen
+            document.getElementById("btnShowPlaylist")?.addEventListener("click", async () => {
+                const playlistId = select.value;
+                const modal = document.getElementById("playlistModal");
+                const listDiv = document.getElementById("playlistTracks");
+
+                listDiv.innerHTML = "<div class='text-center text-gray-400'>Lade Inhalte…</div>";
+                modal.classList.remove("hidden");
+
+                try {
+                    const res = await fetch(`/HomePlex/GetPlaylistTracks?playlistId=${encodeURIComponent(playlistId)}`);
+                    const data = await res.json();
+
+                    if (data.success) {
+                        listDiv.innerHTML = data.tracks.length
+                            ? data.tracks.map(t => `<div>🎵 <b>${t.title}</b> – ${t.artist}</div>`).join("")
+                            : "<div class='text-gray-400'>Keine Titel gefunden.</div>";
+                    } else {
+                        listDiv.innerHTML = `<div class='text-red-400'>${data.message}</div>`;
+                    }
+                } catch {
+                    listDiv.innerHTML = "<div class='text-red-400'>Fehler beim Laden.</div>";
+                }
+            });
+
+            document.getElementById("closeModal")?.addEventListener("click", () => {
+                document.getElementById("playlistModal").classList.add("hidden");
+            });
         });
     </script>
 
