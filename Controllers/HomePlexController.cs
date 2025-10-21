@@ -1,23 +1,63 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using SpotifyAPI.Web;
 using SpotifyPlaylistWebApp.Services;
 
 namespace SpotifyPlaylistWebApp.Controllers;
 
 [Route("Home")]
+[Route("HomePlex")]
 public class HomePlexController : Controller
 {
-    private const string SessionTokenKey = "SpotifyAccessToken";
+    private const string SessionSpotifyTokenKey = "SpotifyAccessToken";
+    private readonly IStringLocalizer<SharedResource> _localizer;
 
-    [HttpGet("SpotifyToPlex")]
-    public IActionResult SpotifyToPlex()
+    public HomePlexController(IStringLocalizer<SharedResource> localizer)
     {
-        // Serve the Plex connection view (shows the orange export UI)
-        return View("PlexActions");
+        _localizer = localizer;
     }
 
+    // ==============================================================
+    // 🔸 Main Plex Entry Page (shown after Spotify login)
+    // ==============================================================
+    [HttpGet("SpotifyToPlex")]
+    public async Task<IActionResult> SpotifyToPlex([FromServices] PlexService plex)
+    {
+        var plexToken = HttpContext.Session.GetString("PlexAuthToken");
+        var spotifyToken = HttpContext.Session.GetString(SessionSpotifyTokenKey);
 
+        if (string.IsNullOrEmpty(plexToken))
+        {
+            // Plex not authenticated → start Plex login
+            return RedirectToAction("PlexActions");
+        }
+
+        if (string.IsNullOrEmpty(spotifyToken))
+        {
+            // Spotify not authenticated → go to Spotify login
+            HttpContext.Session.SetString("ReturnAfterLogin", "/HomePlex/SpotifyToPlex");
+            return RedirectToAction("Login", "Home");
+        }
+
+        // Both tokens available → load playlists
+        try
+        {
+            var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault(spotifyToken));
+            var playlists = await plex.GetAllSpotifyPlaylistsAsync(spotify);
+
+            ViewBag.Playlists = playlists;
+            return View("PlexActions");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("[SpotifyToPlex] " + ex.Message);
+            TempData["Error"] = _localizer["Plex_StatusLoadError"];
+            return RedirectToAction("Index", "Home");
+        }
+    }
+
+    
     // ==============================================================
     // 🔸 Polling endpoint for Plex login confirmation
     // ==============================================================
@@ -26,6 +66,7 @@ public class HomePlexController : Controller
     {
         var pinId = HttpContext.Session.GetInt32("PlexPinId");
         var clientId = HttpContext.Session.GetString("PlexClientId");
+
         if (pinId == null || string.IsNullOrEmpty(clientId))
             return Json(new { success = false });
 
@@ -33,35 +74,50 @@ public class HomePlexController : Controller
         if (string.IsNullOrEmpty(token))
             return Json(new { success = false });
 
+        // Save Plex token and trigger Spotify login next
         HttpContext.Session.SetString("PlexAuthToken", token);
-        return RedirectToAction("PlexActions");
+        HttpContext.Session.SetString("ReturnAfterLogin", "/HomePlex/SpotifyToPlex");
+
+        return RedirectToAction("Login", "Home");
     }
 
     // ==============================================================
-    // 🔸 Main PlexActions page (orange UI)
-    // Loads Spotify playlists (if token available)
+    // 🔸 Disconnect Plex
     // ==============================================================
-    [HttpGet("PlexActions")]
-    public IActionResult PlexActions()
+    [HttpPost("DisconnectPlex")]
+    public async Task<IActionResult> DisconnectPlex([FromServices] IPlexTokenStore tokenStore)
     {
-        var plexToken = HttpContext.Session.GetString("PlexAuthToken");
-        if (string.IsNullOrEmpty(plexToken))
-            return RedirectToAction("SpotifyToPlex");
-        return View("PlexActions");
+        try
+        {
+            var userKey = HttpContext.Session.Id;
+            await tokenStore.DeleteAsync(userKey);
+
+            HttpContext.Session.Remove("PlexAuthToken");
+            HttpContext.Session.Remove("PlexBaseUrl");
+            HttpContext.Session.Remove("PlexMachineId");
+
+            TempData["Info"] = _localizer["Plex_Removed"];
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("[Plex Disconnect] " + ex.Message);
+            TempData["Error"] = _localizer["Plex_DisconnectError"];
+        }
+
+        return RedirectToAction("Index", "Home");
     }
 
-
     // ==============================================================
-    // 🔸 Export selected playlist
+    // 🔸 Export one selected playlist to Plex
     // ==============================================================
     [HttpPost("ExportOne")]
     public async Task<IActionResult> ExportOne([FromServices] PlexService plex, string playlistId, string playlistName)
     {
         var plexToken = HttpContext.Session.GetString("PlexAuthToken");
-        var spotifyToken = HttpContext.Session.GetString(SessionTokenKey);
+        var spotifyToken = HttpContext.Session.GetString(SessionSpotifyTokenKey);
 
         if (string.IsNullOrEmpty(plexToken) || string.IsNullOrEmpty(spotifyToken))
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("SpotifyToPlex");
 
         var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault(spotifyToken));
         var (baseUrl, _) = await plex.DiscoverServerAsync(plexToken);
@@ -76,30 +132,22 @@ public class HomePlexController : Controller
             missingCount = missing.Count
         });
 
-        return RedirectToAction("PlexActions");
+        return RedirectToAction("SpotifyToPlex");
     }
 
     // ==============================================================
-    // 🔸 Export all Spotify playlists to Plex
+    // 🔸 Export all playlists to Plex
     // ==============================================================
     [HttpPost("ExportAll")]
     public async Task<IActionResult> ExportAll([FromServices] PlexService plex)
     {
         var plexToken = HttpContext.Session.GetString("PlexAuthToken");
-        if (string.IsNullOrEmpty(plexToken))
+        var spotifyToken = HttpContext.Session.GetString(SessionSpotifyTokenKey);
+        if (string.IsNullOrEmpty(plexToken) || string.IsNullOrEmpty(spotifyToken))
             return RedirectToAction("SpotifyToPlex");
-
-        var spotifyToken = HttpContext.Session.GetString(SessionTokenKey);
-        if (string.IsNullOrEmpty(spotifyToken))
-        {
-            HttpContext.Session.SetString("ReturnAfterLogin",
-                Url.Action("ExportAll", "HomePlex") ?? "/HomePlex/ExportAll");
-            return RedirectToAction("Login", "Home");
-        }
 
         var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault(spotifyToken));
         var (baseUrl, _) = await plex.DiscoverServerAsync(plexToken);
-
         var playlists = await plex.GetAllSpotifyPlaylistsAsync(spotify);
         var results = new List<object>();
 
@@ -117,62 +165,51 @@ public class HomePlexController : Controller
         }
 
         TempData["ExportAllResult"] = JsonSerializer.Serialize(results);
-        return RedirectToAction("PlexActions");
+        return RedirectToAction("SpotifyToPlex");
     }
 
     // ==============================================================
-    // 🔸 Disconnect Plex (manual button)
-    // ==============================================================
-    [HttpPost("DisconnectPlex")]
-    public async Task<IActionResult> DisconnectPlex([FromServices] IPlexTokenStore tokenStore)
-    {
-        var userKey = HttpContext.Session.Id;
-        await tokenStore.DeleteAsync(userKey);
-
-        HttpContext.Session.Remove("PlexAuthToken");
-        HttpContext.Session.Remove("PlexBaseUrl");
-        HttpContext.Session.Remove("PlexMachineId");
-
-        TempData["Info"] = "Plex-Verknüpfung entfernt.";
-        return RedirectToAction("Index", "Home");
-    }
-
-    // ==============================================================
-    // 🔸 New AJAX endpoints for client-side Plex login
+    // 🔸 GetPlexPin (AJAX) – Client triggers Plex login
     // ==============================================================
     [HttpGet("GetPlexPin")]
     public async Task<IActionResult> GetPlexPin([FromServices] PlexService plex)
     {
         var (pinId, code, clientId) = await plex.CreatePinAsync();
-        var loginUrl = $"https://app.plex.tv/auth#?clientID={clientId}&code={code}&context[device][product]=SpotifyToPlex";
+        var loginUrl =
+            $"https://app.plex.tv/auth#?clientID={clientId}&code={code}&context[device][product]=SpotifyToPlex";
 
-        // Store pin ID and clientId for later verification
         HttpContext.Session.SetInt32("PlexPinId", pinId);
         HttpContext.Session.SetString("PlexClientId", clientId);
 
         return Json(new { success = true, pinId, code, clientId, loginUrl });
     }
 
+    // ==============================================================
+    // 🔸 Save Plex Token via AJAX
+    // ==============================================================
     [HttpPost("SavePlexToken")]
-    public async Task<IActionResult> SavePlexToken([FromBody] JsonElement json)
+    public IActionResult SavePlexToken([FromBody] JsonElement json)
     {
         try
         {
             var token = json.GetProperty("token").GetString();
             if (string.IsNullOrWhiteSpace(token))
-                return BadRequest("No Plex token received.");
+                return BadRequest(_localizer["Plex_NoToken"]);
 
             HttpContext.Session.SetString("PlexAuthToken", token);
             Console.WriteLine($"[Plex] Token saved to session: {token[..8]}...");
-
             return Ok(new { success = true });
         }
         catch (Exception ex)
         {
             Console.WriteLine("[Plex SaveToken] " + ex.Message);
-            return BadRequest(new { success = false, message = ex.Message });
+            return BadRequest(new { success = false, message = _localizer["Plex_LoginFailed"] });
         }
     }
 
-
+    [HttpGet("PlexActions")] 
+    public IActionResult PlexActions()
+    { 
+        return RedirectToAction("SpotifyToPlex");;
+    }
 }

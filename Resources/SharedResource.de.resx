@@ -4,6 +4,37 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
 
+	<data name="Plex_LoginFailed" xml:space="preserve">
+    <value>Fehler bei der Plex-Anmeldung.</value>
+  </data>
+	<data name="Plex_UserFetchFailed" xml:space="preserve">
+    <value>Plex-Benutzer konnte nicht abgerufen werden.</value>
+  </data>
+	<data name="Plex_NoToken" xml:space="preserve">
+    <value>Kein gültiger Plex-Token empfangen.</value>
+  </data>
+	<data name="Plex_Welcome" xml:space="preserve">
+    <value>Willkommen, {0}!</value>
+  </data>
+	<data name="Plex_StatusLoadError" xml:space="preserve">
+    <value>Fehler beim Laden der Plex-Aktionsseite.</value>
+  </data>
+	<data name="Plex_DisconnectError" xml:space="preserve">
+    <value>Fehler beim Trennen der Plex-Verbindung.</value>
+  </data>
+	<data name="Plex_StatusCheckError" xml:space="preserve">
+    <value>Fehler bei der Statusprüfung der Plex-Verbindung.</value>
+  </data>
+	<data name="Plex_LoginStartError" xml:space="preserve">
+    <value>Plex-Login konnte nicht gestartet werden.</value>
+  </data>
+	<data name="Plex_PageLoadError" xml:space="preserve">
+    <value>Fehler beim Laden der Spotify→Plex-Seite.</value>
+  </data>
+
+
+
+
 	<data name="PlexActions_SyncSpotifyPlaylistsWithPlex" xml:space="preserve">
   <value>Synchronisiere deine Spotify-Playlists automatisch mit deiner Plex-Bibliothek.</value>
 </data>

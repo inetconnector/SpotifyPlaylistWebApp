@@ -65,6 +65,7 @@ public class HomeController : Controller
     {
         return View();
     }
+
     public IActionResult Login()
     {
         // Generate PKCE codes and store verifier in session
@@ -72,7 +73,7 @@ public class HomeController : Controller
         HttpContext.Session.SetString(SessionVerifierKey, verifier);
 
         var loginRequest = new LoginRequest(
-            new Uri(_redirectUri),          // MUST match Spotify Dashboard Redirect URI exactly
+            new Uri(_redirectUri), // MUST match Spotify Dashboard Redirect URI exactly
             _clientId,
             LoginRequest.ResponseType.Code)
         {
@@ -86,8 +87,8 @@ public class HomeController : Controller
                 Scopes.UserLibraryRead,
                 Scopes.PlaylistModifyPrivate,
                 Scopes.PlaylistModifyPublic,
-                Scopes.PlaylistReadPrivate,          // <-- added
-                Scopes.PlaylistReadCollaborative     // <-- added
+                Scopes.PlaylistReadPrivate, // <-- added
+                Scopes.PlaylistReadCollaborative // <-- added
             }
         };
 
@@ -202,6 +203,7 @@ public class HomeController : Controller
             return Error($"Unerwarteter Fehler: {ex.Message}");
         }
     }
+
     private ContentResult Info(string msg)
     {
         return HtmlResult(msg, "#10b981"); // Smaragdgrün (freundlicher Hinweis)

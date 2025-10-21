@@ -3,8 +3,8 @@ using System.Collections.Concurrent;
 namespace SpotifyPlaylistWebApp.Services;
 
 /// <summary>
-/// Stores Plex tokens purely in memory (RAM-based, per application instance).
-/// Thread-safe and lightweight; suitable for temporary in-session storage.
+///     Stores Plex tokens purely in memory (RAM-based, per application instance).
+///     Thread-safe and lightweight; suitable for temporary in-session storage.
 /// </summary>
 public class MemoryPlexTokenStore : IPlexTokenStore
 {
@@ -12,7 +12,7 @@ public class MemoryPlexTokenStore : IPlexTokenStore
     private static readonly ConcurrentDictionary<string, string> _tokens = new();
 
     /// <summary>
-    /// Saves a Plex token in memory for a given user key.
+    ///     Saves a Plex token in memory for a given user key.
     /// </summary>
     public Task SaveAsync(string userKey, string plexToken, CancellationToken ct = default)
     {
@@ -21,7 +21,7 @@ public class MemoryPlexTokenStore : IPlexTokenStore
     }
 
     /// <summary>
-    /// Loads the Plex token for a given user key, or returns null if not found.
+    ///     Loads the Plex token for a given user key, or returns null if not found.
     /// </summary>
     public Task<string?> LoadAsync(string userKey, CancellationToken ct = default)
     {
@@ -30,7 +30,7 @@ public class MemoryPlexTokenStore : IPlexTokenStore
     }
 
     /// <summary>
-    /// Deletes the Plex token associated with the given user key.
+    ///     Deletes the Plex token associated with the given user key.
     /// </summary>
     public Task DeleteAsync(string userKey, CancellationToken ct = default)
     {
