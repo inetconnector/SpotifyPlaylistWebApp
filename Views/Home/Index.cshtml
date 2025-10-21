@@ -202,65 +202,16 @@
     </div>
 </footer>
 
-<!-- === Plex Integration Script (placed at the end for reliability) === -->
-<script>
-        /**
-         * Binds the Plex connect button after DOM is ready,
-         * requests the Plex login URL from the server, opens it in a new window,
-         * and starts polling for successful authentication to redirect to PlexActions.
-         */
-        document.addEventListener('DOMContentLoaded', () => {
-            const plexButton = document.getElementById('btnPlexConnect');
+    <!-- === Plex Integration Script (AJAX-based client login, no warning) === -->
+    <script src="/js/plex-login.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const plexButton = document.getElementById("btnPlexConnect");
             if (!plexButton) return;
-
-            plexButton.addEventListener('click', async () => {
-                try {
-                    const res = await fetch('/Home/SpotifyToPlex', { cache: 'no-store' });
-                    const data = await res.json();
-
-                    if (data && data.success && data.loginUrl) {
-                        // Open Plex login in a separate window/tab; keep main app in place
-                        window.open(data.loginUrl, '_blank', 'width=900,height=700,noopener');
-                        // Start polling server to detect successful authentication
-                        pollForPlexAuth();
-                    } else {
-                        alert('Could not start Plex authentication.');
-                    }
-                } catch (e) {
-                    console.error('Error starting Plex login:', e);
-                }
-            });
+            plexButton.addEventListener("click", startPlexLogin);
         });
-
-        /**
-         * Polls the server to check if Plex authentication is complete.
-         * On success, server responds with a redirect to /Home/PlexActions,
-         * which we follow in the current (main) window.
-         */
-        async function pollForPlexAuth() {
-            try {
-                const res = await fetch('/Home/CheckPlexAuth', { cache: 'no-store' });
-
-                // If server performs a redirect, follow it
-                if (res.redirected) {
-                    window.location.href = res.url;
-                    return;
-                }
-
-                // Optional JSON path (if controller returns JSON instead of redirect)
-                const data = await res.json().catch(() => ({}));
-                if (data && data.success && data.redirect) {
-                    window.location.href = data.redirect;
-                    return;
-                }
-            } catch (e) {
-                console.warn('Polling error:', e);
-            }
-
-            // Retry after 2 seconds
-            setTimeout(pollForPlexAuth, 2000);
-        }
     </script>
+
 
 </body>
 </html>

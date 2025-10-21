@@ -36,6 +36,21 @@
 	<data name="PlexActions_ExportFinished" xml:space="preserve">
   <value>Export completed.</value>
 </data>
+	<data name="Spotify403_Info_Line1" xml:space="preserve">
+    <value>This Spotify app is currently in test mode.</value>
+  </data>
+	<data name="Spotify403_Info_Line2" xml:space="preserve">
+    <value>Your Spotify account is not yet authorized.</value>
+  </data>
+	<data name="Spotify403_Info_Contact" xml:space="preserve">
+    <value>Please contact</value>
+  </data>
+	<data name="Spotify403_Info_Action" xml:space="preserve">
+    <value>and provide your Spotify email address to request access as a test user.</value>
+  </data>
+	<data name="Button_BackToHome" xml:space="preserve">
+    <value>Back to Start</value>
+  </data>
 
 	<data name="Attr_Dashboard_E_Mail" xml:space="preserve"><value>Email</value></data>
 	<data name="Attr_Dashboard_Erstellt_deine_gespeicherten_Lieblingssongs_in_O" xml:space="preserve"><value>Creates your saved favorite songs in the original order.</value></data>

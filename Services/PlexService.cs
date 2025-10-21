@@ -5,9 +5,16 @@ using SpotifyAPI.Web;
 
 namespace SpotifyPlaylistWebApp.Services;
 
+/// <summary>
+/// Handles Spotify → Plex playlist export and synchronization.
+/// All tokens and missing-track cache are stored in memory only.
+/// </summary>
 public class PlexService
 {
     private readonly HttpClient _http;
+
+    // 🔹 In-memory cache for missing songs (instead of writing JSON files)
+    private static readonly Dictionary<string, List<string>> _missingCache = new();
 
     public PlexService(HttpClient http)
     {
@@ -18,7 +25,7 @@ public class PlexService
         _http.DefaultRequestHeaders.Add("X-Plex-Device", "WebApp");
     }
 
-    // ✅ Token-Prüfung
+    // ✅ Validate Plex token
     public async Task<bool> ValidateTokenAsync(string plexToken)
     {
         try
@@ -33,15 +40,23 @@ public class PlexService
         }
     }
 
-    // ✅ PIN anfordern
+    // ============================================================
+    // 🔸 Request PIN for Plex authentication
+    // ============================================================
+    private const string PLEX_CLIENT_ID = "inetconnector-spotify-to-plex";
+    private const string PLEX_PRODUCT_NAME = "SpotifyToPlex";
+    private const string PLEX_DEVICE = "WebApp";
+    private const string PLEX_PLATFORM = "InetConnector Server";
+    private const string PLEX_VERSION = "1.0";
+
     public async Task<(int PinId, string Code, string ClientId)> CreatePinAsync()
     {
-        var clientId = Guid.NewGuid().ToString();
-
         using var c = new HttpClient();
-        c.DefaultRequestHeaders.Add("X-Plex-Product", "SpotifyToPlex");
-        c.DefaultRequestHeaders.Add("X-Plex-Client-Identifier", clientId);
-        c.DefaultRequestHeaders.Add("X-Plex-Device-Name", "SpotifyPlaylistWebApp");
+        c.DefaultRequestHeaders.Add("X-Plex-Product", PLEX_PRODUCT_NAME);
+        c.DefaultRequestHeaders.Add("X-Plex-Device", PLEX_DEVICE);
+        c.DefaultRequestHeaders.Add("X-Plex-Platform", PLEX_PLATFORM);
+        c.DefaultRequestHeaders.Add("X-Plex-Version", PLEX_VERSION);
+        c.DefaultRequestHeaders.Add("X-Plex-Client-Identifier", PLEX_CLIENT_ID);
         c.DefaultRequestHeaders.Add("Accept", "application/json");
 
         var res = await c.PostAsync("https://plex.tv/api/v2/pins?strong=true", null);
@@ -49,16 +64,16 @@ public class PlexService
 
         var json = await res.Content.ReadAsStringAsync();
         using var doc = JsonDocument.Parse(json);
-        var root = doc.RootElement;
+        var id = doc.RootElement.GetProperty("id").GetInt32();
+        var code = doc.RootElement.GetProperty("code").GetString() ?? throw new Exception("Error: No Plex code received.");
 
-        var id = root.GetProperty("id").GetInt32();
-        var code = root.GetProperty("code").GetString() ?? throw new Exception("Fehler: Kein Plex-Code erhalten.");
-
-        Console.WriteLine($"[Plex CreatePin] Code={code}, ID={id}, Client={clientId}");
-        return (id, code, clientId);
+        Console.WriteLine($"[Plex CreatePin] Code={code}, ID={id}, Client={PLEX_CLIENT_ID}");
+        return (id, code, PLEX_CLIENT_ID);
     }
 
-    // ✅ Polling für Plex-PIN
+    // ============================================================
+    // 🔸 Poll for Plex token
+    // ============================================================
     public async Task<string?> PollPinAsync(int pinId, string clientId)
     {
         using var c = new HttpClient();
@@ -68,6 +83,7 @@ public class PlexService
         var url = $"https://plex.tv/api/v2/pins/{pinId}?includeClient=true&X-Plex-Client-Identifier={clientId}";
 
         for (var attempt = 1; attempt <= 10; attempt++)
+        {
             try
             {
                 var res = await c.GetAsync(url);
@@ -80,7 +96,6 @@ public class PlexService
                         await Task.Delay(2000);
                         continue;
                     }
-
                     return null;
                 }
 
@@ -94,7 +109,7 @@ public class PlexService
                     var token = tokenProp.GetString();
                     if (!string.IsNullOrWhiteSpace(token))
                     {
-                        Console.WriteLine("[Plex Poll] Success \u2192 Token received.");
+                        Console.WriteLine("[Plex Poll] Success → Token received.");
                         return token;
                     }
                 }
@@ -107,11 +122,14 @@ public class PlexService
                 Console.WriteLine($"[Plex Poll] Exception: {ex.Message}");
                 await Task.Delay(2000);
             }
+        }
 
         return null;
     }
 
-    // ✅ Server-Discovery
+    // ============================================================
+    // 🔸 Discover Plex servers linked to the user
+    // ============================================================
     public async Task<(string BaseUrl, string MachineId)> DiscoverServerAsync(string plexToken)
     {
         var xml = await _http.GetStringAsync($"https://plex.tv/api/resources?includeHttps=1&X-Plex-Token={plexToken}");
@@ -122,26 +140,27 @@ public class PlexService
                 ((string?)d.Attribute("provides") ?? "").Contains("server", StringComparison.OrdinalIgnoreCase));
 
         if (server == null)
-            throw new Exception("Kein Plex-Server im Konto gefunden.");
+            throw new Exception("No Plex server found in this account.");
 
         var connection = server.Elements("Connection")
-                             .FirstOrDefault(c =>
-                                 c.Attribute("local")?.Value == "0" && c.Attribute("protocol")?.Value == "https")
-                         ?? server.Elements("Connection").FirstOrDefault();
+            .FirstOrDefault(c =>
+                c.Attribute("local")?.Value == "0" && c.Attribute("protocol")?.Value == "https")
+            ?? server.Elements("Connection").FirstOrDefault();
 
         if (connection == null)
-            throw new Exception("Keine gültige Server-Verbindung gefunden.");
+            throw new Exception("No valid Plex server connection found.");
 
-        var baseUrl = connection.Attribute("uri")?.Value ?? throw new Exception("Keine Server-URI gefunden.");
+        var baseUrl = connection.Attribute("uri")?.Value ?? throw new Exception("No server URI found.");
         var machineId = server.Attribute("machineIdentifier")?.Value ?? "unknown";
 
         Console.WriteLine($"[Plex Discover] Server={baseUrl}, Machine={machineId}");
         return (baseUrl, machineId);
     }
 
-    // ✅ Playlist-Liste abrufen
-    public async Task<List<(string Title, string RatingKey)>> GetPlexPlaylistsAsync(string plexBaseUrl,
-        string plexToken)
+    // ============================================================
+    // 🔸 Fetch Plex playlists
+    // ============================================================
+    public async Task<List<(string Title, string RatingKey)>> GetPlexPlaylistsAsync(string plexBaseUrl, string plexToken)
     {
         var xml = await _http.GetStringAsync($"{plexBaseUrl}/playlists/all?X-Plex-Token={plexToken}");
         var doc = XDocument.Parse(xml);
@@ -152,9 +171,10 @@ public class PlexService
             .ToList();
     }
 
-    // ✅ Spotify Playlist Tracks abrufen
-    public async Task<List<(string Title, string Artist)>> GetSpotifyPlaylistTracksAsync(SpotifyClient spotify,
-        string playlistId)
+    // ============================================================
+    // 🔸 Fetch all tracks from a Spotify playlist
+    // ============================================================
+    public async Task<List<(string Title, string Artist)>> GetSpotifyPlaylistTracksAsync(SpotifyClient spotify, string playlistId)
     {
         var tracks = new List<(string Title, string Artist)>();
         var page = await spotify.Playlists.GetItems(playlistId);
@@ -175,7 +195,9 @@ public class PlexService
         return tracks;
     }
 
-    // ✅ Plex-Titel suchen
+    // ============================================================
+    // 🔸 Search tracks on Plex
+    // ============================================================
     public async Task<List<(string Title, string Artist, string? RatingKey)>> SearchTracksOnPlexAsync(
         string plexBaseUrl, string plexToken, List<(string Title, string Artist)> tracks)
     {
@@ -194,7 +216,7 @@ public class PlexService
 
                 if (key == null)
                 {
-                    // fallback ohne Artist
+                    // fallback without artist
                     var q2 = Uri.EscapeDataString(title);
                     var xml2 = await _http.GetStringAsync($"{plexBaseUrl}/search?query={q2}&X-Plex-Token={plexToken}");
                     var doc2 = XDocument.Parse(xml2);
@@ -213,40 +235,43 @@ public class PlexService
         return results;
     }
 
-    // ✅ Neue Plex-Playlist erstellen
+    // ============================================================
+    // 🔸 Create new Plex playlist
+    // ============================================================
     public async Task<string> CreatePlaylistAsync(string plexBaseUrl, string plexToken, string name)
     {
-        var url =
-            $"{plexBaseUrl}/playlists?type=audio&title={Uri.EscapeDataString(name)}&smart=0&X-Plex-Token={plexToken}";
+        var url = $"{plexBaseUrl}/playlists?type=audio&title={Uri.EscapeDataString(name)}&smart=0&X-Plex-Token={plexToken}";
         var res = await _http.PostAsync(url, null);
         res.EnsureSuccessStatusCode();
 
         var xml = await res.Content.ReadAsStringAsync();
         var doc = XDocument.Parse(xml);
-
         var key = doc.Descendants("Playlist").FirstOrDefault()?.Attribute("ratingKey")?.Value;
+
         if (string.IsNullOrEmpty(key))
-            throw new Exception("Playlist konnte nicht erstellt werden.");
+            throw new Exception("Failed to create Plex playlist.");
 
         return key;
     }
 
-    // ✅ Tracks hinzufügen
-    public async Task AddTracksToPlaylistAsync(string plexBaseUrl, string plexToken, string playlistKey,
-        IEnumerable<string> ratingKeys)
+    // ============================================================
+    // 🔸 Add tracks to existing Plex playlist
+    // ============================================================
+    public async Task AddTracksToPlaylistAsync(string plexBaseUrl, string plexToken, string playlistKey, IEnumerable<string> ratingKeys)
     {
         foreach (var key in ratingKeys)
         {
             var uri = $"server://local/com.plexapp.plugins.library/library/metadata/{key}";
-            var url =
-                $"{plexBaseUrl}/playlists/{playlistKey}/items?uri={Uri.EscapeDataString(uri)}&X-Plex-Token={plexToken}";
+            var url = $"{plexBaseUrl}/playlists/{playlistKey}/items?uri={Uri.EscapeDataString(uri)}&X-Plex-Token={plexToken}";
             var res = await _http.PutAsync(url, null);
             res.EnsureSuccessStatusCode();
             await Task.Delay(50);
         }
     }
 
-    // ✅ Alle Spotify-Playlists laden
+    // ============================================================
+    // 🔸 Load all Spotify playlists for export
+    // ============================================================
     public async Task<List<(string Id, string Name)>> GetAllSpotifyPlaylistsAsync(SpotifyClient spotify)
     {
         var result = new List<(string Id, string Name)>();
@@ -265,66 +290,34 @@ public class PlexService
         return result;
     }
 
-    // ✅ Export einer Spotify-Playlist
+    // ============================================================
+    // 🔸 Export one Spotify playlist to Plex (with memory cache)
+    // ============================================================
     public async Task<(string ExportedName, int AddedCount, List<string> Missing)> ExportOnePlaylistAsync(
         SpotifyClient spotify, string spotifyPlaylistId, string? explicitExportName,
         string plexBaseUrl, string plexToken)
     {
-        // Load previously missing tracks from local cache
-        var cachePath = Path.Combine(AppContext.BaseDirectory, "data", "plex_missing_cache.json");
-        Directory.CreateDirectory(Path.GetDirectoryName(cachePath)!);
-
-        var cache = new Dictionary<string, List<string>>();
-        if (File.Exists(cachePath))
-            try
-            {
-                var json = await File.ReadAllTextAsync(cachePath);
-                cache = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(json)
-                        ?? new Dictionary<string, List<string>>();
-            }
-            catch
-            {
-                cache = new Dictionary<string, List<string>>();
-            }
-
         var name = !string.IsNullOrWhiteSpace(explicitExportName)
             ? explicitExportName.Trim()
             : $"Spotify - {(await spotify.Playlists.Get(spotifyPlaylistId)).Name}";
 
+        // Load missing entries from memory
+        _missingCache.TryGetValue(name, out var oldMissing);
+        oldMissing ??= new List<string>();
+
         var tracks = await GetSpotifyPlaylistTracksAsync(spotify, spotifyPlaylistId);
+        var searchCandidates = tracks.Where(t => !oldMissing.Contains($"{t.Artist} — {t.Title}")).ToList();
 
-        // Check if we had previous missing entries
-        var oldMissing = cache.ContainsKey(name) ? cache[name] : new List<string>();
+        Console.WriteLine($"[Plex Export] Searching {searchCandidates.Count} new tracks, reusing {oldMissing.Count} missing.");
 
-        // Remove previously missing from search if they are still missing
-        var searchCandidates = tracks
-            .Where(t => !oldMissing.Contains($"{t.Artist} — {t.Title}"))
-            .ToList();
-
-        Console.WriteLine(
-            $"[Plex Export] Searching {searchCandidates.Count} new tracks, reusing {oldMissing.Count} previous missing entries.");
-
-        // Search in Plex
         var matches = await SearchTracksOnPlexAsync(plexBaseUrl, plexToken, searchCandidates);
 
-        var foundKeys = matches
-            .Where(m => m.RatingKey != null)
-            .Select(m => m.RatingKey!)
-            .ToList();
+        var foundKeys = matches.Where(m => m.RatingKey != null).Select(m => m.RatingKey!).ToList();
+        var newlyMissing = matches.Where(m => m.RatingKey == null).Select(m => $"{m.Artist} — {m.Title}").ToList();
 
-        var newlyMissing = matches
-            .Where(m => m.RatingKey == null)
-            .Select(m => $"{m.Artist} — {m.Title}")
-            .ToList();
+        // Merge old + new missing and deduplicate
+        var combinedMissing = oldMissing.Concat(newlyMissing).Distinct().OrderBy(x => x).ToList();
 
-        // Combine old + new missing, then remove duplicates
-        var combinedMissing = oldMissing
-            .Concat(newlyMissing)
-            .Distinct()
-            .OrderBy(x => x)
-            .ToList();
-
-        // Create or find existing Plex playlist
         var existingPlaylists = await GetPlexPlaylistsAsync(plexBaseUrl, plexToken);
         var existing = existingPlaylists.FirstOrDefault(p => p.Title.Equals(name, StringComparison.OrdinalIgnoreCase));
 
@@ -340,15 +333,13 @@ public class PlexService
             Console.WriteLine($"[Plex Export] Created new playlist '{name}'");
         }
 
-        if (foundKeys.Any()) await AddTracksToPlaylistAsync(plexBaseUrl, plexToken, playlistKey, foundKeys);
+        if (foundKeys.Any())
+            await AddTracksToPlaylistAsync(plexBaseUrl, plexToken, playlistKey, foundKeys);
 
-        // Update cache
-        cache[name] = combinedMissing;
-        await File.WriteAllTextAsync(cachePath,
-            JsonSerializer.Serialize(cache, new JsonSerializerOptions { WriteIndented = true }));
+        // Save to memory cache
+        _missingCache[name] = combinedMissing;
 
         Console.WriteLine($"[Plex Export] {name}: +{foundKeys.Count} added, {combinedMissing.Count} still missing.");
-
         return (name, foundKeys.Count, combinedMissing);
     }
 }

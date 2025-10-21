@@ -10,21 +10,13 @@ public class HomePlexController : Controller
 {
     private const string SessionTokenKey = "SpotifyAccessToken";
 
-    // ==============================================================
-    // 🔸 Entry point: /Home/SpotifyToPlex
-    // ==============================================================
     [HttpGet("SpotifyToPlex")]
-    public async Task<IActionResult> SpotifyToPlex([FromServices] PlexService plex)
+    public IActionResult SpotifyToPlex()
     {
-        var (pinId, code, clientId) = await plex.CreatePinAsync();
-        HttpContext.Session.SetInt32("PlexPinId", pinId);
-        HttpContext.Session.SetString("PlexClientId", clientId);
-
-        var loginUrl =
-            $"https://app.plex.tv/auth#?clientID={clientId}&code={code}&context[device][product]=SpotifyToPlex";
-
-        return Json(new { success = true, loginUrl });
+        // Serve the Plex connection view (shows the orange export UI)
+        return View("PlexActions");
     }
+
 
     // ==============================================================
     // 🔸 Polling endpoint for Plex login confirmation
@@ -144,4 +136,43 @@ public class HomePlexController : Controller
         TempData["Info"] = "Plex-Verknüpfung entfernt.";
         return RedirectToAction("Index", "Home");
     }
+
+    // ==============================================================
+    // 🔸 New AJAX endpoints for client-side Plex login
+    // ==============================================================
+    [HttpGet("GetPlexPin")]
+    public async Task<IActionResult> GetPlexPin([FromServices] PlexService plex)
+    {
+        var (pinId, code, clientId) = await plex.CreatePinAsync();
+        var loginUrl = $"https://app.plex.tv/auth#?clientID={clientId}&code={code}&context[device][product]=SpotifyToPlex";
+
+        // Store pin ID and clientId for later verification
+        HttpContext.Session.SetInt32("PlexPinId", pinId);
+        HttpContext.Session.SetString("PlexClientId", clientId);
+
+        return Json(new { success = true, pinId, code, clientId, loginUrl });
+    }
+
+    [HttpPost("SavePlexToken")]
+    public async Task<IActionResult> SavePlexToken([FromBody] JsonElement json)
+    {
+        try
+        {
+            var token = json.GetProperty("token").GetString();
+            if (string.IsNullOrWhiteSpace(token))
+                return BadRequest("No Plex token received.");
+
+            HttpContext.Session.SetString("PlexAuthToken", token);
+            Console.WriteLine($"[Plex] Token saved to session: {token[..8]}...");
+
+            return Ok(new { success = true });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("[Plex SaveToken] " + ex.Message);
+            return BadRequest(new { success = false, message = ex.Message });
+        }
+    }
+
+
 }

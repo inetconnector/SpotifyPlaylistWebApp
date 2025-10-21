@@ -65,40 +65,46 @@ public class HomeController : Controller
     {
         return View();
     }
-
-    // ============================
-    // 🔸 Spotify Login Flow
-    // ============================
-
     public IActionResult Login()
     {
+        // Generate PKCE codes and store verifier in session
         var (verifier, challenge) = PKCEUtil.GenerateCodes();
         HttpContext.Session.SetString(SessionVerifierKey, verifier);
 
         var loginRequest = new LoginRequest(
-            new Uri(_redirectUri),
+            new Uri(_redirectUri),          // MUST match Spotify Dashboard Redirect URI exactly
             _clientId,
             LoginRequest.ResponseType.Code)
         {
             CodeChallenge = challenge,
             CodeChallengeMethod = "S256",
+            // ✅ Add read scopes so we can fetch user's playlists for Plex page
             Scope = new[]
             {
                 Scopes.UserReadPrivate,
                 Scopes.UserTopRead,
                 Scopes.UserLibraryRead,
                 Scopes.PlaylistModifyPrivate,
-                Scopes.PlaylistModifyPublic
+                Scopes.PlaylistModifyPublic,
+                Scopes.PlaylistReadPrivate,          // <-- added
+                Scopes.PlaylistReadCollaborative     // <-- added
             }
         };
 
-        _logger.LogInformation("Spotify Login gestartet, PKCE-Challenge erstellt.");
+        _logger.LogInformation("Spotify login started (PKCE challenge created).");
         return Redirect(loginRequest.ToUri().ToString());
     }
 
     [HttpGet("/callback")]
-    public async Task<IActionResult> Callback([FromQuery] string code)
+    public async Task<IActionResult> Callback([FromQuery] string code, [FromQuery] string? error = null)
     {
+        // Handle Spotify error response explicitly
+        if (!string.IsNullOrEmpty(error))
+        {
+            _logger.LogWarning("Spotify callback error: {Error}", error);
+            return Error($"Spotify-Login fehlgeschlagen: {error}");
+        }
+
         if (string.IsNullOrWhiteSpace(code))
             return Content("Fehler: Kein Spotify-Code erhalten.");
 
@@ -106,24 +112,40 @@ public class HomeController : Controller
         {
             var verifier = HttpContext.Session.GetString(SessionVerifierKey);
             if (string.IsNullOrEmpty(verifier))
+            {
+                _logger.LogWarning("PKCE verifier missing in session. Restarting login.");
                 return RedirectToAction("Login");
+            }
 
+            // Exchange code for token using PKCE
             var tokenResponse = await new OAuthClient().RequestToken(
                 new PKCETokenRequest(_clientId, code, new Uri(_redirectUri), verifier));
 
             if (string.IsNullOrEmpty(tokenResponse.AccessToken))
                 return Content("Fehler: Kein Token erhalten.");
 
+            // Store access token in session
             HttpContext.Session.SetString(SessionTokenKey, tokenResponse.AccessToken);
-            _logger.LogInformation("Spotify Token erfolgreich empfangen.");
+            _logger.LogInformation("Spotify token received and stored.");
+
+            // ✅ If we came here from a protected flow (e.g. Plex export), jump back there
+            var returnUrl = HttpContext.Session.GetString("ReturnAfterLogin");
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                HttpContext.Session.Remove("ReturnAfterLogin");
+                return Redirect(returnUrl);
+            }
+
+            // Default: go to dashboard (existing behavior)
             return RedirectToAction("Dashboard");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Spotify Callback fehlgeschlagen");
+            _logger.LogError(ex, "Spotify Callback failed");
             return Content("Ein Fehler ist beim Login aufgetreten. Bitte erneut versuchen.");
         }
     }
+
 
     // ============================
     // 🔸 Dashboard
@@ -155,6 +177,20 @@ public class HomeController : Controller
             _logger.LogError("Spotify API-Fehler: {StatusCode} - {Message}\n{Body}",
                 apiEx.Response.StatusCode, apiEx.Message, apiEx.Response.Body);
 
+            // === 403 = Benutzer nicht registriert (App im Testmodus) ===
+            if ((int)apiEx.Response.StatusCode == 403)
+            {
+                // Texte aus den Sprachressourcen abrufen
+                var msg = $"""
+                           ℹ️ {_localizer["Spotify403_Info_Line1"]}<br>
+                           {_localizer["Spotify403_Info_Line2"]}<br><br>
+                           {_localizer["Spotify403_Info_Contact"]} <strong>info@inetconnector.com</strong><br>
+                           {_localizer["Spotify403_Info_Action"]}
+                           """;
+                return Info(msg);
+            }
+
+            // === Alle anderen Fehler bleiben rot ===
             return Error($"""
                           🚨 Spotify API-Fehler ({(int)apiEx.Response.StatusCode}): {apiEx.Message}<br>
                           <small>{apiEx.Response.Body}</small>
@@ -166,7 +202,10 @@ public class HomeController : Controller
             return Error($"Unerwarteter Fehler: {ex.Message}");
         }
     }
-
+    private ContentResult Info(string msg)
+    {
+        return HtmlResult(msg, "#10b981"); // Smaragdgrün (freundlicher Hinweis)
+    }
     // ============================
     // 🔸 Playlist-Aktionen
     // ============================

@@ -28,6 +28,21 @@
 	<data name="PlexActions_ExportFinished" xml:space="preserve">
   <value>Export abgeschlossen.</value>
 </data>
+	<data name="Spotify403_Info_Line1" xml:space="preserve">
+    <value>Diese Spotify-App befindet sich derzeit im Testmodus.</value>
+  </data>
+	<data name="Spotify403_Info_Line2" xml:space="preserve">
+    <value>Dein Spotify-Konto ist noch nicht freigeschaltet.</value>
+  </data>
+	<data name="Spotify403_Info_Contact" xml:space="preserve">
+    <value>Bitte kontaktiere</value>
+  </data>
+	<data name="Spotify403_Info_Action" xml:space="preserve">
+    <value>und sende deine Spotify-E-Mail-Adresse, um Zugriff als Testnutzer zu erhalten.</value>
+  </data>
+	<data name="Button_BackToHome" xml:space="preserve">
+    <value>Zurück zur Startseite</value>
+  </data>
 
 	<data name="Attr_Dashboard_E_Mail" xml:space="preserve"><value>E-Mail</value></data>
   <data name="Attr_Dashboard_Erstellt_deine_gespeicherten_Lieblingssongs_in_O" xml:space="preserve"><value>Erstellt deine gespeicherten Lieblingssongs in Originalreihenfolge.</value></data>
