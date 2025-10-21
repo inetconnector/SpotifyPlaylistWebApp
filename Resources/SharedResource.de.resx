@@ -1,12 +1,35 @@
-<?xml version='1.0' encoding='utf-8'?>
 <root>
   <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
 
-  
-  <data name="Attr_Dashboard_E_Mail" xml:space="preserve"><value>E-Mail</value></data>
+	<data name="PlexActions_SyncSpotifyPlaylistsWithPlex" xml:space="preserve">
+  <value>Synchronisiere deine Spotify-Playlists automatisch mit deiner Plex-Bibliothek.</value>
+</data>
+	<data name="PlexActions_ExportPlaylists" xml:space="preserve">
+  <value>Playlist exportieren</value>
+</data>
+	<data name="PlexActions_Disconnect" xml:space="preserve">
+  <value>Plex-Verknüpfung trennen</value>
+</data>
+	<data name="PlexActions_AllPlaylistsExported" xml:space="preserve">
+  <value>Alle Playlists erfolgreich exportiert!</value>
+</data>
+	<data name="PlexActions_Info_Disconnected" xml:space="preserve">
+  <value>Plex-Verknüpfung wurde entfernt.</value>
+</data>
+	<data name="PlexActions_Title" xml:space="preserve">
+  <value>Spotify → Plex</value>
+</data>
+	<data name="PlexActions_ExportStarted" xml:space="preserve">
+  <value>Export der Playlists läuft, bitte warten ...</value>
+</data>
+	<data name="PlexActions_ExportFinished" xml:space="preserve">
+  <value>Export abgeschlossen.</value>
+</data>
+
+	<data name="Attr_Dashboard_E_Mail" xml:space="preserve"><value>E-Mail</value></data>
   <data name="Attr_Dashboard_Erstellt_deine_gespeicherten_Lieblingssongs_in_O" xml:space="preserve"><value>Erstellt deine gespeicherten Lieblingssongs in Originalreihenfolge.</value></data>
   <data name="Attr_Dashboard_Erstellt_deine_meistgeh_rten_Songs_in_der_Origin" xml:space="preserve"><value>Erstellt deine meistgehörten Songs in der Originalreihenfolge.</value></data>
   <data name="Attr_Dashboard_Erstellt_eine_zuf_llige_Playlist_aus_deinen_gesp" xml:space="preserve"><value>Erstellt eine zufällige Playlist aus deinen gespeicherten Lieblingssongs.</value></data>
@@ -116,7 +139,7 @@
   
   <data name="Impressum_97209_Veitsh_chheim" xml:space="preserve"><value>97209 Veitshöchheim</value></data>
   <data name="Impressum_Angaben_gem_5_TMG_18_Abs_2_MStV" xml:space="preserve"><value>Angaben gemäß §5 TMG &amp; §18 Abs. 2 MStV:</value></data>
-  <data name="Impressum_Bismarckstrasse_6e" xml:space="preserve"><value>Bismarckstrasse 6e</value></data>
+  <data name="Impressum_Bismarckstrasse_6e" xml:space="preserve"><value>Bismarckstrasse 6</value></data>
   <data name="Impressum_Daniel_Frede" xml:space="preserve"><value>Daniel Frede</value></data>
   <data name="Impressum_Daniel_Frede_Veitsh_chheim_bei_W_rzburg" xml:space="preserve"><value>Daniel Frede, Veitshöchheim bei Würzburg</value></data>
   <data name="Impressum_Datenschutzerkl_rung" xml:space="preserve"><value>Datenschutzerklärung</value></data>
@@ -212,4 +235,45 @@
 </data><data name="Playlist_AlternativeFavorites" xml:space="preserve">
   <value>Alternative Lieblingssongs</value>
 </data> 
-<data name="Playlist_LikedSongs" xml:space="preserve"><value>Lieblingssongs</value></data></root>
+<data name="Playlist_LikedSongs" xml:space="preserve"><value>Lieblingssongs</value></data>
+<data name="SpotifyToPlex_Title"><value>Spotify zu Plex</value></data>
+<data name="SpotifyToPlex_Heading"><value>Verbinde dein Plex-Konto</value></data>
+<data name="SpotifyToPlex_Connect"><value>Mit Plex verbinden</value></data>
+<data name="SpotifyToPlex_Disconnect"><value>Plex-Verknüpfung trennen</value></data>
+<data name="SpotifyToPlex_LoginTitle"><value>Plex-Login</value></data>
+<data name="SpotifyToPlex_LoginDesc"><value>Öffne den Plex-Login und bestätige den Zugriff.</value></data>
+<data name="SpotifyToPlex_Code"><value>Code</value></data>
+<data name="SpotifyToPlex_OpenPlexLogin"><value>Plex-Login öffnen</value></data>
+<data name="SpotifyToPlex_Waiting"><value>Warte auf Bestätigung…</value></data>
+<data name="SpotifyToPlex_Connected"><value>Verbunden! Weiterleitung…</value></data>
+<data name="SpotifyToPlex_SelectPlaylist"><value>Wähle eine Spotify-Playlist zum Export</value></data>
+<data name="SpotifyToPlex_ServerDetected"><value>Verbunden mit Plex-Server:</value></data>
+<data name="SpotifyToPlex_SelectLabel"><value>Playlist</value></data>
+<data name="SpotifyToPlex_ExportNamePlaceholder"><value>Optional: Name der Plex-Playlist (leer lassen = „Spotify - Name“)</value></data>
+<data name="SpotifyToPlex_Export"><value>Jetzt exportieren</value></data>
+<data name="SpotifyToPlex_Exported"><value>Exportiert nach Plex:</value></data>
+<data name="SpotifyToPlex_AddedCount"><value>Hinzugefügte Titel:</value></data>
+<data name="SpotifyToPlex_NotFound"><value>Diese Titel konnten nicht gefunden werden:</value></data>
+<data name="SpotifyToPlex_TokenExpired"><value>Plex-Token ist abgelaufen. Bitte erneut anmelden.</value></data>
+<data name="SpotifyToPlex_ExportAll"><value>Alle exportieren</value></data>
+<data name="SpotifyToPlex_ExportAll_Done"><value>Alle Playlists exportiert</value></data>
+<data name="SpotifyToPlex_ExportAll_Summary"><value>Playlists:</value></data>
+<data name="SpotifyToPlex_TotalMissing"><value>Fehlende Titel insgesamt:</value></data>
+<data name="SpotifyToPlex_NoMissing"><value>Keine fehlenden Titel</value></data>
+	<data name="SpotifyToPlex_Info">
+		<value>Diese Verbindung ist sicher und verwendet die offizielle Plex PIN-Authentifizierung.</value>
+	</data>
+
+  <data name="SpotifyToPlex_ConnectButton" xml:space="preserve">
+    <value>Mit Plex verbinden</value>
+  </data>
+	<data name="SpotifyToPlex_Header" xml:space="preserve">
+    <value>Spotify zu Plex verbinden</value>
+  </data>
+	<data name="SpotifyToPlex_Intro" xml:space="preserve">
+    <value>Synchronisiere deine Spotify-Playlists automatisch mit deiner Plex-Bibliothek.</value>
+  </data>
+
+
+  <data name="SpotifyToPlex_SyncAll" xml:space="preserve"><value>Alle Playlists synchronisieren</value></data>
+</root>

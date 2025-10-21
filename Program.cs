@@ -1,35 +1,23 @@
 using System.Globalization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
+using SpotifyPlaylistWebApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
-    .AddEnvironmentVariables();
-
-
-// ✅ Localization setup
-builder.Services.AddLocalization(opt => opt.ResourcesPath = "Resources");
+// =====================================================
+// 🔹 Core Services
+// =====================================================
 builder.Services.AddControllersWithViews()
     .AddViewLocalization()
     .AddDataAnnotationsLocalization();
 
-// ✅ Supported cultures
-var supportedCultures = new[] { new CultureInfo("de-DE"), new CultureInfo("en-US") };
-builder.Services.Configure<RequestLocalizationOptions>(options =>
-{
-    options.DefaultRequestCulture = new RequestCulture("en-US");
-    options.SupportedCultures = supportedCultures;
-    options.SupportedUICultures = supportedCultures;
-    options.RequestCultureProviders = new IRequestCultureProvider[]
-    {
-        new CookieRequestCultureProvider(),
-        new AcceptLanguageHeaderRequestCultureProvider()
-    };
-});
+builder.Services.AddLocalization(opt => opt.ResourcesPath = "Resources");
+builder.Services.AddDataProtection()
+    .SetApplicationName("SpotifyPlaylistWebApp");
 
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(o =>
 {
     o.Cookie.IsEssential = true;
@@ -42,9 +30,38 @@ builder.Services.Configure<CookiePolicyOptions>(opt =>
     opt.MinimumSameSitePolicy = SameSiteMode.Lax;
 });
 
+// ✅ NEU – wichtig für deinen LanguageSwitcher.cshtml
+builder.Services.AddHttpContextAccessor();
+
+// =====================================================
+// 🔹 Plex Integration
+// =====================================================
+builder.Services.AddScoped<IPlexTokenStore, PlexTokenStore>();
+
+builder.Services.AddHttpClient<PlexService>();
+
+// =====================================================
+// 🔹 Localization Setup
+// =====================================================
+var supportedCultures = new[] { new CultureInfo("de-DE"), new CultureInfo("en-US") };
+
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.DefaultRequestCulture = new RequestCulture("en-US");
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+    options.RequestCultureProviders = new IRequestCultureProvider[]
+    {
+        new CookieRequestCultureProvider(),
+        new AcceptLanguageHeaderRequestCultureProvider()
+    };
+});
+
 var app = builder.Build();
 
-// ✅ Apply localization before routing
+// =====================================================
+// 🔹 Middleware Pipeline
+// =====================================================
 var locOptions = app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
 app.UseRequestLocalization(locOptions);
 
@@ -56,7 +73,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 app.UseCookiePolicy();
 app.UseSession();

@@ -3,11 +3,12 @@
   <PropertyGroup>
     <RootNamespace>SpotifyPlaylistWebApp</RootNamespace>
     <AssemblyName>SpotifyPlaylistWebApp</AssemblyName>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
-  </PropertyGroup>
+  <NoWarn>CS8602;CS8604</NoWarn>
+</PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="SpotifyAPI.Web" Version="7.0.0" />

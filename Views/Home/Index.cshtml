@@ -45,28 +45,28 @@
 
     <!-- 🔹 Schema.org JSON-LD -->
     <script type="application/ld+json">
-{
-  "@@context": "https://schema.org",
-  "@@type": "WebApplication",
-  "name": "Spotify Playlist Generator",
-  "url": "https://playlists.inetconnector.com/",
-  "description": "Erstelle Spotify-Playlists automatisch aus deinen Lieblingssongs oder Top-Tracks mit der Spotify Web API.",
-  "applicationCategory": "MusicApplication",
-  "operatingSystem": "Web",
-  "creator": {
-    "@@type": "Organization",
-    "name": "InetConnector",
-    "url": "https://inetconnector.com"
-  },
-  "offers": {
-    "@@type": "Offer",
-    "price": "0",
-    "priceCurrency": "EUR"
-  }
-}
-</script>
+        {
+          "@@context": "https://schema.org",
+          "@@type": "WebApplication",
+          "name": "Spotify Playlist Generator",
+          "url": "https://playlists.inetconnector.com/",
+          "description": "Erstelle Spotify-Playlists automatisch aus deinen Lieblingssongs oder Top-Tracks mit der Spotify Web API.",
+          "applicationCategory": "MusicApplication",
+          "operatingSystem": "Web",
+          "creator": {
+            "@@type": "Organization",
+            "name": "InetConnector",
+            "url": "https://inetconnector.com"
+          },
+          "offers": {
+            "@@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+          }
+        }
+    </script>
 
-
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
@@ -142,6 +142,15 @@
                 <li>@L["Index_Lieblingssongs_in_Originalreihenfolge_klonen"]</li>
                 <li>@L["Index_Empfehlungen_basierend_auf_deinem_H_rverhalten"]</li>
             </ul>
+
+            <!-- Spotify ➜ Plex Button -->
+            <button id="btnPlexConnect"
+                    class="mt-4 inline-flex items-center justify-center px-6 py-3 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold shadow-md hover:from-yellow-500 hover:to-orange-600 transition-all duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+                Spotify ➜ Plex
+            </button>
         </section>
 
         <!-- SEO-Zusatzabschnitt -->
@@ -164,14 +173,12 @@
                 @L["Index_Jetzt_ber_PayPal_spenden"]
             </a>
             <div class="flex flex-col items-center justify-center">
-
                 <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
                    target="_blank" rel="noopener"
                    class="inline-block transition-transform hover:scale-105">
                     <img src="/QR-Code.png" alt="@L["Attr_Index_PayPal_QR_Code"]"
                          class="w-36 h-36 rounded-2xl border border-white/20 shadow-md hover:border-emerald-400 hover:shadow-emerald-400/20 transition-all"/>
                 </a>
-
                 <p class="text-sm text-white/70 mt-3">@L["Index_Scanne_den_QR_Code_zum_Spenden"]</p>
             </div>
         </div>
@@ -194,5 +201,66 @@
         </div>
     </div>
 </footer>
+
+<!-- === Plex Integration Script (placed at the end for reliability) === -->
+<script>
+        /**
+         * Binds the Plex connect button after DOM is ready,
+         * requests the Plex login URL from the server, opens it in a new window,
+         * and starts polling for successful authentication to redirect to PlexActions.
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            const plexButton = document.getElementById('btnPlexConnect');
+            if (!plexButton) return;
+
+            plexButton.addEventListener('click', async () => {
+                try {
+                    const res = await fetch('/Home/SpotifyToPlex', { cache: 'no-store' });
+                    const data = await res.json();
+
+                    if (data && data.success && data.loginUrl) {
+                        // Open Plex login in a separate window/tab; keep main app in place
+                        window.open(data.loginUrl, '_blank', 'width=900,height=700,noopener');
+                        // Start polling server to detect successful authentication
+                        pollForPlexAuth();
+                    } else {
+                        alert('Could not start Plex authentication.');
+                    }
+                } catch (e) {
+                    console.error('Error starting Plex login:', e);
+                }
+            });
+        });
+
+        /**
+         * Polls the server to check if Plex authentication is complete.
+         * On success, server responds with a redirect to /Home/PlexActions,
+         * which we follow in the current (main) window.
+         */
+        async function pollForPlexAuth() {
+            try {
+                const res = await fetch('/Home/CheckPlexAuth', { cache: 'no-store' });
+
+                // If server performs a redirect, follow it
+                if (res.redirected) {
+                    window.location.href = res.url;
+                    return;
+                }
+
+                // Optional JSON path (if controller returns JSON instead of redirect)
+                const data = await res.json().catch(() => ({}));
+                if (data && data.success && data.redirect) {
+                    window.location.href = data.redirect;
+                    return;
+                }
+            } catch (e) {
+                console.warn('Polling error:', e);
+            }
+
+            // Retry after 2 seconds
+            setTimeout(pollForPlexAuth, 2000);
+        }
+    </script>
+
 </body>
 </html>

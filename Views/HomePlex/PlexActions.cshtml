@@ -1,0 +1,160 @@
+@using System.Globalization
+@using System.Text.Json
+@using Microsoft.Extensions.Localization
+@using SpotifyPlaylistWebApp
+@inject IStringLocalizer<SharedResource> L
+@{
+    Layout = "Layout";
+    ViewData["Title"] = "Spotify → Plex";
+    var playlists = ViewBag.Playlists as List<(string Id, string Name)> ?? new List<(string Id, string Name)>();
+}
+
+<!DOCTYPE html>
+<html lang="@CultureInfo.CurrentUICulture.Name">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            background: radial-gradient(800px 500px at 20% 20%, rgba(255,165,0,0.25), transparent 60%), radial-gradient(700px 500px at 80% 0%, rgba(255,100,0,0.25), transparent 60%), #0b0f17;
+            font-family: system-ui, sans-serif;
+            color: white;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-orange {
+            background: linear-gradient(to right, #fbbf24, #f97316);
+            color: white;
+            font-weight: 600;
+            padding: 0.9rem 1.6rem;
+            border-radius: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            box-shadow: 0 0 10px rgba(0,0,0,0.25);
+        }
+
+            .btn-orange:hover {
+                filter: brightness(1.1);
+                transform: translateY(-2px);
+            }
+
+        select {
+            width: 100%;
+            padding: 0.7rem;
+            border-radius: 0.6rem;
+            background-color: rgba(0,0,0,0.4);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        option {
+            color: black;
+        }
+
+        @@keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(-4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fade-in 0.4s ease forwards;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center px-4">
+<main class="glass rounded-3xl p-10 w-full max-w-md text-center shadow-2xl leading-relaxed">
+    <div class="flex justify-center mb-6">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-r from-yellow-400 to-orange-500 grid place-items-center shadow-md text-3xl">
+            🎧
+        </div>
+    </div>
+
+    <h1 class="text-3xl font-bold mb-3 text-white drop-shadow-sm">
+        Spotify <span class="text-orange-400">→</span> Plex
+    </h1>
+
+    <p class="text-white/80 mb-8">
+        @L["PlexActions_SyncSpotifyPlaylistsWithPlex"]
+    </p>
+
+    @if (TempData["Info"] != null)
+    {
+        <div class="mb-5 px-4 py-3 rounded-lg bg-green-500/20 border border-green-400 text-green-300 shadow-sm animate-fade-in">
+            ✅ @TempData["Info"]
+        </div>
+    }
+
+    @if (TempData["ExportAllResult"] != null)
+    {
+        <div class="mb-5 px-4 py-3 rounded-lg bg-amber-500/20 border border-amber-400 text-amber-300 shadow-sm animate-fade-in">
+            🎵 @L["PlexActions_AllPlaylistsExported"]
+        </div>
+    }
+
+    @if (TempData["ExportOneResult"] != null)
+    {
+        var result = JsonSerializer.Deserialize<dynamic>(TempData["ExportOneResult"]!.ToString()!);
+        <div class="mb-5 px-4 py-3 rounded-lg bg-blue-500/20 border border-blue-400 text-blue-300 shadow-sm animate-fade-in">
+            ✅ <strong>@result?.exportedName</strong> – hinzugefügt: @result?.addedCount, fehlen: @result?.missingCount
+        </div>
+    }
+
+    <!-- 🔽 Playlist-Auswahl -->
+    @if (playlists.Any())
+    {
+        <form method="post" action="/Home/ExportOne" class="mb-4">
+            <select id="playlistId" name="playlistId" required>
+                @foreach (var (Id, Name) in playlists)
+                {
+                    <option value="@Id">@Name</option>
+                }
+            </select>
+            <input type="hidden" name="playlistName" id="playlistNameField"/>
+
+            <script>
+                    const sel = document.getElementById('playlistId');
+                    const nameField = document.getElementById('playlistNameField');
+                    sel.addEventListener('change', () => {
+                        nameField.value = sel.options[sel.selectedIndex].text;
+                    });
+                    nameField.value = sel.options[sel.selectedIndex].text;
+                </script>
+
+            <button type="submit" class="btn-orange mt-4">🎵 @L["PlexActions_ExportSelected"]</button>
+        </form>
+    }
+
+    <div class="flex flex-col space-y-4">
+        <form method="post" action="/Home/ExportAll">
+            <button type="submit" class="btn-orange">
+                🔄 @L["PlexActions_ExportPlaylists"]
+            </button>
+        </form>
+
+        <form method="post" action="/Home/DisconnectPlex">
+            <button type="submit" class="btn-orange bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-400 hover:to-orange-500">
+                🗑️ @L["PlexActions_Disconnect"]
+            </button>
+        </form>
+    </div>
+</main>
+</body>
+</html>

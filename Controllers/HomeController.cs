@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
+﻿using System.Globalization;
+using System.Text;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using SpotifyAPI.Web;
-using System.Globalization;
-using System.Text;
 
 namespace SpotifyPlaylistWebApp.Controllers;
 
@@ -20,13 +19,13 @@ public class HomeController : Controller
     // === API-Rate-Limit / Delay ===
     private static readonly TimeSpan ApiDelay = TimeSpan.FromMilliseconds(500);
 
-    private readonly ILogger<HomeController> _logger;
-    private readonly IServiceProvider _services;
-    private readonly IStringLocalizer<SharedResource> _localizer;
-    private readonly IConfiguration _config;
-
     private readonly string _clientId;
+    private readonly IConfiguration _config;
+    private readonly IStringLocalizer<SharedResource> _localizer;
+
+    private readonly ILogger<HomeController> _logger;
     private readonly string _redirectUri;
+    private readonly IServiceProvider _services;
 
     public HomeController(
         ILogger<HomeController> logger,
@@ -40,21 +39,32 @@ public class HomeController : Controller
         _config = config;
 
         _clientId = _config["Spotify:ClientId"]
-            ?? Environment.GetEnvironmentVariable("SPOTIFY_CLIENT_ID")
-            ?? throw new InvalidOperationException("Spotify ClientId fehlt.");
+                    ?? Environment.GetEnvironmentVariable("SPOTIFY_CLIENT_ID")
+                    ?? throw new InvalidOperationException("Spotify ClientId fehlt.");
 
         _redirectUri = _config["Spotify:RedirectUri"]
-            ?? Environment.GetEnvironmentVariable("SPOTIFY_REDIRECT_URI")
-            ?? throw new InvalidOperationException("Spotify RedirectUri fehlt.");
+                       ?? Environment.GetEnvironmentVariable("SPOTIFY_REDIRECT_URI")
+                       ?? throw new InvalidOperationException("Spotify RedirectUri fehlt.");
     }
 
     // ============================
     // 🔸 Grundseiten
     // ============================
 
-    public IActionResult Index() => View();
-    public IActionResult Impressum() => View();
-    public IActionResult Datenschutz() => View();
+    public IActionResult Index()
+    {
+        return View();
+    }
+
+    public IActionResult Impressum()
+    {
+        return View();
+    }
+
+    public IActionResult Datenschutz()
+    {
+        return View();
+    }
 
     // ============================
     // 🔸 Spotify Login Flow
@@ -162,29 +172,41 @@ public class HomeController : Controller
     // ============================
 
     [HttpGet]
-    public IActionResult CreateTopMix() =>
-        StartPlaylistJob(GetToken(), "Top-Mix", "[TopMix]", false, true);
+    public IActionResult CreateTopMix()
+    {
+        return StartPlaylistJob(GetToken(), "Top-Mix", "[TopMix]", false, true);
+    }
 
     [HttpGet]
-    public IActionResult CreateTopList() =>
-        StartPlaylistJob(GetToken(), "Top-Liste", "[TopList]", false, false);
+    public IActionResult CreateTopList()
+    {
+        return StartPlaylistJob(GetToken(), "Top-Liste", "[TopList]", false, false);
+    }
 
     [HttpGet]
-    public IActionResult CreateFavMix() =>
-        StartPlaylistJob(GetToken(), "Favoriten-Mix", "[FavMix]", true, true);
+    public IActionResult CreateFavMix()
+    {
+        return StartPlaylistJob(GetToken(), "Favoriten-Mix", "[FavMix]", true, true);
+    }
 
     [HttpGet]
-    public IActionResult CreateFavList() =>
-        StartPlaylistJob(GetToken(), "Favoriten-Liste", "[FavList]", true, false);
+    public IActionResult CreateFavList()
+    {
+        return StartPlaylistJob(GetToken(), "Favoriten-Liste", "[FavList]", true, false);
+    }
 
     [HttpGet]
-    public IActionResult CreateAlternativeFavorites() =>
-        StartAlternativeFavoritesJob(GetToken());
+    public IActionResult CreateAlternativeFavorites()
+    {
+        return StartAlternativeFavoritesJob(GetToken());
+    }
 
     // === Alias für CloneLikedSongs (gleiche Funktion wie CreateFavList)
     [HttpGet]
-    public IActionResult CloneLikedSongs() =>
-        StartLikedCloneJob(GetToken());
+    public IActionResult CloneLikedSongs()
+    {
+        return StartLikedCloneJob(GetToken());
+    }
 
     // === Empfehlungen (neue Logik mit Spotify-Empfehlungen)
     [HttpGet]
@@ -199,19 +221,20 @@ public class HomeController : Controller
             var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token));
 
             return RunJob(async () =>
-            {
-                var me = await spotify.UserProfile.Current();
-                using var scope = _logger.BeginScope(new Dictionary<string, object?>
                 {
-                    ["UserId"] = me.Id,
-                    ["Action"] = "[Recommendations]"
-                });
+                    var me = await spotify.UserProfile.Current();
+                    using var scope = _logger.BeginScope(new Dictionary<string, object?>
+                    {
+                        ["UserId"] = me.Id,
+                        ["Action"] = "[Recommendations]"
+                    });
 
-                await GenerateRecommendationsAsync(spotify, me.Id);
-            },
+                    await GenerateRecommendationsAsync(spotify, me.Id);
+                },
                 async () =>
                 {
-                    var me = await new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token)).UserProfile.Current();
+                    var me = await new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token)).UserProfile
+                        .Current();
                     return $"{me.Id}_[Recommendations]";
                 },
                 _localizer["Playlist_Recommendations"],
@@ -224,8 +247,10 @@ public class HomeController : Controller
         }
     }
 
-    private string GetToken() =>
-        HttpContext.Session.GetString(SessionTokenKey) ?? string.Empty;
+    private string GetToken()
+    {
+        return HttpContext.Session.GetString(SessionTokenKey) ?? string.Empty;
+    }
 
     // ============================
     // 🔸 Cooldown & Startlogik
@@ -242,19 +267,20 @@ public class HomeController : Controller
             var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token));
 
             return RunJob(async () =>
-            {
-                var me = await spotify.UserProfile.Current();
-                using var scope = _logger.BeginScope(new Dictionary<string, object?>
                 {
-                    ["UserId"] = me.Id,
-                    ["Action"] = logTag
-                });
+                    var me = await spotify.UserProfile.Current();
+                    using var scope = _logger.BeginScope(new Dictionary<string, object?>
+                    {
+                        ["UserId"] = me.Id,
+                        ["Action"] = logTag
+                    });
 
-                await GeneratePlaylistAsync(spotify, me.Id, namePrefix, shuffled, useLikedSongs, _logger);
-            },
+                    await GeneratePlaylistAsync(spotify, me.Id, namePrefix, shuffled, useLikedSongs, _logger);
+                },
                 async () =>
                 {
-                    var me = await new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token)).UserProfile.Current();
+                    var me = await new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token)).UserProfile
+                        .Current();
                     return $"{me.Id}_{logTag}";
                 },
                 namePrefix,
@@ -266,6 +292,7 @@ public class HomeController : Controller
             return Error($"Fehler beim Starten von {namePrefix}: {ex.Message}");
         }
     }
+
     private IActionResult StartLikedCloneJob(string token)
     {
         if (string.IsNullOrWhiteSpace(token))
@@ -274,50 +301,51 @@ public class HomeController : Controller
         {
             var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token));
             return RunJob(async () =>
-            {
-                var me = await spotify.UserProfile.Current();
-                using var scope = _logger.BeginScope(new Dictionary<string, object?>
                 {
-                    ["UserId"] = me.Id,
-                    ["Action"] = "[LikedClone]"
-                });
+                    var me = await spotify.UserProfile.Current();
+                    using var scope = _logger.BeginScope(new Dictionary<string, object?>
+                    {
+                        ["UserId"] = me.Id,
+                        ["Action"] = "[LikedClone]"
+                    });
 
-                // 1) Hole alle geliketen Tracks
-                var liked = await spotify.Library.GetTracks(new LibraryTracksRequest { Limit = 50 });
-                var tracks = new List<string>();
-                while (true)
-                {
-                    tracks.AddRange(liked.Items.Where(i => i.Track != null).Select(i => i.Track.Uri));
-                    if (string.IsNullOrEmpty(liked.Next)) break;
-                    liked = await spotify.NextPage(liked);
-                    await Task.Delay(ApiDelay);
-                }
+                    // 1) Hole alle geliketen Tracks
+                    var liked = await spotify.Library.GetTracks(new LibraryTracksRequest { Limit = 50 });
+                    var tracks = new List<string>();
+                    while (true)
+                    {
+                        tracks.AddRange(liked.Items.Where(i => i.Track != null).Select(i => i.Track.Uri));
+                        if (string.IsNullOrEmpty(liked.Next)) break;
+                        liked = await spotify.NextPage(liked);
+                        await Task.Delay(ApiDelay);
+                    }
 
-                // 2) Neue Playlist anlegen "Lieblingssongs YYYY-MM-DD"
-                var today = DateTime.UtcNow.ToString("yyyy-MM-dd");
-                var playlistName = $"Lieblingssongs {today}";
-                var newPl = await spotify.Playlists.Create(me.Id, new PlaylistCreateRequest(playlistName)
-                {
-                    Public = false,
-                    Description = "Kopie der 'Liked Songs'"
-                });
+                    // 2) Neue Playlist anlegen "Lieblingssongs YYYY-MM-DD"
+                    var today = DateTime.UtcNow.ToString("yyyy-MM-dd");
+                    var playlistName = $"Lieblingssongs {today}";
+                    var newPl = await spotify.Playlists.Create(me.Id, new PlaylistCreateRequest(playlistName)
+                    {
+                        Public = false,
+                        Description = "Kopie der 'Liked Songs'"
+                    });
 
-                // 3) In Blöcken hinzufügen
-                for (int i = 0; i < tracks.Count; i += 100)
+                    // 3) In Blöcken hinzufügen
+                    for (var i = 0; i < tracks.Count; i += 100)
+                    {
+                        var chunk = tracks.Skip(i).Take(100).ToList();
+                        if (chunk.Count == 0) break;
+                        await spotify.Playlists.AddItems(newPl.Id, new PlaylistAddItemsRequest(chunk));
+                        await Task.Delay(ApiDelay);
+                    }
+                },
+                async () =>
                 {
-                    var chunk = tracks.Skip(i).Take(100).ToList();
-                    if (chunk.Count == 0) break;
-                    await spotify.Playlists.AddItems(newPl.Id, new PlaylistAddItemsRequest(chunk));
-                    await Task.Delay(ApiDelay);
-                }
-            },
-            async () =>
-            {
-                var me = await new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token)).UserProfile.Current();
-                return $"{me.Id}_[LikedClone]";
-            },
-            "Lieblingssongs",
-            "[LikedClone]");
+                    var me = await new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token)).UserProfile
+                        .Current();
+                    return $"{me.Id}_[LikedClone]";
+                },
+                "Lieblingssongs",
+                "[LikedClone]");
         }
         catch (Exception ex)
         {
@@ -337,19 +365,20 @@ public class HomeController : Controller
             var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token));
 
             return RunJob(async () =>
-            {
-                var me = await spotify.UserProfile.Current();
-                using var scope = _logger.BeginScope(new Dictionary<string, object?>
                 {
-                    ["UserId"] = me.Id,
-                    ["Action"] = "[AltFavorites]"
-                });
+                    var me = await spotify.UserProfile.Current();
+                    using var scope = _logger.BeginScope(new Dictionary<string, object?>
+                    {
+                        ["UserId"] = me.Id,
+                        ["Action"] = "[AltFavorites]"
+                    });
 
-                await GenerateAlternativeFavoritesAsync(spotify, me.Id);
-            },
+                    await GenerateAlternativeFavoritesAsync(spotify, me.Id);
+                },
                 async () =>
                 {
-                    var me = await new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token)).UserProfile.Current();
+                    var me = await new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token)).UserProfile
+                        .Current();
                     return $"{me.Id}_[AltFavorites]";
                 },
                 _localizer["Playlist_AlternativeFavorites"],
@@ -362,10 +391,14 @@ public class HomeController : Controller
         }
     }
 
-    private IActionResult RunJob(Func<Task> job, Func<Task<string>> computeCooldownKeyAsync, string actionName, string logTag)
+    private IActionResult RunJob(Func<Task> job, Func<Task<string>> computeCooldownKeyAsync, string actionName,
+        string logTag)
     {
         string key;
-        try { key = computeCooldownKeyAsync().GetAwaiter().GetResult(); }
+        try
+        {
+            key = computeCooldownKeyAsync().GetAwaiter().GetResult();
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Cooldown-Key konnte nicht ermittelt werden.");
@@ -377,8 +410,10 @@ public class HomeController : Controller
             if (_lastActions.TryGetValue(key, out var last) && DateTime.UtcNow - last < CooldownDuration)
             {
                 var remaining = CooldownDuration - (DateTime.UtcNow - last);
-                return Warn($"⏳ Bitte warte {remaining.Minutes}:{remaining.Seconds:D2} Minuten, bevor du diese Aktion erneut startest.");
+                return Warn(
+                    $"⏳ Bitte warte {remaining.Minutes}:{remaining.Seconds:D2} Minuten, bevor du diese Aktion erneut startest.");
             }
+
             _lastActions[key] = DateTime.UtcNow;
         }
 
@@ -404,26 +439,25 @@ public class HomeController : Controller
     // 🔸 Playlist-Logik
     // ============================
 
-    private static async Task GeneratePlaylistAsync(SpotifyClient spotify, string userId, string namePrefix, bool shuffled, bool useLikedSongs, ILogger logger)
+    private static async Task GeneratePlaylistAsync(SpotifyClient spotify, string userId, string namePrefix,
+        bool shuffled, bool useLikedSongs, ILogger logger)
     {
         var allTracks = new List<FullTrack>();
         const int pageSize = 50;
 
         if (useLikedSongs)
-        {
-            for (var offset = 0; ; offset += pageSize)
+            for (var offset = 0;; offset += pageSize)
             {
-                var saved = await spotify.Library.GetTracks(new LibraryTracksRequest { Limit = pageSize, Offset = offset });
+                var saved = await spotify.Library.GetTracks(new LibraryTracksRequest
+                    { Limit = pageSize, Offset = offset });
                 if (saved.Items == null || saved.Items.Count == 0) break;
 
                 allTracks.AddRange(saved.Items.Select(i => i.Track).Where(t => t != null)!);
                 if (saved.Items.Count < pageSize) break;
                 await Task.Delay(ApiDelay);
             }
-        }
         else
-        {
-            for (var offset = 0; ; offset += pageSize)
+            for (var offset = 0;; offset += pageSize)
             {
                 var top = await spotify.Personalization.GetTopTracks(new PersonalizationTopRequest
                 {
@@ -437,7 +471,6 @@ public class HomeController : Controller
                 if (top.Items.Count < pageSize) break;
                 await Task.Delay(ApiDelay);
             }
-        }
 
         if (allTracks.Count == 0)
         {
@@ -449,7 +482,8 @@ public class HomeController : Controller
         var uris = finalList.Select(t => t.Uri).ToList();
 
         var playlistName = $"{namePrefix} {DateTime.Now:yyyy-MM-dd}";
-        var playlist = await spotify.Playlists.Create(userId, new PlaylistCreateRequest(playlistName) { Public = false });
+        var playlist =
+            await spotify.Playlists.Create(userId, new PlaylistCreateRequest(playlistName) { Public = false });
 
         for (var i = 0; i < uris.Count; i += 100)
         {
@@ -472,7 +506,8 @@ public class HomeController : Controller
 
             for (var offset = 0; offset < 200; offset += pageSize)
             {
-                var liked = await spotify.Library.GetTracks(new LibraryTracksRequest { Limit = pageSize, Offset = offset });
+                var liked = await spotify.Library.GetTracks(new LibraryTracksRequest
+                    { Limit = pageSize, Offset = offset });
                 if (liked.Items == null || liked.Items.Count == 0) break;
 
                 likedTracks.AddRange(liked.Items.Select(i => i.Track).Where(t => t != null)!);
@@ -497,13 +532,15 @@ public class HomeController : Controller
                     var albumTracks = await spotify.Albums.GetTracks(track.Album.Id);
                     var fromAlbum = albumTracks.Items
                         .Where(t => t?.Uri != null)
-                        .FirstOrDefault(t => !likedUriSet.Contains(t.Uri) && !usedUris.Contains(t.Uri) && t.Id != track.Id);
+                        .FirstOrDefault(t =>
+                            !likedUriSet.Contains(t.Uri) && !usedUris.Contains(t.Uri) && t.Id != track.Id);
                     replacementUri = fromAlbum?.Uri;
                 }
-                catch { }
+                catch
+                {
+                }
 
                 if (replacementUri == null)
-                {
                     try
                     {
                         var artistId = track.Artists?.FirstOrDefault()?.Id;
@@ -511,12 +548,14 @@ public class HomeController : Controller
                         {
                             var top = await spotify.Artists.GetTopTracks(artistId, new ArtistsTopTracksRequest("DE"));
                             var fromArtist = top.Tracks
-                                .FirstOrDefault(t => !likedUriSet.Contains(t.Uri) && !usedUris.Contains(t.Uri) && t.Id != track.Id);
+                                .FirstOrDefault(t =>
+                                    !likedUriSet.Contains(t.Uri) && !usedUris.Contains(t.Uri) && t.Id != track.Id);
                             replacementUri = fromArtist?.Uri;
                         }
                     }
-                    catch { }
-                }
+                    catch
+                    {
+                    }
 
                 var finalUri = replacementUri ?? track.Uri;
                 if (usedUris.Add(finalUri))
@@ -575,23 +614,24 @@ public class HomeController : Controller
                 .ToList();
 
             // 3️⃣ Determine Spotify market dynamically based on UI culture
-            var culture = System.Globalization.CultureInfo.CurrentUICulture;
-            string market = "US";
+            var culture = CultureInfo.CurrentUICulture;
+            var market = "US";
 
             if (!string.IsNullOrEmpty(culture.Name) && culture.Name.Contains('-'))
                 market = culture.Name.Split('-').Last().ToUpperInvariant();
             else if (culture.TwoLetterISOLanguageName.Length == 2)
                 market = culture.TwoLetterISOLanguageName.ToUpperInvariant();
 
-            _logger.LogInformation("Generating recommendations using market '{Market}' with {Count} seed tracks.", market, seedSubset.Count);
+            _logger.LogInformation("Generating recommendations using market '{Market}' with {Count} seed tracks.",
+                market, seedSubset.Count);
 
             // 4️⃣ Request recommendations from Spotify
             var recRequest = new RecommendationsRequest
             {
                 Limit = 50,
                 Market = market
-            }; 
-            
+            };
+
             if (seedSubset.Count == 0)
             {
                 _logger.LogWarning("No top tracks found to use as seeds. Falling back to liked songs.");
@@ -629,11 +669,13 @@ public class HomeController : Controller
                 await Task.Delay(ApiDelay);
             }
 
-            _logger.LogInformation("✅ Playlist '{Title}' created with {Count} recommended songs (market {Market}).", title, uris.Count, market);
+            _logger.LogInformation("✅ Playlist '{Title}' created with {Count} recommended songs (market {Market}).",
+                title, uris.Count, market);
         }
         catch (APIException apiEx)
         {
-            _logger.LogError(apiEx, "Spotify API error while generating recommendations: {Status} - {Message}", apiEx.Response.StatusCode, apiEx.Message);
+            _logger.LogError(apiEx, "Spotify API error while generating recommendations: {Status} - {Message}",
+                apiEx.Response.StatusCode, apiEx.Message);
         }
         catch (Exception ex)
         {
@@ -646,9 +688,20 @@ public class HomeController : Controller
     // 🔸 HTML Helper
     // ============================
 
-    private ContentResult OkMessage(string msg) => HtmlResult(msg, "#10b981");
-    private ContentResult Warn(string msg) => HtmlResult(msg, "#facc15");
-    private ContentResult Error(string msg) => HtmlResult(msg, "#ef4444");
+    private ContentResult OkMessage(string msg)
+    {
+        return HtmlResult(msg, "#10b981");
+    }
+
+    private ContentResult Warn(string msg)
+    {
+        return HtmlResult(msg, "#facc15");
+    }
+
+    private ContentResult Error(string msg)
+    {
+        return HtmlResult(msg, "#ef4444");
+    }
 
     private ContentResult HtmlResult(string message, string color)
     {
