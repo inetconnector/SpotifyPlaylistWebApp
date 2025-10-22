@@ -11,6 +11,21 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
+	<data name="Plex_ExportSummary" xml:space="preserve">
+  <value>Playlist Export Summary</value>
+</data>
+	<data name="Plex_ExportedTracks" xml:space="preserve">
+  <value>Exported Tracks</value>
+</data>
+	<data name="Plex_MissingTracks" xml:space="preserve">
+  <value>Missing Tracks</value>
+</data>
+	<data name="Plex_NoExportData" xml:space="preserve">
+  <value>No export data found.</value>
+</data>
+	<data name="Plex_BackToOverview" xml:space="preserve">
+  <value>Back to Overview</value>
+</data>
 
 	<data name="Plex_LoginFailed" xml:space="preserve">
     <value>Plex login failed.</value>

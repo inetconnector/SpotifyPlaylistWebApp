@@ -33,6 +33,21 @@
   </data>
 
 
+	<data name="Plex_ExportSummary" xml:space="preserve">
+  <value>Playlist-Export-Ergebnis</value>
+</data>
+	<data name="Plex_ExportedTracks" xml:space="preserve">
+  <value>Exportierte Titel</value>
+</data>
+	<data name="Plex_MissingTracks" xml:space="preserve">
+  <value>Fehlende Titel</value>
+</data>
+	<data name="Plex_NoExportData" xml:space="preserve">
+  <value>Keine Exportdaten gefunden.</value>
+</data>
+	<data name="Plex_BackToOverview" xml:space="preserve">
+  <value>Zurück zur Übersicht</value>
+</data>
 
 
 	<data name="PlexActions_SyncSpotifyPlaylistsWithPlex" xml:space="preserve">
