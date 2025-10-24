@@ -133,6 +133,8 @@ public class HomePlexController : Controller
                 addedCount,
                 missingCount = missing.Count
             });
+            TempData["LastMissingTracks"] = JsonSerializer.Serialize(missing);
+
 
             return RedirectToAction("ExportResult");
         }
@@ -147,6 +149,95 @@ public class HomePlexController : Controller
     // ==============================================================
     // 🔸 AJAX: Get all Plex playlists (Title + RatingKey)
     // ==============================================================
+
+    // ==============================================================
+    // 🔸 SSE Live Export – Stream progress to client
+    // ==============================================================
+    [HttpGet("ExportOneLive")]
+    public async Task ExportOneLive([FromServices] PlexService plex, string playlistId, string playlistName)
+    {
+        Response.Headers.Add("Content-Type", "text/event-stream");
+        Response.Headers.Add("Cache-Control", "no-cache");
+
+        var plexToken = HttpContext.Session.GetString("PlexAuthToken");
+        var spotifyToken = HttpContext.Session.GetString(SessionSpotifyTokenKey);
+        if (string.IsNullOrEmpty(plexToken) || string.IsNullOrEmpty(spotifyToken))
+        {
+            await Response.WriteAsync("data: ERROR: Tokens missing\n\n");
+            await Response.Body.FlushAsync();
+            return;
+        }
+
+        var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault(spotifyToken));
+        var (baseUrl, _) = await plex.DiscoverServerAsync(plexToken);
+        var tracks = await plex.GetSpotifyPlaylistTracksAsync(spotify, playlistId);
+
+        async Task Send(string msg)
+        {
+            await Response.WriteAsync($"data: {msg}\n\n");
+            await Response.Body.FlushAsync();
+        }
+
+        int added = 0, missing = 0, total = tracks.Count;
+        await Send($"Starting export for playlist '{playlistName}' ({total} tracks)");
+
+        foreach (var track in tracks)
+        {
+            await Send($"Searching: {track.Artist} — {track.Title}");
+            var results = await plex.SearchTracksOnPlexAsync(baseUrl, plexToken, new List<(string, string)> { track });
+            var match = results.FirstOrDefault();
+
+            if (match.RatingKey != null)
+            {
+                added++;
+                await Send($"✅ Found: {track.Artist} — {track.Title}");
+                var existingPlaylists = await plex.GetPlexPlaylistsAsync(baseUrl, plexToken);
+                var pl = existingPlaylists.FirstOrDefault(p => p.Title.StartsWith(playlistName));
+                var key = pl.RatingKey;
+                if (string.IsNullOrEmpty(key))
+                    key = await plex.CreatePlaylistAsync(baseUrl, plexToken, playlistName);
+                await plex.AddTracksToPlaylistAsync(baseUrl, plexToken, key, new[] { match.RatingKey });
+            }
+            else
+            {
+                missing++;
+                await Send($"❌ Missing: {track.Artist} — {track.Title}");
+            }
+
+            await Send($"progress:{added}:{missing}:{total}");
+        }
+
+        await Send($"done:{added}:{missing}:{total}");
+    }
+
+    // ==============================================================
+    // 🔸 Download missing tracks CSV
+    // ==============================================================
+    [HttpGet("DownloadMissing")]
+    public IActionResult DownloadMissing()
+    {
+        try
+        {
+            if (!TempData.ContainsKey("LastMissingTracks"))
+                return Content("No missing tracks recorded.");
+
+            var json = TempData["LastMissingTracks"]?.ToString();
+            if (string.IsNullOrWhiteSpace(json))
+                return Content("No missing tracks data available.");
+
+            var missing = System.Text.Json.JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
+            var csv = PlexService.GenerateMissingCsv(missing);
+
+            return File(csv, "text/csv", "MissingTracks.csv");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("[DownloadMissing] " + ex);
+            return Content("Error creating CSV: " + ex.Message);
+        }
+    }
+
+
     [HttpGet("GetPlexPlaylists")]
     public async Task<IActionResult> GetPlexPlaylists([FromServices] PlexService plex)
     {
@@ -184,9 +275,9 @@ public class HomePlexController : Controller
             var (baseUrl, _) = await plex.DiscoverServerAsync(plexToken);
             var xml = await plex.GetRawPlaylistsXmlAsync(baseUrl, plexToken);
 
-           //return  Content($"{baseUrl}/playlists/all?X-Plex-Token={plexToken}", "application/xml");
-             
-           return Content(xml, "application/xml");
+            //return  Content($"{baseUrl}/playlists/all?X-Plex-Token={plexToken}", "application/xml");
+
+            return Content(xml, "application/xml");
         }
         catch (Exception ex)
         {
@@ -217,7 +308,7 @@ public class HomePlexController : Controller
             Console.WriteLine("[GetPlexPlaylistTracks] " + ex);
             return Json(new { success = false, message = ex.Message });
         }
-    } 
+    }
 
     // ==============================================================
     // 🔸 AJAX: Delete Plex playlist

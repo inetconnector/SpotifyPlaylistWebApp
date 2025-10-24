@@ -12,7 +12,42 @@
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
 
-
+	<data name="SpotifyToPlex_LiveExportStatus" xml:space="preserve">
+    <value>Live Export Status</value>
+  </data>
+	<data name="SpotifyToPlex_Initializing" xml:space="preserve">
+    <value>Initializing…</value>
+  </data>
+	<data name="SpotifyToPlex_Starting" xml:space="preserve">
+    <value>Starting…</value>
+  </data>
+	<data name="SpotifyToPlex_Done" xml:space="preserve">
+    <value>Done!</value>
+  </data>
+	<data name="SpotifyToPlex_Added" xml:space="preserve">
+    <value>added</value>
+  </data>
+	<data name="SpotifyToPlex_Missing" xml:space="preserve">
+    <value>missing</value>
+  </data>
+	<data name="SpotifyToPlex_Total" xml:space="preserve">
+    <value>total</value>
+  </data>
+	<data name="SpotifyToPlex_ConnectionLost" xml:space="preserve">
+    <value>Connection lost.</value>
+  </data>
+	<data name="SpotifyToPlex_Stopped" xml:space="preserve">
+    <value>Stopped.</value>
+  </data>
+	<data name="SpotifyToPlex_DownloadMissingCsv" xml:space="preserve">
+    <value>Download missing tracks as CSV</value>
+  </data>
+	<data name="SpotifyToPlex_Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+	<data name="SpotifyToPlex_Stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
 	<data name="PlexActions_PlexPlaylists_Title" xml:space="preserve">
   <value>Existing Plex Playlists</value>
 </data>

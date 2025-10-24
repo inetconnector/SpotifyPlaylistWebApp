@@ -159,6 +159,10 @@ public class PlexService
     // ============================================================
     // 🔸 Fetch Plex playlists
     // ============================================================
+
+    // ============================================================
+    // 🔸 Fetch Plex playlists
+    // ============================================================
     public async Task<List<(string Title, string RatingKey)>> GetPlexPlaylistsAsync(string plexBaseUrl, string plexToken)
     {
         var xml = await _http.GetStringAsync($"{plexBaseUrl}/playlists/all?X-Plex-Token={plexToken}");
@@ -196,6 +200,62 @@ public class PlexService
 
         return playlists;
     }
+//    public async Task<List<(string Title, string RatingKey)>> GetPlexPlaylistsAsync(string plexBaseUrl, string plexToken)
+    //{
+    //        var xml = await _http.GetStringAsync($"{plexBaseUrl}/playlists/all?X-Plex-Token={plexToken}");
+    //        if (string.IsNullOrWhiteSpace(xml))
+    //            return new List<(string, string)>();
+
+    //        var doc = XDocument.Parse(xml, LoadOptions.None);
+
+    //        static string FormatDuration(long ms)
+    //        {
+    //            if (ms <= 0) return "0 s";
+    //            var ts = TimeSpan.FromMilliseconds(ms);
+    //            if (ts.TotalHours >= 1)
+    //                return $"{(int)ts.TotalHours} h {ts.Minutes} m";
+    //            if (ts.TotalMinutes >= 1)
+    //                return $"{(int)ts.TotalMinutes} m {ts.Seconds} s";
+    //            return $"{ts.Seconds} s";
+    //        }
+
+    //        var playlists = doc.Descendants("Playlist")
+    //            .Where(x => ((string?)x.Attribute("playlistType") ?? "")
+    //                .Equals("audio", StringComparison.OrdinalIgnoreCase))
+    //            .Select(x =>
+    //            {
+    //                var rawTitle = (string?)x.Attribute("title")
+    //                               ?? (string?)x.Attribute("titleSort")
+    //                               ?? (string?)x.Element("title")
+    //                               ?? "<NoName>";
+    //                var cleanTitle = new string(rawTitle.Where(ch => !char.IsControl(ch)).ToArray())
+    //                    .Replace("\uFE0F", "")
+    //                    .Trim();
+
+    //                var count = (int?)x.Attribute("leafCount") ?? 0;
+    //                var durationMs = (long?)x.Attribute("duration") ?? 0;
+    //                var nice = $"{cleanTitle} ({count} · {FormatDuration(durationMs)})";
+
+    //                var key = (string?)x.Attribute("ratingKey") ?? "";
+    //                return (Title: nice, RatingKey: key);
+    //            })
+    //            .Where(p => !string.IsNullOrWhiteSpace(p.Title))
+    //            .Where(p => {
+    //                // extract number from title inside parentheses to enforce <= 1000
+    //                var m = System.Text.RegularExpressions.Regex.Match(p.Title, @"\((\d+) ·");
+    //                if (m.Success && int.TryParse(m.Groups[1].Value, out var c)) return c <= 1000;
+    //                return true;
+    //            })
+    //            .Distinct()
+    //            .ToList();
+
+    //        Console.WriteLine("==== PLEX PLAYLISTS (audio) ====");
+    //        foreach (var (t, k) in playlists)
+    //            Console.WriteLine($"  {t} ({k})");
+    //        Console.WriteLine("================================");
+
+    //        return playlists;
+    //    }
 
 
     // ============================================================
@@ -222,46 +282,160 @@ public class PlexService
 
         return tracks;
     }
+    // ============================================================
+    // 🔸 Music-Library Section ermitteln
+    // ============================================================
+    public async Task<string> GetMusicSectionKeyAsync(string plexBaseUrl, string plexToken)
+    {
+        var xml = await _http.GetStringAsync($"{plexBaseUrl}/library/sections?X-Plex-Token={plexToken}");
+        var doc = XDocument.Parse(xml);
+
+        var dir = doc.Descendants("Directory")
+            .FirstOrDefault(d =>
+                string.Equals((string?)d.Attribute("type"), "artist", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals((string?)d.Attribute("type"), "audio", StringComparison.OrdinalIgnoreCase));
+
+        var key = (string?)dir?.Attribute("key");
+        if (string.IsNullOrWhiteSpace(key))
+            throw new Exception("Kein Music-Library-Section (artist/audio) gefunden.");
+
+        Console.WriteLine($"[Plex Library] SectionKey={key}");
+        return key!;
+    }
 
     // ============================================================
     // 🔸 Search tracks on Plex
+    // ============================================================
+    // ============================================================
+    // 🔸 Verbesserte Track-Suche (Section + Fuzzy + Fallback)
     // ============================================================
     public async Task<List<(string Title, string Artist, string? RatingKey)>> SearchTracksOnPlexAsync(
         string plexBaseUrl, string plexToken, List<(string Title, string Artist)> tracks)
     {
         var results = new List<(string Title, string Artist, string? RatingKey)>();
+        string sectionKey = await GetMusicSectionKeyAsync(plexBaseUrl, plexToken);
 
-        foreach (var (title, artist) in tracks)
+        foreach (var (titleRaw, artistRaw) in tracks)
         {
-            var q = Uri.EscapeDataString($"{artist} {title}");
-            var url = $"{plexBaseUrl}/search?query={q}&X-Plex-Token={plexToken}";
+            var title = titleRaw ?? "";
+            var artist = artistRaw ?? "";
+            string? ratingKey = null;
 
+            // 1️⃣ Exakte Filtersuche innerhalb des Music-Sections
             try
             {
-                var xml = await _http.GetStringAsync(url);
-                var doc = XDocument.Parse(xml);
-                var key = doc.Descendants("Track").FirstOrDefault()?.Attribute("ratingKey")?.Value;
+                var url1 =
+                    $"{plexBaseUrl}/library/sections/{sectionKey}/all" +
+                    $"?type=10&track.title={Uri.EscapeDataString(title)}" +
+                    $"&artist={Uri.EscapeDataString(artist)}&X-Plex-Token={plexToken}";
 
-                if (key == null)
-                {
-                    // fallback without artist
-                    var q2 = Uri.EscapeDataString(title);
-                    var xml2 = await _http.GetStringAsync($"{plexBaseUrl}/search?query={q2}&X-Plex-Token={plexToken}");
-                    var doc2 = XDocument.Parse(xml2);
-                    key = doc2.Descendants("Track").FirstOrDefault()?.Attribute("ratingKey")?.Value;
-                }
-
-                results.Add((title, artist, key));
+                var xml1 = await _http.GetStringAsync(url1);
+                var doc1 = XDocument.Parse(xml1);
+                ratingKey = doc1.Descendants("Track").FirstOrDefault()?.Attribute("ratingKey")?.Value;
             }
-            catch (Exception ex)
+            catch { /* ignorieren */ }
+
+            // 2️⃣ Falls nichts gefunden → freie Section-Suche mit Fuzzy-Matching
+            if (ratingKey == null)
             {
-                Console.WriteLine($"[Plex Search] {artist} - {title}: {ex.Message}");
-                results.Add((title, artist, null));
+                try
+                {
+                    var q = Uri.EscapeDataString($"{artist} {title}");
+                    var url2 = $"{plexBaseUrl}/library/sections/{sectionKey}/search?type=10&query={q}&X-Plex-Token={plexToken}";
+                    var xml2 = await _http.GetStringAsync(url2);
+                    var doc2 = XDocument.Parse(xml2);
+
+                    var wantedT = Normalize(title);
+                    var wantedA = Normalize(artist);
+
+                    var candidates = doc2.Descendants("Track")
+                        .Select(t => new
+                        {
+                            Key = (string?)t.Attribute("ratingKey"),
+                            T = Normalize((string?)t.Attribute("title") ?? ""),
+                            A = Normalize((string?)t.Attribute("grandparentTitle") ?? (string?)t.Attribute("parentTitle") ?? "")
+                        })
+                        .Select(c => new
+                        {
+                            c.Key,
+                            c.T,
+                            c.A,
+                            score = Levenshtein(c.T, wantedT) + Levenshtein(c.A, wantedA)
+                        })
+                        .OrderBy(x => x.score)
+                        .Take(3)
+                        .ToList();
+
+                    var best = candidates.FirstOrDefault();
+                    if (best != null && best.score < 6)
+                        ratingKey = best.Key;
+                }
+                catch { /* ignorieren */ }
             }
+
+            // 3️⃣ Fallback – globale Suche (wenn alles andere versagt)
+            if (ratingKey == null)
+            {
+                try
+                {
+                    var q = Uri.EscapeDataString($"{artist} {title}");
+                    var url3 = $"{plexBaseUrl}/search?query={q}&type=10&X-Plex-Token={plexToken}";
+                    var xml3 = await _http.GetStringAsync(url3);
+                    var doc3 = XDocument.Parse(xml3);
+                    ratingKey = doc3.Descendants("Track").FirstOrDefault()?.Attribute("ratingKey")?.Value;
+                }
+                catch { /* ignorieren */ }
+            }
+
+            results.Add((titleRaw, artistRaw, ratingKey));
         }
 
         return results;
     }
+
+    private static string Normalize(string s)
+    {
+        if (string.IsNullOrWhiteSpace(s)) return "";
+        s = s.ToLowerInvariant();
+
+        // Inhalt in Klammern / [] entfernen
+        s = System.Text.RegularExpressions.Regex.Replace(s, @"\s*[\(\[].*?[\)\]]\s*", " ");
+
+        // "feat." / "ft." entfernen
+        s = System.Text.RegularExpressions.Regex.Replace(s, @"\s+(feat\.|ft\.)\s+.*$", "");
+
+        // Unicode-Dashes / Sonderzeichen vereinheitlichen
+        s = s.Replace('–', '-').Replace('—', '-').Replace('’', '\'');
+        s = new string(s.Where(ch => char.IsLetterOrDigit(ch) || char.IsWhiteSpace(ch) || ch == '-' || ch == '\'').ToArray());
+
+        // Whitespace normalisieren
+        s = System.Text.RegularExpressions.Regex.Replace(s, @"\s+", " ").Trim();
+        return s;
+    }
+
+    private static int Levenshtein(string a, string b)
+    {
+        if (a == b) return 0;
+        if (a.Length == 0) return b.Length;
+        if (b.Length == 0) return a.Length;
+
+        var v0 = new int[b.Length + 1];
+        var v1 = new int[b.Length + 1];
+        for (int i = 0; i < v0.Length; i++) v0[i] = i;
+
+        for (int i = 0; i < a.Length; i++)
+        {
+            v1[0] = i + 1;
+            for (int j = 0; j < b.Length; j++)
+            {
+                int cost = a[i] == b[j] ? 0 : 1;
+                v1[j + 1] = Math.Min(Math.Min(v1[j] + 1, v0[j + 1] + 1), v0[j] + cost);
+            }
+            Array.Copy(v1, v0, v0.Length);
+        }
+        return v1[b.Length];
+    }
+
 
     // ============================================================
     // 🔸 Create new Plex playlist
@@ -287,18 +461,63 @@ public class PlexService
     // 🔸 Add tracks to existing Plex playlist
     // ============================================================
     public async Task AddTracksToPlaylistAsync(string plexBaseUrl, string plexToken, string playlistKey,
-        IEnumerable<string> ratingKeys)
+        IEnumerable<string> ratingKeys, string? machineId = null)
     {
+        var serverId = string.IsNullOrWhiteSpace(machineId) ? "local" : machineId;
+
         foreach (var key in ratingKeys)
         {
-            var uri = $"server://local/com.plexapp.plugins.library/library/metadata/{key}";
-            var url =
-                $"{plexBaseUrl}/playlists/{playlistKey}/items?uri={Uri.EscapeDataString(uri)}&X-Plex-Token={plexToken}";
-            var res = await _http.PutAsync(url, null);
-            res.EnsureSuccessStatusCode();
-            await Task.Delay(50);
+            var uri = $"server://{serverId}/com.plexapp.plugins.library/library/metadata/{key}";
+            var url = $"{plexBaseUrl}/playlists/{playlistKey}/items?uri={Uri.EscapeDataString(uri)}&X-Plex-Token={plexToken}";
+
+            // Neuer Request pro PUT ohne KeepAlive
+            using var req = new HttpRequestMessage(HttpMethod.Put, url);
+            req.Headers.ConnectionClose = true;
+
+            using var res = await _http.SendAsync(req);
+            if (!res.IsSuccessStatusCode)
+            {
+                var msg = await res.Content.ReadAsStringAsync();
+                Console.WriteLine($"[Plex AddTrack] Error {res.StatusCode}: {msg}");
+            }
+
+            await Task.Delay(200); // leichtes Delay für Plex API Stabilität
         }
     }
+
+    // ============================================================
+    // 🔸 Generate CSV of missing tracks
+    // ============================================================
+    public static byte[] GenerateMissingCsv(List<string> missing)
+    {
+        using var ms = new MemoryStream();
+        using var writer = new StreamWriter(ms, System.Text.Encoding.UTF8);
+
+        writer.WriteLine("Artist;Album;Title");
+
+        foreach (var entry in missing
+                     .Select(m =>
+                     {
+                         // Erwartetes Format: "Artist — Title" oder "Artist — Album — Title"
+                         var parts = m.Split('—').Select(p => p.Trim()).ToArray();
+                         string artist = parts.Length > 0 ? parts[0] : "";
+                         string album = parts.Length > 2 ? parts[1] : "";
+                         string title = parts.Length > 1 ? parts.Last() : "";
+
+                         return new { artist, album, title };
+                     })
+                     .OrderBy(x => x.artist)
+                     .ThenBy(x => x.album)
+                     .ThenBy(x => x.title))
+        {
+            writer.WriteLine($"{entry.artist};{entry.album};{entry.title}");
+        }
+
+        writer.Flush();
+        return ms.ToArray();
+    }
+
+
 
     // ============================================================
     // 🔸 Load all Spotify playlists for export
