@@ -3,6 +3,27 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+	<data name="PlexActions_PlexPlaylists_Title" xml:space="preserve">
+  <value>Vorhandene Plex-Playlists</value>
+</data>
+	<data name="PlexActions_LoadingPlexPlaylists" xml:space="preserve">
+  <value>Lade Plex-Playlists …</value>
+</data>
+	<data name="PlexActions_NoPlexPlaylists" xml:space="preserve">
+  <value>Keine Plex-Playlists gefunden.</value>
+</data>
+	<data name="PlexActions_LoadingTracks" xml:space="preserve">
+  <value>Lade Titel …</value>
+</data>
+	<data name="PlexActions_NoTracksFound" xml:space="preserve">
+  <value>Keine Titel in dieser Playlist gefunden.</value>
+</data>
+	<data name="PlexActions_ConfirmDelete" xml:space="preserve">
+  <value>Möchtest du diese Playlist wirklich löschen?</value>
+</data> 
+	<data name="Playlist_Inhalt" xml:space="preserve">
+  <value>Playlist-Inhalt</value>
+</data>
 
 	<data name="Plex_LoginFailed" xml:space="preserve">
     <value>Fehler bei der Plex-Anmeldung.</value>

@@ -159,17 +159,44 @@ public class PlexService
     // ============================================================
     // 🔸 Fetch Plex playlists
     // ============================================================
-    public async Task<List<(string Title, string RatingKey)>> GetPlexPlaylistsAsync(string plexBaseUrl,
-        string plexToken)
+    public async Task<List<(string Title, string RatingKey)>> GetPlexPlaylistsAsync(string plexBaseUrl, string plexToken)
     {
         var xml = await _http.GetStringAsync($"{plexBaseUrl}/playlists/all?X-Plex-Token={plexToken}");
-        var doc = XDocument.Parse(xml);
+        if (string.IsNullOrWhiteSpace(xml))
+            return new List<(string, string)>();
 
-        return doc.Descendants("Playlist")
-            .Where(x => (string?)x.Attribute("playlistType") == "audio")
-            .Select(x => ((string?)x.Attribute("title") ?? "Untitled", (string?)x.Attribute("ratingKey") ?? ""))
+        var doc = XDocument.Parse(xml, LoadOptions.None);
+
+        var playlists = doc.Descendants("Playlist")
+            .Where(x => ((string?)x.Attribute("playlistType") ?? "")
+                .Equals("audio", StringComparison.OrdinalIgnoreCase))
+            .Select(x =>
+            {
+                // extract title robustly
+                var rawTitle = (string?)x.Attribute("title")
+                               ?? (string?)x.Attribute("titleSort")
+                               ?? (string?)x.Element("title")
+                               ?? "<NoName>";
+
+                var cleanTitle = new string(rawTitle.Where(ch => !char.IsControl(ch)).ToArray())
+                    .Replace("\uFE0F", "") // remove emoji variation selectors
+                    .Trim();
+
+                var key = (string?)x.Attribute("ratingKey") ?? "";
+                return (Title: cleanTitle, RatingKey: key); // <-- named tuple fields
+            })
+            .Where(p => !string.IsNullOrWhiteSpace(p.Title)) // <-- correct property
+            .Distinct()
             .ToList();
+
+        Console.WriteLine("==== PLEX PLAYLISTS (audio) ====");
+        foreach (var (t, k) in playlists)
+            Console.WriteLine($"  {t} ({k})");
+        Console.WriteLine("================================");
+
+        return playlists;
     }
+
 
     // ============================================================
     // 🔸 Fetch all tracks from a Spotify playlist
@@ -347,4 +374,47 @@ public class PlexService
         Console.WriteLine($"[Plex Export] {name}: +{foundKeys.Count} added, {combinedMissing.Count} still missing.");
         return (name, foundKeys.Count, combinedMissing);
     }
+    // ============================================================
+    // 🔸 Get tracks (XML → readable list) from Plex playlist
+    // ============================================================
+    public async Task<List<(string Title, string Artist)>> GetPlaylistTracksAsync(
+        string plexBaseUrl, string plexToken, string ratingKey)
+    {
+        var xml = await _http.GetStringAsync($"{plexBaseUrl}/playlists/{ratingKey}/items?X-Plex-Token={plexToken}");
+        var doc = XDocument.Parse(xml);
+
+        return doc.Descendants("Track")
+            .Select(x => (
+                (string?)x.Attribute("title") ?? "Untitled",
+                (string?)x.Attribute("grandparentTitle") ?? "Unknown"
+            ))
+            .ToList();
+    }
+
+    // ============================================================
+    // 🔸 Raw XML (used for AJAX return)
+    // ============================================================
+    public async Task<List<object>> GetPlaylistTracksXmlAsync(string plexBaseUrl, string plexToken, string ratingKey)
+    {
+        var tracks = await GetPlaylistTracksAsync(plexBaseUrl, plexToken, ratingKey);
+        return tracks.Select(t => new { title = t.Title, artist = t.Artist }).ToList<object>();
+    }
+
+    // ============================================================
+    // 🔸 Delete a Plex playlist
+    // ============================================================
+    public async Task DeletePlaylistAsync(string plexBaseUrl, string plexToken, string ratingKey)
+    {
+        var url = $"{plexBaseUrl}/playlists/{ratingKey}?X-Plex-Token={plexToken}";
+        var res = await _http.DeleteAsync(url);
+        res.EnsureSuccessStatusCode();
+        Console.WriteLine($"[Plex Delete] Playlist {ratingKey} deleted.");
+    }
+
+    public async Task<string> GetRawPlaylistsXmlAsync(string plexBaseUrl, string plexToken)
+    {
+        var xml = await _http.GetStringAsync($"{plexBaseUrl}/playlists/all?X-Plex-Token={plexToken}");
+        return xml;
+    }
+
 }

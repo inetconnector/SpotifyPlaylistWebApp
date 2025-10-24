@@ -11,7 +11,28 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
-	<data name="Plex_ExportSummary" xml:space="preserve">
+
+
+	<data name="PlexActions_PlexPlaylists_Title" xml:space="preserve">
+  <value>Existing Plex Playlists</value>
+</data>
+	<data name="PlexActions_LoadingPlexPlaylists" xml:space="preserve">
+  <value>Loading Plex playlists …</value>
+</data>
+	<data name="PlexActions_NoPlexPlaylists" xml:space="preserve">
+  <value>No Plex playlists found.</value>
+</data>
+	<data name="PlexActions_LoadingTracks" xml:space="preserve">
+  <value>Loading tracks …</value>
+</data>
+	<data name="PlexActions_NoTracksFound" xml:space="preserve">
+  <value>No tracks found in this playlist.</value>
+</data>
+	<data name="PlexActions_ConfirmDelete" xml:space="preserve">
+  <value>Are you sure you want to delete this playlist?</value>
+		</data>
+
+		<data name="Plex_ExportSummary" xml:space="preserve">
   <value>Playlist Export Summary</value>
 </data>
 	<data name="Plex_ExportedTracks" xml:space="preserve">

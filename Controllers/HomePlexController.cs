@@ -120,6 +120,7 @@ public class HomePlexController : Controller
 
         try
         {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30)); // timeout 30s
             var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault(spotifyToken));
             var (baseUrl, _) = await plex.DiscoverServerAsync(plexToken);
 
@@ -137,9 +138,108 @@ public class HomePlexController : Controller
         }
         catch (Exception ex)
         {
-            Console.WriteLine("[ExportOne] " + ex);
-            TempData["Error"] = _localizer["Plex_ExportFailed"].Value;
+            Console.WriteLine("[ExportOne] ERROR: " + ex);
+            TempData["ErrorMessage"] = $"Export-Error: {ex.Message}";
             return RedirectToAction("SpotifyToPlex");
+        }
+    }
+
+    // ==============================================================
+    // 🔸 AJAX: Get all Plex playlists (Title + RatingKey)
+    // ==============================================================
+    [HttpGet("GetPlexPlaylists")]
+    public async Task<IActionResult> GetPlexPlaylists([FromServices] PlexService plex)
+    {
+        try
+        {
+            var plexToken = HttpContext.Session.GetString("PlexAuthToken");
+            if (string.IsNullOrEmpty(plexToken))
+                return Json(new { success = false, message = "No Plex token." });
+
+            var (baseUrl, _) = await plex.DiscoverServerAsync(plexToken);
+            var playlists = await plex.GetPlexPlaylistsAsync(baseUrl, plexToken);
+
+            // Umwandeln in serialisierbare Objekte
+            var result = playlists.Select(p => new { title = p.Title, ratingKey = p.RatingKey }).ToList();
+
+            return Json(new { success = true, playlists = result });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("[GetPlexPlaylists] " + ex);
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+
+    [HttpGet("GetPlexPlaylistsRaw")]
+    public async Task<IActionResult> GetPlexPlaylistsRaw([FromServices] PlexService plex)
+    {
+        try
+        {
+            var plexToken = HttpContext.Session.GetString("PlexAuthToken");
+            if (string.IsNullOrEmpty(plexToken))
+                return Content("No Plex token available.");
+
+            var (baseUrl, _) = await plex.DiscoverServerAsync(plexToken);
+            var xml = await plex.GetRawPlaylistsXmlAsync(baseUrl, plexToken);
+
+           //return  Content($"{baseUrl}/playlists/all?X-Plex-Token={plexToken}", "application/xml");
+             
+           return Content(xml, "application/xml");
+        }
+        catch (Exception ex)
+        {
+            return Content($"Error: {ex.Message}");
+        }
+    }
+
+
+    // ==============================================================
+    // 🔸 AJAX: Get tracks of one Plex playlist
+    // ==============================================================
+    [HttpGet("GetPlexPlaylistTracks")]
+    public async Task<IActionResult> GetPlexPlaylistTracks([FromServices] PlexService plex, string ratingKey)
+    {
+        try
+        {
+            var plexToken = HttpContext.Session.GetString("PlexAuthToken");
+            if (string.IsNullOrEmpty(plexToken))
+                return Json(new { success = false, message = "No Plex token." });
+
+            var (baseUrl, _) = await plex.DiscoverServerAsync(plexToken);
+            var xml = await plex.GetPlaylistTracksXmlAsync(baseUrl, plexToken, ratingKey);
+
+            return Json(new { success = true, tracks = xml });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("[GetPlexPlaylistTracks] " + ex);
+            return Json(new { success = false, message = ex.Message });
+        }
+    } 
+
+    // ==============================================================
+    // 🔸 AJAX: Delete Plex playlist
+    // ==============================================================
+    [HttpPost("DeletePlexPlaylist")]
+    public async Task<IActionResult> DeletePlexPlaylist([FromServices] PlexService plex, [FromForm] string ratingKey)
+    {
+        try
+        {
+            var plexToken = HttpContext.Session.GetString("PlexAuthToken");
+            if (string.IsNullOrEmpty(plexToken))
+                return Json(new { success = false, message = "No Plex token." });
+
+            var (baseUrl, _) = await plex.DiscoverServerAsync(plexToken);
+            await plex.DeletePlaylistAsync(baseUrl, plexToken, ratingKey);
+
+            return Json(new { success = true });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("[DeletePlexPlaylist] " + ex);
+            return Json(new { success = false, message = ex.Message });
         }
     }
 
