@@ -1,4 +1,5 @@
 @using System.Globalization
+@using System.Text.Json
 @using Microsoft.Extensions.Localization
 @using SpotifyPlaylistWebApp
 @inject IStringLocalizer<SharedResource> L
@@ -33,9 +34,9 @@
         <h1 class="text-3xl font-bold mb-3">Spotify → Plex</h1>
         <p class="text-gray-300 mb-8">@L["PlexActions_SyncSpotifyPlaylistsWithPlex"]</p>
 
-        <!-- ================================
-        STATUS / CONNECTION INFO
-        ================================== -->
+        @* ================================
+           STATUS / CONNECTION INFO
+           ================================== *@
         @if (!hasPlex)
         {
             <div class="bg-red-600/30 border border-red-500 rounded-lg p-3 mb-4">
@@ -63,9 +64,9 @@
         }
         else
         {
-            <!-- ================================
-            SPOTIFY-PLAYLIST DROPDOWN
-            ================================== -->
+            @* ================================
+               SPOTIFY-PLAYLIST DROPDOWN
+               ================================== *@
             <div class="text-left mb-6">
                 <label for="playlistSelect" class="block text-sm text-gray-400 mb-2">
                     @L["SpotifyToPlex_SelectPlaylist"]
@@ -90,9 +91,9 @@
 
             <hr class="my-8 border-gray-700">
 
-            <!-- ================================
-            PLEX-PLAYLIST DROPDOWN
-            ================================== -->
+            @* ================================
+               PLEX-PLAYLIST DROPDOWN
+               ================================== *@
             <div class="text-left mb-6">
                 <label for="plexSelect" class="block text-sm text-gray-400 mb-2">
                     @L["PlexActions_PlexPlaylists_Title"]
@@ -118,20 +119,21 @@
                 </div>
             </div>
 
-            <!-- Playlist exportieren -->
-            // <form method="post" action="/HomePlex/ExportOne" class="mb-3">
-            //     @Html.AntiForgeryToken()
-            //     <input type="hidden" name="playlistName" id="selectedPlaylistName" />
-            //     <input type="hidden" name="playlistId" id="selectedPlaylistId" />
-            //     <button type="submit"
-            //             class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-orange-500
-            //                                    text-black font-semibold rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)]
-            //                                    hover:brightness-110 active:translate-y-[1px] transition-all duration-150">
-            //         📤 @L["PlexActions_ExportPlaylists"]
-            //     </button>
-            // </form>
+            @* (Optional) Klassischer Export & ExportAll – auskommentiert
+            <form method="post" action="/HomePlex/ExportOne" class="mb-3">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="playlistName" id="selectedPlaylistName" />
+                <input type="hidden" name="playlistId" id="selectedPlaylistId" />
+                <button type="submit"
+                        class="w-full py-3.5 bg-gradient-to-r from-yellow-400 to-orange-500
+                                           text-black font-semibold rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)]
+                                           hover:brightness-110 active:translate-y-[1px] transition-all duration-150">
+                    📤 @L["PlexActions_ExportPlaylists"]
+                </button>
+            </form>
+            *@
 
-            <!-- Live Export (SSE) -->
+            @* Live Export (SSE) *@
             <button type="button" id="btnLiveExport"
                     class="w-full py-3.5 bg-gradient-to-r from-green-400 to-emerald-600
                                        text-black font-semibold rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)]
@@ -139,18 +141,19 @@
                 ⚡ @L["SpotifyToPlex_LiveExport"]
             </button>
 
-            <!-- Alle exportieren -->
-            // <form method="post" action="/HomePlex/ExportAll" class="mb-3">
-            //     @Html.AntiForgeryToken()
-            //     <button type="submit"
-            //             class="w-full py-3.5 bg-gradient-to-r from-orange-500 to-red-600
-            //                                    text-white font-semibold rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)]
-            //                                    hover:brightness-110 active:translate-y-[1px] transition-all duration-150">
-            //         🔁 @L["SpotifyToPlex_ExportAll"]
-            //     </button>
-            // </form>
+            @* (Optional) Export All – auskommentiert
+            <form method="post" action="/HomePlex/ExportAll" class="mb-3">
+                @Html.AntiForgeryToken()
+                <button type="submit"
+                        class="w-full py-3.5 bg-gradient-to-r from-orange-500 to-red-600
+                                           text-white font-semibold rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)]
+                                           hover:brightness-110 active:translate-y-[1px] transition-all duration-150">
+                    🔁 @L["SpotifyToPlex_ExportAll"]
+                </button>
+            </form>
+            *@
 
-            <!-- Disconnect -->
+            @* Disconnect *@
             <form method="post" action="/HomePlex/DisconnectPlex">
                 @Html.AntiForgeryToken()
                 <button type="submit"
@@ -163,9 +166,9 @@
         }
     </div>
 
-    <!-- ================================
-    MODAL: Playlist Inhalt
-    ================================== -->
+    @* ================================
+       MODAL: Playlist Inhalt
+       ================================== *@
     <div id="playlistModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
         <div class="bg-gray-900 p-6 rounded-2xl shadow-2xl max-w-lg w-full text-left text-white">
             <h2 class="text-xl font-semibold mb-3">@L["SpotifyToPlex_PlaylistContent"]</h2>
@@ -178,6 +181,21 @@
     </div>
 
     <script>
+        // Lokalisierte Texte sicher in JS (UTF-8) verfügbar machen
+        const T = {
+            Starting: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_Starting"].Value)),
+            Added: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_Added"].Value)),
+            Missing: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_Missing"].Value)),
+            Done: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_Done"].Value)),
+            Total: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_Total"].Value)),
+            ConnectionLost: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_ConnectionLost"].Value)),
+            Loading: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_Loading"].Value)),
+            NoTracksFound: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_NoTracksFound"].Value)),
+            LoadError: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_LoadError"].Value)),
+            LoadingTracks: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_LoadingTracks"].Value)),
+            NowExporting: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_NowExporting"].Value))
+        };
+
         let liveEvt = null;
 
         function appendLiveLog(html) {
@@ -192,13 +210,15 @@
             const bar = document.getElementById("liveBar");
             const progress = document.getElementById("liveProgress");
             const summary = document.getElementById("liveSummary");
+            const now = document.getElementById("liveNow");
 
             modal.classList.remove("hidden");
             log.innerHTML = "";
             bar.style.width = "0%";
-            progress.textContent = "@L["SpotifyToPlex_Starting"]";
+            progress.textContent = T.Starting;
             summary.classList.add("hidden");
             summary.innerHTML = "";
+            now.textContent = "";
 
             if (liveEvt) { try { liveEvt.close(); } catch { } }
 
@@ -206,6 +226,8 @@
 
             liveEvt.onmessage = (e) => {
                 const data = e.data || "";
+
+                // Server sendet “progress:added:missing:total”
                 if (data.startsWith("progress:")) {
                     const parts = data.split(":");
                     const added = parseInt(parts[1] || "0");
@@ -215,30 +237,46 @@
                     const pct = total > 0 ? Math.round((done / total) * 100) : 0;
 
                     bar.style.width = pct + "%";
-                    progress.textContent = `✅ ${added} @L["SpotifyToPlex_Added"]   ❌ ${miss} @L["SpotifyToPlex_Missing"]   (${pct}%)`;
-                } else if (data.startsWith("done:")) {
+                    progress.textContent = `✅ ${added} ${T.Added}   ❌ ${miss} ${T.Missing}   (${pct}%)`;
+                    return;
+                }
+
+                // Server sendet “now:Artist — Title”
+                if (data.startsWith("now:")) {
+                    now.textContent = `${T.NowExporting}: ${data.substring(4)}`;
+                    appendLiveLog(`🎧 ${data.substring(4)}`);
+                    return;
+                }
+
+                // Server sendet “done:added:missing:total”
+                if (data.startsWith("done:")) {
                     const parts = data.split(":");
                     const added = parseInt(parts[1] || "0");
                     const miss = parseInt(parts[2] || "0");
                     const total = parseInt(parts[3] || "0");
 
                     bar.style.width = "100%";
-                    progress.innerHTML = "<b>@L["SpotifyToPlex_Done"]</b>";
+                    progress.innerHTML = `<b>${T.Done}</b>`;
                     summary.classList.remove("hidden");
-                    summary.innerHTML = `✅ ${added} @L["SpotifyToPlex_Added"] &nbsp;|&nbsp; ❌ ${miss} @L["SpotifyToPlex_Missing"] &nbsp;|&nbsp; 🎵 ${total} @L["SpotifyToPlex_Total"]`;
+                    summary.innerHTML = `✅ ${added} ${T.Added} &nbsp;|&nbsp; ❌ ${miss} ${T.Missing} &nbsp;|&nbsp; 🎵 ${total} ${T.Total}`;
+
                     document.getElementById("downloadMissingContainer")?.classList.remove("hidden");
 
                     try { liveEvt.close(); } catch { }
                     liveEvt = null;
-                } else if (data.startsWith("ERROR")) {
+                    return;
+                }
+
+                if (data.startsWith("ERROR")) {
                     appendLiveLog("<span class='text-red-400'>❌ " + data + "</span>");
                 } else {
+                    // generische Logs vom Server (z.B. “🔍 Suchen …”, “✅ Gefunden …”)
                     appendLiveLog(data);
                 }
             };
 
             liveEvt.onerror = () => {
-                appendLiveLog("<span class='text-red-400'>❌ @L["SpotifyToPlex_ConnectionLost"]</span>");
+                appendLiveLog("<span class='text-red-400'>❌ " + T.ConnectionLost + "</span>");
                 try { liveEvt.close(); } catch { }
                 liveEvt = null;
             };
@@ -249,7 +287,7 @@
             const nameInput = document.getElementById("selectedPlaylistName");
             const idInput = document.getElementById("selectedPlaylistId");
 
-            if (select && select.options.length > 0) {
+            if (select && select.options.length > 0 && nameInput && idInput) {
                 const opt = select.options[0];
                 nameInput.value = opt.text;
                 idInput.value = opt.value;
@@ -261,11 +299,12 @@
                 idInput.value = opt.value;
             });
 
+            // Spotify Playlist anzeigen
             document.getElementById("btnShowPlaylist")?.addEventListener("click", async () => {
                 const playlistId = select.value;
                 const modal = document.getElementById("playlistModal");
                 const listDiv = document.getElementById("playlistTracks");
-                listDiv.innerHTML = "<div class='text-center text-gray-400'>@L["SpotifyToPlex_Loading"]</div>";
+                listDiv.innerHTML = `<div class='text-center text-gray-400'>${T.Loading}</div>`;
                 modal.classList.remove("hidden");
 
                 try {
@@ -274,10 +313,10 @@
                     listDiv.innerHTML = data.success
                         ? (data.tracks.length
                             ? data.tracks.map(t => `<div>🎵 <b>${t.title}</b> – ${t.artist}</div>`).join("")
-                            : "<div class='text-gray-400'>@L["SpotifyToPlex_NoTracksFound"]</div>")
+                            : `<div class='text-gray-400'>${T.NoTracksFound}</div>`)
                         : `<div class='text-red-400'>${data.message}</div>`;
                 } catch {
-                    listDiv.innerHTML = "<div class='text-red-400'>@L["SpotifyToPlex_LoadError"]</div>";
+                    listDiv.innerHTML = `<div class='text-red-400'>${T.LoadError}</div>`;
                 }
             });
 
@@ -285,6 +324,7 @@
                 document.getElementById("playlistModal").classList.add("hidden");
             });
 
+            // Live Export Button
             document.getElementById("btnLiveExport")?.addEventListener("click", () => {
                 const playlistSelect = document.getElementById("playlistSelect");
                 if (!playlistSelect) return;
@@ -293,65 +333,62 @@
                 startLiveExport(playlistId, playlistName);
             });
 
-            document.getElementById("btnStopLive")?.addEventListener("click", () => {
-                if (liveEvt) {
-                    try { liveEvt.close(); } catch { }
-                }
-                appendLiveLog("<span class='text-red-400'>⏹ @L["SpotifyToPlex_Stopped"]</span>");
-            });
-
-            document.getElementById("btnCloseLive")?.addEventListener("click", () => {
-                document.getElementById("liveExportModal").classList.add("hidden");
-                if (liveEvt) {
-                    try { liveEvt.close(); } catch { }
-                    liveEvt = null;
-                }
-            });
-
+            // Plex Playlists laden
             loadPlexPlaylistsDropdown();
         });
 
+        // Plex Playlists als Dropdown laden
         async function loadPlexPlaylistsDropdown() {
             const plexSelect = document.getElementById("plexSelect");
-            plexSelect.innerHTML = "<option>@L["PlexActions_LoadingPlexPlaylists"]...</option>";
+            plexSelect.innerHTML = `<option>@L["PlexActions_LoadingPlexPlaylists"]...</option>`;
+
             try {
                 const res = await fetch("/HomePlex/GetPlexPlaylists");
                 const data = await res.json();
+
                 if (!data.success) {
                     plexSelect.innerHTML = `<option class='text-red-400'>${data.message}</option>`;
                     return;
                 }
+
                 plexSelect.innerHTML = data.playlists.length
-                    ? data.playlists.map(p => `<option value='${p.ratingKey}'>${p.title ?? "&lt;NoName&gt;"}</option>`).join("")
-                    : "<option>@L["PlexActions_NoPlexPlaylists"]</option>";
+                    ? data.playlists.map(p => `<option value="${p.ratingKey}">${p.title ?? "&lt;NoName&gt;"}</option>`).join("")
+                    : `<option>@L["PlexActions_NoPlexPlaylists"]</option>`;
             } catch {
                 plexSelect.innerHTML = `<option class='text-red-400'>@L["SpotifyToPlex_LoadError"]</option>`;
             }
         }
 
+        // Plex Playlist anzeigen
         document.getElementById("btnShowPlexPlaylist")?.addEventListener("click", async () => {
             const plexSelect = document.getElementById("plexSelect");
             const ratingKey = plexSelect.value;
             if (!ratingKey) return;
+
             const modal = document.getElementById("playlistModal");
             const listDiv = document.getElementById("playlistTracks");
             modal.classList.remove("hidden");
-            listDiv.innerHTML = "<div class='text-center text-gray-400'>@L["SpotifyToPlex_LoadingTracks"]</div>";
+            listDiv.innerHTML = `<div class='text-center text-gray-400'>${T.LoadingTracks}</div>`;
+
             const res = await fetch(`/HomePlex/GetPlexPlaylistTracks?ratingKey=${encodeURIComponent(ratingKey)}`);
             const data = await res.json();
+
             listDiv.innerHTML = data.success
                 ? (data.tracks.length
                     ? data.tracks.map(t => `<div>🎵 <b>${t.title}</b> – ${t.artist}</div>`).join("")
-                    : "<div class='text-gray-400'>@L["SpotifyToPlex_NoTracksFound"]</div>")
+                    : `<div class='text-gray-400'>${T.NoTracksFound}</div>`)
                 : `<div class='text-red-400'>${data.message}</div>`;
         });
 
+        // Plex Playlist löschen
         document.getElementById("btnDeletePlex")?.addEventListener("click", async () => {
             const plexSelect = document.getElementById("plexSelect");
             const ratingKey = plexSelect.value;
             const title = plexSelect.options[plexSelect.selectedIndex]?.text;
             if (!ratingKey || title.includes("Lade")) return;
+
             if (!confirm(`@L["PlexActions_ConfirmDelete"] "${title}"?`)) return;
+
             await fetch("/HomePlex/DeletePlexPlaylist", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -361,27 +398,40 @@
         });
     </script>
 
-    <!-- ================================
-    MODAL: Live Export Status
-    ================================== -->
+    @* ================================
+       MODAL: Live Export Status
+       ================================== *@
     <div id="liveExportModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
         <div class="bg-gray-900 p-6 rounded-2xl shadow-2xl max-w-2xl w-full text-left text-white">
-            <h2 class="text-xl font-semibold mb-3">🎧 @L["SpotifyToPlex_LiveExportStatus"]</h2>
+            <h2 class="text-xl font-semibold mb-1">🎧 @L["SpotifyToPlex_LiveExportStatus"]</h2>
+
+            <div id="liveNow" class="text-sm text-gray-300 mb-2"></div>
+
             <div id="liveLog" class="max-h-96 overflow-y-auto text-sm font-mono bg-black/40 rounded-lg p-3 mb-3"></div>
+
             <div id="liveProgress" class="text-gray-300 text-sm mb-2">@L["SpotifyToPlex_Initializing"]</div>
             <div class="w-full bg-gray-700 rounded-full h-2 mb-4">
                 <div id="liveBar" class="bg-orange-500 h-2 rounded-full transition-all duration-200" style="width:0%;"></div>
             </div>
             <div id="liveSummary" class="hidden text-sm text-gray-200 mb-3"></div>
+
+            @* 📥 Missing Tracks Download *@
             <div id="downloadMissingContainer" class="hidden mb-4 text-center">
-                <a id="btnDownloadMissing" href="/HomePlex/DownloadMissing"
-                   class="inline-block px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg font-semibold shadow hover:brightness-110">
+                <a id="btnDownloadMissing"
+                   href="/HomePlex/DownloadMissing"
+                   class="inline-block px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500
+                          text-white rounded-lg font-semibold shadow hover:brightness-110">
                     📥 @L["SpotifyToPlex_DownloadMissingCsv"]
                 </a>
             </div>
+
             <div class="grid grid-cols-2 gap-2">
-                <button id="btnCloseLive" class="py-2 bg-gradient-to-r from-gray-700 to-gray-800 rounded-lg hover:brightness-110">@L["SpotifyToPlex_Ok"]</button>
-                <button id="btnStopLive" class="py-2 bg-gradient-to-r from-rose-600 to-red-700 rounded-lg hover:brightness-110">⏹ @L["SpotifyToPlex_Stop"]</button>
+                <button id="btnCloseLive" class="py-2 bg-gradient-to-r from-gray-700 to-gray-800 rounded-lg hover:brightness-110">
+                    @L["SpotifyToPlex_Ok"]
+                </button>
+                <button id="btnStopLive" class="py-2 bg-gradient-to-r from-rose-600 to-red-700 rounded-lg hover:brightness-110" onclick="if(liveEvt){try{liveEvt.close();}catch{}};">
+                    ⏹ @L["SpotifyToPlex_Stop"]
+                </button>
             </div>
         </div>
     </div>

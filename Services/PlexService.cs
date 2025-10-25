@@ -21,7 +21,9 @@ public class PlexService
     private const string PLEX_VERSION = "1.0";
 
     // 🔹 In-memory cache for missing songs (instead of writing JSON files)
+    //     Stored as lines: "Artist — Album — Title"  (Album optional)
     private static readonly Dictionary<string, List<string>> _missingCache = new();
+
     private readonly HttpClient _http;
 
     public PlexService(HttpClient http)
@@ -31,6 +33,35 @@ public class PlexService
         _http.DefaultRequestHeaders.Add("User-Agent", "SpotifyToPlex/1.0");
         _http.DefaultRequestHeaders.Add("X-Plex-Product", "SpotifyToPlex");
         _http.DefaultRequestHeaders.Add("X-Plex-Device", "WebApp");
+    }
+
+    // ============================================================
+    // 🔸 Public helpers for the missing-cache (so du brauchst keine Reflection mehr)
+    // ============================================================
+    public static void UpdateMissingCache(string playlistName, IEnumerable<(string Artist, string Title, string? Album)> missingTuples)
+    {
+        if (string.IsNullOrWhiteSpace(playlistName)) return;
+
+        var materialized = (missingTuples ?? Enumerable.Empty<(string Artist, string Title, string? Album)>())
+            .Select(m => FormatMissingEntry(m.Artist, m.Title, m.Album))
+            .Distinct()
+            .ToList();
+
+        _missingCache[playlistName] = materialized;
+    }
+
+    public static IReadOnlyDictionary<string, List<string>> GetMissingCacheSnapshot()
+        => new Dictionary<string, List<string>>(_missingCache);
+
+    private static string FormatMissingEntry(string artist, string title, string? album)
+    {
+        artist = artist?.Trim() ?? "";
+        title = title?.Trim() ?? "";
+        album = album?.Trim() ?? "";
+
+        return string.IsNullOrEmpty(album)
+            ? $"{artist} — {title}"
+            : $"{artist} — {album} — {title}";
     }
 
     // ✅ Validate Plex token
@@ -159,10 +190,6 @@ public class PlexService
     // ============================================================
     // 🔸 Fetch Plex playlists
     // ============================================================
-
-    // ============================================================
-    // 🔸 Fetch Plex playlists
-    // ============================================================
     public async Task<List<(string Title, string RatingKey)>> GetPlexPlaylistsAsync(string plexBaseUrl, string plexToken)
     {
         var xml = await _http.GetStringAsync($"{plexBaseUrl}/playlists/all?X-Plex-Token={plexToken}");
@@ -176,20 +203,18 @@ public class PlexService
                 .Equals("audio", StringComparison.OrdinalIgnoreCase))
             .Select(x =>
             {
-                // extract title robustly
                 var rawTitle = (string?)x.Attribute("title")
                                ?? (string?)x.Attribute("titleSort")
                                ?? (string?)x.Element("title")
                                ?? "<NoName>";
 
                 var cleanTitle = new string(rawTitle.Where(ch => !char.IsControl(ch)).ToArray())
-                    .Replace("\uFE0F", "") // remove emoji variation selectors
-                    .Trim();
+                    .Replace("\uFE0F", "").Trim();
 
                 var key = (string?)x.Attribute("ratingKey") ?? "";
-                return (Title: cleanTitle, RatingKey: key); // <-- named tuple fields
+                return (Title: cleanTitle, RatingKey: key);
             })
-            .Where(p => !string.IsNullOrWhiteSpace(p.Title)) // <-- correct property
+            .Where(p => !string.IsNullOrWhiteSpace(p.Title))
             .Distinct()
             .ToList();
 
@@ -200,66 +225,9 @@ public class PlexService
 
         return playlists;
     }
-//    public async Task<List<(string Title, string RatingKey)>> GetPlexPlaylistsAsync(string plexBaseUrl, string plexToken)
-    //{
-    //        var xml = await _http.GetStringAsync($"{plexBaseUrl}/playlists/all?X-Plex-Token={plexToken}");
-    //        if (string.IsNullOrWhiteSpace(xml))
-    //            return new List<(string, string)>();
-
-    //        var doc = XDocument.Parse(xml, LoadOptions.None);
-
-    //        static string FormatDuration(long ms)
-    //        {
-    //            if (ms <= 0) return "0 s";
-    //            var ts = TimeSpan.FromMilliseconds(ms);
-    //            if (ts.TotalHours >= 1)
-    //                return $"{(int)ts.TotalHours} h {ts.Minutes} m";
-    //            if (ts.TotalMinutes >= 1)
-    //                return $"{(int)ts.TotalMinutes} m {ts.Seconds} s";
-    //            return $"{ts.Seconds} s";
-    //        }
-
-    //        var playlists = doc.Descendants("Playlist")
-    //            .Where(x => ((string?)x.Attribute("playlistType") ?? "")
-    //                .Equals("audio", StringComparison.OrdinalIgnoreCase))
-    //            .Select(x =>
-    //            {
-    //                var rawTitle = (string?)x.Attribute("title")
-    //                               ?? (string?)x.Attribute("titleSort")
-    //                               ?? (string?)x.Element("title")
-    //                               ?? "<NoName>";
-    //                var cleanTitle = new string(rawTitle.Where(ch => !char.IsControl(ch)).ToArray())
-    //                    .Replace("\uFE0F", "")
-    //                    .Trim();
-
-    //                var count = (int?)x.Attribute("leafCount") ?? 0;
-    //                var durationMs = (long?)x.Attribute("duration") ?? 0;
-    //                var nice = $"{cleanTitle} ({count} · {FormatDuration(durationMs)})";
-
-    //                var key = (string?)x.Attribute("ratingKey") ?? "";
-    //                return (Title: nice, RatingKey: key);
-    //            })
-    //            .Where(p => !string.IsNullOrWhiteSpace(p.Title))
-    //            .Where(p => {
-    //                // extract number from title inside parentheses to enforce <= 1000
-    //                var m = System.Text.RegularExpressions.Regex.Match(p.Title, @"\((\d+) ·");
-    //                if (m.Success && int.TryParse(m.Groups[1].Value, out var c)) return c <= 1000;
-    //                return true;
-    //            })
-    //            .Distinct()
-    //            .ToList();
-
-    //        Console.WriteLine("==== PLEX PLAYLISTS (audio) ====");
-    //        foreach (var (t, k) in playlists)
-    //            Console.WriteLine($"  {t} ({k})");
-    //        Console.WriteLine("================================");
-
-    //        return playlists;
-    //    }
-
 
     // ============================================================
-    // 🔸 Fetch all tracks from a Spotify playlist
+    // 🔸 Fetch all tracks from a Spotify playlist (Title + Artist)
     // ============================================================
     public async Task<List<(string Title, string Artist)>> GetSpotifyPlaylistTracksAsync(SpotifyClient spotify,
         string playlistId)
@@ -282,6 +250,7 @@ public class PlexService
 
         return tracks;
     }
+
     // ============================================================
     // 🔸 Music-Library Section ermitteln
     // ============================================================
@@ -303,9 +272,6 @@ public class PlexService
         return key!;
     }
 
-    // ============================================================
-    // 🔸 Search tracks on Plex
-    // ============================================================
     // ============================================================
     // 🔸 Verbesserte Track-Suche (Section + Fuzzy + Fallback)
     // ============================================================
@@ -436,7 +402,6 @@ public class PlexService
         return v1[b.Length];
     }
 
-
     // ============================================================
     // 🔸 Create new Plex playlist
     // ============================================================
@@ -470,7 +435,6 @@ public class PlexService
             var uri = $"server://{serverId}/com.plexapp.plugins.library/library/metadata/{key}";
             var url = $"{plexBaseUrl}/playlists/{playlistKey}/items?uri={Uri.EscapeDataString(uri)}&X-Plex-Token={plexToken}";
 
-            // Neuer Request pro PUT ohne KeepAlive
             using var req = new HttpRequestMessage(HttpMethod.Put, url);
             req.Headers.ConnectionClose = true;
 
@@ -486,7 +450,7 @@ public class PlexService
     }
 
     // ============================================================
-    // 🔸 Generate CSV of missing tracks
+    // 🔸 Generate CSV of missing tracks (sortiert: Artist → Album → Title)
     // ============================================================
     public static byte[] GenerateMissingCsv(List<string> missing)
     {
@@ -503,7 +467,6 @@ public class PlexService
                          string artist = parts.Length > 0 ? parts[0] : "";
                          string album = parts.Length > 2 ? parts[1] : "";
                          string title = parts.Length > 1 ? parts.Last() : "";
-
                          return new { artist, album, title };
                      })
                      .OrderBy(x => x.artist)
@@ -516,8 +479,6 @@ public class PlexService
         writer.Flush();
         return ms.ToArray();
     }
-
-
 
     // ============================================================
     // 🔸 Load all Spotify playlists for export
@@ -593,6 +554,7 @@ public class PlexService
         Console.WriteLine($"[Plex Export] {name}: +{foundKeys.Count} added, {combinedMissing.Count} still missing.");
         return (name, foundKeys.Count, combinedMissing);
     }
+
     // ============================================================
     // 🔸 Get tracks (XML → readable list) from Plex playlist
     // ============================================================
@@ -635,5 +597,4 @@ public class PlexService
         var xml = await _http.GetStringAsync($"{plexBaseUrl}/playlists/all?X-Plex-Token={plexToken}");
         return xml;
     }
-
 }

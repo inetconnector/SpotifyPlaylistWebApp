@@ -3,6 +3,27 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+	 
+	<data name="SpotifyToPlex_Searching" xml:space="preserve">
+  <value>Suche</value>
+</data>
+
+	<data name="SpotifyToPlex_Found" xml:space="preserve">
+  <value>Gefunden</value>
+</data>
+
+	<data name="SpotifyToPlex_MissingTrack" xml:space="preserve">
+  <value>Nicht gefunden</value>
+</data>
+
+	<data name="SpotifyToPlex_Tracks" xml:space="preserve">
+  <value>Titel</value>
+</data>
+
+	<data name="SpotifyToPlex_Exporting" xml:space="preserve">
+  <value>Exportiere Playlist</value>
+</data>
+  
 	<data name="SpotifyToPlex_LiveExportStatus" xml:space="preserve">
     <value>Live-Export-Status</value>
   </data>
