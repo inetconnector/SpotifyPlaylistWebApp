@@ -7,7 +7,8 @@
     Layout = "Layout";
     ViewData["Title"] = "Spotify → Plex";
 
-    var playlists = ViewBag.Playlists as List<(string Id, string Name)> ?? new List<(string Id, string Name)>();
+    var playlists = ViewBag.Playlists as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> 
+                    ?? new List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>();
     var hasPlex = !string.IsNullOrEmpty(Context.Session.GetString("PlexAuthToken"));
     var hasSpotify = !string.IsNullOrEmpty(Context.Session.GetString("SpotifyAccessToken"));
 }
@@ -75,10 +76,11 @@
                 <div class="flex space-x-2">
                     <select id="playlistSelect" name="playlistId"
                             class="flex-1 bg-gray-800 border border-gray-700 rounded-lg p-2 w-full focus:ring-2 focus:ring-orange-500">
-                        @foreach (var (id, name) in playlists)
+                        @foreach (var item in playlists)
                         {
-                            <option value="@id">@name</option>
+                            <option value="@item.Value">@item.Text</option>
                         }
+
                     </select>
 
                     <button type="button" id="btnShowPlaylist"
