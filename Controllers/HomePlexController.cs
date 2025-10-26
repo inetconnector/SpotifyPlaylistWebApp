@@ -4,7 +4,7 @@ using SpotifyAPI.Web;
 using SpotifyPlaylistWebApp.Services;
 using System.Reflection;
 using System.Text.Json;
-
+using System.Linq;
 namespace SpotifyPlaylistWebApp.Controllers;
 
 [Route("Home")]
@@ -142,7 +142,6 @@ public class HomePlexController : Controller
             return RedirectToAction("SpotifyToPlex");
         }
     }
-
     // ============================================================
     // 🔸 Live Export — localized event messages
     // ============================================================
@@ -151,6 +150,8 @@ public class HomePlexController : Controller
         [FromServices] IStringLocalizer<SharedResource> L,
         string playlistId, string playlistName)
     {
+        var missingList = new List<(string Artist, string Title, string? Album)>();
+
         Response.ContentType = "text/event-stream";
         Response.Headers.Add("Cache-Control", "no-cache");
         await using var writer = new StreamWriter(Response.Body);
@@ -175,26 +176,49 @@ public class HomePlexController : Controller
 
             int added = 0, missing = 0, total = tracks.Count;
 
+            // 🎶 Create new Plex playlist for export
+            var playlistTitle = $"Spotify_{playlistName}_{DateTime.Now:yyyy-MM-dd_HH-mm}";
+            await writer.WriteLineAsync($"data: 🪄 Creating Plex playlist: {playlistTitle}\n");
+            await writer.FlushAsync();
+
+            var plexPlaylistKey = await plex.CreatePlaylistAsync(baseUrl, plexToken, playlistTitle);
+            if (string.IsNullOrEmpty(plexPlaylistKey))
+            {
+                await writer.WriteLineAsync($"data: ERROR Could not create Plex playlist.\n");
+                await writer.FlushAsync();
+                return;
+            }
+
+            // 🧩 Add found tracks one by one
             foreach (var (title, artist) in tracks)
             {
                 await writer.WriteLineAsync($"data: 🔍 {L["SpotifyToPlex_Searching"]}: {artist} — {title}\n");
                 await writer.FlushAsync();
 
                 var found = await plex.SearchTracksOnPlexAsync(baseUrl, plexToken, new() { (title, artist) });
-                if (found.First().RatingKey != null)
+                var match = found.FirstOrDefault();
+
+                if (!string.IsNullOrEmpty(match.RatingKey))
                 {
                     added++;
+                    // ✅ add this track to the newly created Plex playlist
+                    await plex.AddTracksToPlaylistAsync(baseUrl, plexToken, plexPlaylistKey, new[] { match.RatingKey }, machineId);
+
                     await writer.WriteLineAsync($"data: ✅ {L["SpotifyToPlex_Found"]}: {artist} — {title}\n");
                 }
                 else
                 {
                     missing++;
+                    missingList.Add((artist, title, null)); // store missing for cache
                     await writer.WriteLineAsync($"data: ❌ {L["SpotifyToPlex_MissingTrack"]}: {artist} — {title}\n");
                 }
 
                 await writer.WriteLineAsync($"data: progress:{added}:{missing}:{total}\n");
                 await writer.FlushAsync();
             }
+
+            // ✅ Save missing tracks via public helper (no reflection)
+            PlexService.UpdateMissingCache(playlistTitle, missingList);
 
             await writer.WriteLineAsync($"data: done:{added}:{missing}:{total}\n");
             await writer.FlushAsync();
@@ -205,6 +229,7 @@ public class HomePlexController : Controller
             await writer.FlushAsync();
         }
     }
+
 
     // ==============================================================
     // 🔸 Download Missing Songs CSV
@@ -399,6 +424,7 @@ public class HomePlexController : Controller
             return RedirectToAction("SpotifyToPlex");
         }
     }
+
 
     // ==============================================================
     // 🔸 GetPlexPin (AJAX) – Client triggers Plex login

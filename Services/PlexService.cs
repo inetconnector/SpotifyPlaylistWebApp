@@ -215,6 +215,11 @@ public class PlexService
                 var key = (string?)x.Attribute("ratingKey") ?? "";
                 return (Title: cleanTitle, RatingKey: key);
             })
+            // 🔹 Filter system playlists
+            .Where(p =>
+                !string.Equals(p.Title, "All Music", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(p.Title, "Recently Added", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(p.Title, "Recently Played", StringComparison.OrdinalIgnoreCase))
             .Where(p => !string.IsNullOrWhiteSpace(p.Title))
             .Distinct()
             .ToList();
@@ -403,51 +408,46 @@ public class PlexService
         return v1[b.Length];
     }
 
+
     // ============================================================
-    // 🔸 Create new Plex playlist
+    // 🔸 Add tracks to existing Plex playlist (fixed version)
     // ============================================================
-    public async Task<string> CreatePlaylistAsync(string plexBaseUrl, string plexToken, string name)
+    public async Task AddTracksToPlaylistAsync(
+        string plexBaseUrl, string plexToken, string playlistKey,
+        IEnumerable<string> ratingKeys, string machineId)
     {
-        var url =
-            $"{plexBaseUrl}/playlists?type=audio&title={Uri.EscapeDataString(name)}&smart=0&X-Plex-Token={plexToken}";
-        var res = await _http.PostAsync(url, null);
-        res.EnsureSuccessStatusCode();
+        if (string.IsNullOrWhiteSpace(machineId))
+            throw new ArgumentException("machineId must not be empty when adding tracks.", nameof(machineId));
 
-        var xml = await res.Content.ReadAsStringAsync();
-        var doc = XDocument.Parse(xml);
-        var key = doc.Descendants("Playlist").FirstOrDefault()?.Attribute("ratingKey")?.Value;
-
-        if (string.IsNullOrEmpty(key))
-            throw new Exception("Failed to create Plex playlist.");
-
-        return key;
-    }
-
-    // ============================================================
-    // 🔸 Add tracks to existing Plex playlist
-    // ============================================================
-    public async Task AddTracksToPlaylistAsync(string plexBaseUrl, string plexToken, string playlistKey, IEnumerable<string> ratingKeys, string machineId)
-    {
-        var serverId = string.IsNullOrWhiteSpace(machineId) ? throw new ArgumentException("machineId must not be empty when adding tracks.", nameof(machineId)) : machineId;
-
-        foreach (var key in ratingKeys)
+        var keyList = ratingKeys?.ToList() ?? new List<string>();
+        if (keyList.Count == 0)
         {
-            var uri = $"server://{serverId}/com.plexapp.plugins.library/library/metadata/{key}";
+            Console.WriteLine("[Plex AddTracks] No keys to add.");
+            return;
+        }
+
+        foreach (var key in keyList)
+        {
+            // ✅ Correct Plex URI format for adding tracks to playlists
+            var uri = $"library://{machineId}/com.plexapp.plugins.library/library/metadata/{key}";
+
             var url = $"{plexBaseUrl}/playlists/{playlistKey}/items?uri={Uri.EscapeDataString(uri)}&X-Plex-Token={plexToken}";
 
-            using var req = new HttpRequestMessage(HttpMethod.Put, url);
+            using var req = new HttpRequestMessage(HttpMethod.Post, url);
             req.Headers.ConnectionClose = true;
 
             using var res = await _http.SendAsync(req);
-            if (!res.IsSuccessStatusCode)
-            {
-                var msg = await res.Content.ReadAsStringAsync();
-                Console.WriteLine($"[Plex AddTrack] Error {res.StatusCode}: {msg}");
-            }
+            var msg = await res.Content.ReadAsStringAsync();
 
-            await Task.Delay(200); // leichtes Delay für Plex API Stabilität
+            if (!res.IsSuccessStatusCode)
+                Console.WriteLine($"[Plex AddTracks] ERROR {res.StatusCode}: {msg}");
+            else
+                Console.WriteLine($"[Plex AddTracks] Added track {key} → playlist {playlistKey}");
+
+            await Task.Delay(150); // small delay for Plex API stability
         }
     }
+
 
     // ============================================================
     // 🔸 Generate CSV of missing tracks (sortiert: Artist → Album → Title)
@@ -622,4 +622,43 @@ public class PlexService
         var xml = await _http.GetStringAsync($"{plexBaseUrl}/playlists/all?X-Plex-Token={plexToken}");
         return xml;
     }
+
+    // ============================================================
+    // 🔸 Create new Plex playlist (fixed version)
+    // ============================================================
+    public async Task<string> CreatePlaylistAsync(string plexBaseUrl, string plexToken, string name)
+    {
+        // discover music section for correct URI
+        string sectionKey = await GetMusicSectionKeyAsync(plexBaseUrl, plexToken);
+
+        // Fallback-URI – Plex requires a valid item reference
+        var uri = $"library://{sectionKey}/item/0";
+
+        var url =
+            $"{plexBaseUrl}/playlists?" +
+            $"type=audio" +
+            $"&title={Uri.EscapeDataString(name)}" +
+            $"&smart=0" +
+            $"&uri={Uri.EscapeDataString(uri)}" +
+            $"&X-Plex-Token={plexToken}";
+
+        var res = await _http.PostAsync(url, null);
+        if (!res.IsSuccessStatusCode)
+        {
+            var msg = await res.Content.ReadAsStringAsync();
+            throw new Exception($"CreatePlaylist failed: {res.StatusCode} – {msg}");
+        }
+
+        var xml = await res.Content.ReadAsStringAsync();
+        var doc = XDocument.Parse(xml);
+        var key = doc.Descendants("Playlist").FirstOrDefault()?.Attribute("ratingKey")?.Value;
+
+        if (string.IsNullOrEmpty(key))
+            throw new Exception("Failed to parse created playlist key.");
+
+        Console.WriteLine($"[Plex] Created playlist '{name}' key={key}");
+        return key;
+    }
+
+
 }

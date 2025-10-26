@@ -1,7 +1,7 @@
 @using System.Globalization
 @using System.Text.Json
 @using Microsoft.Extensions.Localization
-@using SpotifyPlaylistWebApp
+@using SpotifyPlaylistWebApp 
 @inject IStringLocalizer<SharedResource> L
 @{
     Layout = "Layout";
@@ -195,6 +195,7 @@
             NoTracksFound: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_NoTracksFound"].Value)),
             LoadError: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_LoadError"].Value)),
             LoadingTracks: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_LoadingTracks"].Value)),
+            ExportStopped: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_ExportStopped"].Value)),
             NowExporting: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_NowExporting"].Value))
         };
 
@@ -399,6 +400,56 @@
             await loadPlexPlaylistsDropdown();
         });
     </script>
+    <script>
+    // Close modal normally (OK button)
+    document.getElementById("btnCloseLive")?.addEventListener("click", () => {
+        const modal = document.getElementById("liveExportModal");
+        if (modal) {
+            modal.style.transition = "opacity 0.4s ease";
+            modal.style.opacity = "0";
+            setTimeout(() => {
+                modal.classList.add("hidden");
+                modal.style.opacity = "1"; // reset for next open
+            }, 400);
+        }
+    });
+
+    // Stop Live Export
+    document.getElementById("btnStopLive")?.addEventListener("click", () => {
+        // Close EventSource safely
+        try {
+            if (typeof liveEvt !== "undefined" && liveEvt) {
+                liveEvt.close();
+                liveEvt = null;
+            }
+        } catch (e) {
+            console.warn("EventSource close failed", e);
+        }
+
+        // Append yellow log entry
+        const log = document.getElementById("liveLog");
+        if (log) {
+            log.innerHTML += `<div class='text-yellow-400'>⏹ ${T.ExportStopped}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Update progress text
+        const progress = document.getElementById("liveProgress");
+        if (progress) progress.textContent = `⏹ ${T.ExportStopped}`;
+
+        // Fade-out and close modal
+        const modal = document.getElementById("liveExportModal");
+        if (modal) {
+            modal.style.transition = "opacity 0.4s ease";
+            modal.style.opacity = "0";
+            setTimeout(() => {
+                modal.classList.add("hidden");
+                modal.style.opacity = "1"; // restore for next open
+            }, 400);
+        }
+    });
+</script>
+
 
     @* ================================
        MODAL: Live Export Status
@@ -437,6 +488,11 @@
             </div>
         </div>
     </div>
+    <style>
+        #liveExportModal {
+            transition: opacity 0.4s ease;
+        }
+    </style>
 
 </body>
 </html>

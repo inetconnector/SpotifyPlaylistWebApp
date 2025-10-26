@@ -446,6 +446,9 @@
     <value>Synchronisiere deine Spotify-Playlists automatisch mit deiner Plex-Bibliothek.</value>
   </data>
 
+	<data name="SpotifyToPlex_ExportStopped" xml:space="preserve">
+  <value>Export abgebrochen.</value>
+</data>
 
-  <data name="SpotifyToPlex_SyncAll" xml:space="preserve"><value>Alle Playlists synchronisieren</value></data>
+	<data name="SpotifyToPlex_SyncAll" xml:space="preserve"><value>Alle Playlists synchronisieren</value></data>
 </root>

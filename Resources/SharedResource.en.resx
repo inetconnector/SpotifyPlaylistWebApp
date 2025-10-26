@@ -450,6 +450,9 @@ Third-party contributions are marked as such. Duplication, processing, distribut
     <value>Sync your Spotify playlists automatically with your Plex library.</value>
   </data>
 
+	<data name="SpotifyToPlex_ExportStopped" xml:space="preserve">
+  <value>Export stopped.</value>
+</data>
 
-  <data name="SpotifyToPlex_SyncAll" xml:space="preserve"><value>Sync all playlists</value></data>
+	<data name="SpotifyToPlex_SyncAll" xml:space="preserve"><value>Sync all playlists</value></data>
 </root>
