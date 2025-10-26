@@ -3,7 +3,32 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-	 
+	<data name="Dashboard_Source_LikedSongs" xml:space="preserve">
+  <value>Lieblingssongs</value>
+</data>
+
+	<data name="Dashboard_Source_Label" xml:space="preserve">
+  <value>Wähle die Playlist-Quelle</value>
+</data>
+
+	<data name="Dashboard_Source_Description" xml:space="preserve">
+  <value>Wähle aus, ob deine Lieblingssongs oder eine vorhandene Spotify-Playlist als Quelle verwendet werden sollen.</value>
+</data>
+
+	<data name="SpotifyToPlex_SourceType" xml:space="preserve">
+    <value>Quelltyp</value>
+  </data>
+	<data name="SpotifyToPlex_SourceLiked" xml:space="preserve">
+    <value>❤️ Lieblingssongs</value>
+  </data>
+	<data name="SpotifyToPlex_SourcePlaylist" xml:space="preserve">
+    <value>🎵 Bestehende Playlist</value>
+  </data>
+ 
+	<data name="SpotifyToPlex_StartExport" xml:space="preserve">
+    <value>Export starten</value>
+  </data>
+
 	<data name="SpotifyToPlex_Searching" xml:space="preserve">
   <value>Suche</value>
 </data>
@@ -23,7 +48,15 @@
 	<data name="SpotifyToPlex_Exporting" xml:space="preserve">
   <value>Exportiere Playlist</value>
 </data>
-  
+	<data name="Btn_Playlist_Clone">
+		<value>Playlist klonen</value>
+	</data>
+	<data name="Btn_Alternative_Playlist">
+		<value>Alternative Playlist erstellen</value>
+	</data>
+	<data name="Btn_Playlist_Shuffle">
+		<value>Playlist mischen</value>
+	</data>
 	<data name="SpotifyToPlex_LiveExportStatus" xml:space="preserve">
     <value>Live-Export-Status</value>
   </data>

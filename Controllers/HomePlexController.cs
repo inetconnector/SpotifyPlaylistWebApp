@@ -29,19 +29,17 @@ public class HomePlexController : Controller
         var spotifyToken = HttpContext.Session.GetString(SessionSpotifyTokenKey);
 
         if (string.IsNullOrEmpty(plexToken))
-            // Plex not authenticated → start Plex login
             return RedirectToAction("PlexActions");
 
         if (string.IsNullOrEmpty(spotifyToken))
         {
-            // Spotify not authenticated → redirect to Spotify login
             HttpContext.Session.SetString("ReturnAfterLogin", "/HomePlex/SpotifyToPlex");
             return RedirectToAction("Login", "Home");
         }
 
         try
         {
-            // Load Spotify playlists for selection
+            // ✅ Load all user playlists for selection
             var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault(spotifyToken));
             var playlists = await plex.GetAllSpotifyPlaylistsAsync(spotify);
 
@@ -373,9 +371,12 @@ public class HomePlexController : Controller
             var (baseUrl, machineId) = await plex.DiscoverServerAsync(plexToken);
             var playlists = await plex.GetAllSpotifyPlaylistsAsync(spotify);
             var results = new List<object>();
-
-            foreach (var (id, name) in playlists)
+              
+            foreach (var item in playlists)
             {
+                var id = item.Value;
+                var name = item.Text;
+
                 var (exportedName, addedCount, missing) =
                     await plex.ExportOnePlaylistAsync(spotify, id, name, baseUrl, plexToken);
 
@@ -386,6 +387,7 @@ public class HomePlexController : Controller
                     missingCount = missing.Count
                 });
             }
+
 
             TempData["ExportAllResult"] = JsonSerializer.Serialize(results);
             return RedirectToAction("SpotifyToPlex");

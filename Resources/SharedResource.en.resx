@@ -10,7 +10,33 @@
 	</resheader>
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-	</resheader> 
+	</resheader>
+	<data name="Dashboard_Source_LikedSongs" xml:space="preserve">
+  <value>Liked Songs</value>
+</data>
+
+	<data name="Dashboard_Source_Label" xml:space="preserve">
+  <value>Select Playlist Source</value>
+</data>
+
+	<data name="Dashboard_Source_Description" xml:space="preserve">
+  <value>Select whether to use your liked songs or an existing Spotify playlist as the source.</value>
+</data>
+
+	<data name="SpotifyToPlex_SourceType" xml:space="preserve">
+    <value>Source type</value>
+  </data>
+	<data name="SpotifyToPlex_SourceLiked" xml:space="preserve">
+    <value>❤️ Liked Songs</value>
+  </data>
+	<data name="SpotifyToPlex_SourcePlaylist" xml:space="preserve">
+    <value>🎵 Existing Playlist</value>
+  </data>
+ 
+	<data name="SpotifyToPlex_StartExport" xml:space="preserve">
+    <value>Start Export</value>
+  </data>
+
 	<data name="SpotifyToPlex_Tracks" xml:space="preserve">
   <value>tracks</value>
 </data> 
@@ -28,9 +54,18 @@
   <value>Starting export for playlist</value>
 </data>
 
-	<data name="SpotifyToPlex_LiveExport" xml:space="preserve">
-    <value>Live Export</value>
-  </data>
+
+	<data name="Btn_Playlist_Clone">
+		<value>Clone playlist</value>
+	</data>
+	<data name="Btn_Alternative_Playlist">
+		<value>Create alternative playlist</value>
+	</data>
+	<data name="Btn_Playlist_Shuffle">
+		<value>Shuffle playlist</value>
+	</data>
+
+
 	<data name="SpotifyToPlex_LiveExportStatus" xml:space="preserve">
     <value>Live Export Status</value>
   </data>

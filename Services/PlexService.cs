@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using System.Xml.Linq;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using SpotifyAPI.Web;
 
 namespace SpotifyPlaylistWebApp.Services;
@@ -478,27 +479,50 @@ public class PlexService
         writer.Flush();
         return ms.ToArray();
     }
-
-    // ============================================================
-    // 🔸 Load all Spotify playlists for export
-    // ============================================================
-    public async Task<List<(string Id, string Name)>> GetAllSpotifyPlaylistsAsync(SpotifyClient spotify)
+    /// <summary>
+    /// Loads all Spotify playlists of the current user and returns them as SelectListItem objects for dropdowns.
+    /// </summary>
+    public async Task<List<SelectListItem>> GetAllSpotifyPlaylistsAsync(SpotifyClient spotify)
     {
-        var result = new List<(string Id, string Name)>();
-        var page = await spotify.Playlists.CurrentUsers(new PlaylistCurrentUsersRequest { Limit = 50 });
+        var list = new List<SelectListItem>();
 
-        while (true)
+        try
         {
-            foreach (var p in page.Items)
-                if (p != null && !string.IsNullOrEmpty(p.Id))
-                    result.Add((p.Id, p.Name));
+            var page = await spotify.Playlists.CurrentUsers(new PlaylistCurrentUsersRequest { Limit = 50 });
 
-            if (string.IsNullOrEmpty(page.Next)) break;
-            page = await spotify.NextPage(page);
+            while (true)
+            {
+                if (page.Items != null)
+                {
+                    foreach (var pl in page.Items)
+                    {
+                        if (pl == null || string.IsNullOrEmpty(pl.Id)) continue;
+
+                        list.Add(new SelectListItem
+                        {
+                            Value = pl.Id,
+                            Text = pl.Name ?? "(Unnamed Playlist)"
+                        });
+                    }
+                }
+
+                if (string.IsNullOrEmpty(page.Next))
+                    break;
+
+                page = await spotify.NextPage(page);
+            }
+        }
+        catch (APIException apiEx)
+        {
+            Console.WriteLine($"[PlexService] Spotify API error while loading playlists: {apiEx.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[PlexService] Unexpected error while loading playlists: {ex}");
         }
 
-        return result;
-    }
+        return list;
+    } 
 
     // ============================================================
     // 🔸 Export one Spotify playlist to Plex (with memory cache)

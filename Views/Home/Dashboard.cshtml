@@ -11,8 +11,8 @@
 <!doctype html>
 <html lang="@CultureInfo.CurrentUICulture.Name">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>@L["Dashboard_Dashboard_InetConnector_Playlist_Generator_nutzt"]</title>
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -38,7 +38,6 @@
                 color: #34d399;
             }
 
-        /* === Modern Spotify Buttons (mit Tooltip) === */
         .btn {
             position: relative;
             display: inline-flex;
@@ -71,30 +70,27 @@
                 filter: drop-shadow(0 0 6px rgba(16,185,129,0.55));
             }
 
-            /* === Tooltip Styling === */
             .btn[data-tip]::after {
                 content: attr(data-tip);
                 position: absolute;
                 bottom: -2.6rem;
                 left: 50%;
                 transform: translateX(-50%) translateY(6px);
-                background: rgba(0, 0, 0, 0.8);
+                background: rgba(0,0,0,0.8);
                 color: #fff;
                 padding: 0.4rem 0.7rem;
                 border-radius: 0.5rem;
                 font-size: 0.75rem;
                 white-space: nowrap;
-                pointer-events: none;
                 opacity: 0;
                 transition: all 0.25s ease;
             }
 
             .btn:hover::after {
                 opacity: 1;
-                transform: translate(-50%, 0);
+                transform: translate(-50%,0);
             }
 
-        /* === Fade-in Animation (Razor-escape @@) === */
         @@keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -122,209 +118,130 @@
         .delay-3 {
             animation-delay: 0.6s;
         }
-
-        /* === Share Buttons === */
-        .share-btn {
-            width: 2.75rem;
-            height: 2.75rem;
-            border-radius: 9999px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.05rem;
-            text-decoration: none;
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-        }
-
-            .share-btn:hover {
-                transform: scale(1.12);
-                box-shadow: 0 0 14px rgba(255,255,255,0.15);
-            }
-
-        .wa {
-            background-color: #25D366;
-        }
-
-        .tg {
-            background-color: #0088cc;
-        }
-
-        .x {
-            background-color: #000;
-        }
-
-        .fb {
-            background-color: #1877F2;
-        }
-
-        .rd {
-            background-color: #FF4500;
-        }
-
-        .li {
-            background-color: #0A66C2;
-        }
-
-        .em {
-            background-color: #6B7280;
-        }
     </style>
 </head>
 
 <body class="min-h-screen flex flex-col">
+    <main class="flex-grow max-w-4xl mx-auto px-6 py-16">
+        <div class="glass rounded-3xl p-8 md:p-10 shadow-xl text-center">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 fade-in">Welcome, @user 👋</h1>
+            <p class="text-white/70 mb-8 fade-in delay-1">
+                @L["Dashboard_Erstelle_automatisch_deine_Spotify_Playlists_mit"]
+            </p>
 
-<main class="flex-grow max-w-4xl mx-auto px-6 py-16">
-    <div class="glass rounded-3xl p-8 md:p-10 shadow-xl text-center">
-        <h1 class="text-3xl md:text-4xl font-bold mb-2 fade-in">Willkommen, @user 👋</h1>
-        <p class="text-white/70 mb-8 fade-in delay-1">@L["Dashboard_Erstelle_automatisch_deine_Spotify_Playlists_mit"]</p>
+            <!-- 🔹 Source type selector -->
+            <div class="fade-in delay-1 mb-8">
+                <label for="sourceType" class="block text-sm font-semibold mb-2">
+                    @L["SpotifyToPlex_SourceType"]
+                </label>
 
-        <!-- Hauptaktionen (ALLE 5 Buttons, mit Tooltips & .btn-Klasse für Cooldown) -->
-        <div class="flex flex-wrap justify-center gap-7 mt-6 fade-in delay-2">
-            <a href="/Home/CloneLikedSongs" class="btn" data-tip=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Desc_Liked_Clone"].Value))>
-                <span class="icon">📜</span>
-                <span>@L["Btn_Liked_Clone"]</span>
-            </a>
+                <select id="sourceType" class="text-black rounded px-3 py-2 w-64">
+                    <option value="liked">@L["SpotifyToPlex_SourceLiked"]</option>
+                    <option value="playlist">@L["SpotifyToPlex_SourcePlaylist"]</option>
+                </select>
 
-            <a href="/Home/CreateAlternativeFavorites" class="btn" data-tip=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Desc_Alternative_Favorites"].Value))>
-                <span class="icon">🎶</span>
-                <span>@L["Btn_Alternative_Favorites"]</span>
-            </a>
+                <!-- Playlist selection (hidden by default) -->
+                <div id="playlistContainer" class="mt-8 text-center hidden">
+                    <label for="playlistSelect" class="block mb-2 text-lg font-semibold text-white">
+                        @L["Dashboard_Source_Label"]
+                    </label>
 
-            <a href="/Home/CreateRecommendations" class="btn" data-tip=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Desc_Recommendations"].Value))>
-                <span class="icon">✨</span>
-                <span>@L["Btn_Recommendations"]</span>
-            </a>
+                    <select id="playlistSelect"
+                            name="playlistSelect"
+                            class="bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2 w-72 focus:ring-emerald-500 focus:border-emerald-500">
+                        <option value="LikedSongs">@L["Dashboard_Source_LikedSongs"].Value</option> 
 
-            <a href="/Home/CreateFavMix" class="btn" data-tip=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Desc_Liked_Shuffle"].Value))>
-                <span class="icon">🔀</span>
-                <span>@L["Btn_Liked_Shuffle"]</span>
-            </a>
+                        @if (ViewBag.Playlists != null)
+                        {
+                            foreach (var item in (IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.Playlists)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        }
+                    </select>
 
-            <a href="/Home/CreateTopList" class="btn" data-tip=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Desc_Most_Listened"].Value))>
-                <span class="icon">📈</span>
-                <span>@L["Btn_Most_Listened"]</span>
-            </a>
-        </div>
+                    <p class="text-sm text-gray-400 mt-2">
+                        @L["Dashboard_Source_Description"]
+                    </p>
+                </div>
+            </div>
 
-        <p class="mt-10 text-white/70 text-sm">
-            @L["Dashboard_Jede_Aktion_erstellt_eine_neue_Playlist_in_deine"]<br/>
-            @L["Dashboard_Die_Erstellung_erfolgt_im_Hintergrund_und_dauert"]
-        </p>
-
-        <hr class="my-10 border-white/20"/>
-
-        <!-- Spendenblock -->
-        <div class="flex flex-col items-center">
-            <h2 class="text-2xl font-semibold mb-3">@L["Dashboard_Unterst_tze_das_Projekt"]</h2>
-            <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
-               target="_blank" rel="noopener"
-               class="btn mb-4 text-lg px-8 py-4 w-auto h-auto">
-                💚 @L["Dashboard_Jetzt_ber_PayPal_spenden"]
-            </a>
-            <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
-               target="_blank" rel="noopener"
-               class="inline-block transition-transform hover:scale-105">
-                <img src="/QR-Code.png" alt=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Attr_Dashboard_PayPal_QR_Code"].Value))
-                     class="w-36 h-36 rounded-2xl border border-white/20 shadow-md hover:border-emerald-400 hover:shadow-emerald-400/20 transition-all"/>
-            </a>
-            <p class="text-white/60 text-sm mt-3">@L["Dashboard_Scanne_den_QR_Code_zum_Spenden"]</p>
-        </div>
-
-        <hr class="my-10 border-white/20"/>
-
-        <!-- Teilen -->
-        <div class="text-center">
-            <h2 class="text-2xl font-semibold mb-3">@L["Dashboard_Teile_dieses_Tool"]</h2>
-            <p class="text-white/70 text-sm mb-4">@L["Dashboard_Hilf_anderen_ihre_Spotify_Playlists_zu_optimiere"]</p>
-            <div class="flex flex-wrap justify-center gap-3">
-                <a href="https://wa.me/?text=🎧%20InetConnector%20Playlist%20Generator™%20https://playlists.inetconnector.com"
-                   target="_blank" class="share-btn wa" title=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Attr_Dashboard_WhatsApp"].Value))>
-                    WA
+            <!-- 🔸 Main buttons -->
+            <div class="flex flex-wrap justify-center gap-7 mt-6 fade-in delay-2">
+                <a id="btnClone" href="/Home/CloneLikedSongs" class="btn" data-action="clone" data-tip=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Desc_Liked_Clone"].Value))>
+                    <span class="icon">📜</span><span>@L["Btn_Liked_Clone"]</span>
                 </a>
-                <a href="https://t.me/share/url?url=https://playlists.inetconnector.com"
-                   target="_blank" class="share-btn tg" title=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Attr_Dashboard_Telegram"].Value))>
-                    TG
+                <a id="btnAlt" href="/Home/CreateAlternativeFavorites" class="btn" data-action="alt" data-tip=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Desc_Alternative_Favorites"].Value))>
+                    <span class="icon">🎶</span><span>@L["Btn_Alternative_Favorites"]</span>
                 </a>
-                <a href="https://x.com/intent/tweet?text=🎧%20InetConnector%20Playlist%20Generator™%20https://playlists.inetconnector.com"
-                   target="_blank" class="share-btn x" title=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Attr_Dashboard_X_Twitter"].Value))>
-                    𝕏
+                <a id="btnReco" href="/Home/CreateRecommendations" class="btn" data-action="reco" data-tip=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Desc_Recommendations"].Value))>
+                    <span class="icon">✨</span><span>@L["Btn_Recommendations"]</span>
                 </a>
-                <a href="https://www.facebook.com/sharer/sharer.php?u=https://playlists.inetconnector.com"
-                   target="_blank" class="share-btn fb" title=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Attr_Dashboard_Facebook"].Value))>
-                    Fb
+                <a id="btnMix" href="/Home/CreateFavMix" class="btn" data-action="mix" data-tip=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Desc_Liked_Shuffle"].Value))>
+                    <span class="icon">🔀</span><span>@L["Btn_Liked_Shuffle"]</span>
                 </a>
-                <a href="https://www.reddit.com/submit?url=https://playlists.inetconnector.com"
-                   target="_blank" class="share-btn rd" title=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Attr_Dashboard_Reddit"].Value))>
-                    R
-                </a>
-                <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://playlists.inetconnector.com"
-                   target="_blank" class="share-btn li" title=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Attr_Dashboard_LinkedIn"].Value))>
-                    in
-                </a>
-                <a href="mailto:?subject=InetConnector%20Playlist%20Generator™&body=Hey,%20probier%20mal%20den%20InetConnector%20Playlist%20Generator™:%20https://playlists.inetconnector.com"
-                   class="share-btn em" title=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Attr_Dashboard_E_Mail"].Value))>
-                    ✉️
+                <a id="btnTop" href="/Home/CreateTopList" class="btn" data-action="top" data-tip=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Desc_Most_Listened"].Value))>
+                    <span class="icon">📈</span><span>@L["Btn_Most_Listened"]</span>
                 </a>
             </div>
+
+            <p class="mt-10 text-white/70 text-sm">
+                @L["Dashboard_Jede_Aktion_erstellt_eine_neue_Playlist_in_deine"]<br />
+                @L["Dashboard_Die_Erstellung_erfolgt_im_Hintergrund_und_dauert"]
+            </p>
         </div>
+    </main>
 
-        <div class="mt-10 text-sm text-white/70">
-            <a href="/Home/Impressum" class="hover:text-white underline">@L["Dashboard_Impressum"]</a> @L["Dashboard_Text"]
-            <a href="/Home/Datenschutz" class="hover:text-white underline">@L["Dashboard_Datenschutzerkl_rung"]</a>
-        </div>
-    </div>
-</main>
+    <!-- 🔧 Dynamic JavaScript logic -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const sourceType = document.getElementById("sourceType");
+            const playlistContainer = document.getElementById("playlistContainer");
+            const playlistSelect = document.getElementById("playlistSelect");
+            const btns = document.querySelectorAll('.btn[data-action]');
 
-<footer class="max-w-5xl mx-auto px-6 mt-10 pb-10 text-sm text-white/70">
-    <div class="glass rounded-2xl p-5 flex flex-col md:flex-row justify-between items-center gap-3">
-        <div>© @DateTime.Now.Year InetConnector – Alle Rechte vorbehalten</div>
-        <div class="flex items-center gap-3">
-            <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
-               target="_blank" rel="noopener" class="hover:text-white underline">
-                @L["Dashboard_Spenden"]
-            </a>
-        </div>
-    </div>
-</footer>
+            // Localized text sets for buttons
+            const txtLiked = {
+                clone: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Btn_Liked_Clone"].Value)),
+                alt: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Btn_Alternative_Favorites"].Value)),
+                mix: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Btn_Liked_Shuffle"].Value))
+            };
+            const txtPlaylist = {
+                clone: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Btn_Playlist_Clone"].Value)),
+                alt: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Btn_Alternative_Playlist"].Value)),
+                mix: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Btn_Playlist_Shuffle"].Value))
+            };
 
-<!-- Cooldown + Spenden-Popup Script (unverändert beibehalten) -->
+            // Update labels + target URLs when switching between "Liked Songs" and "Playlist"
+            function updateUI() {
+                const usePlaylist = sourceType.value === "playlist";
+                playlistContainer.classList.toggle("hidden", !usePlaylist);
 
+                btns.forEach(btn => {
+                    const action = btn.dataset.action;
+                    const label = btn.querySelector('span:last-child');
+                    if (usePlaylist && txtPlaylist[action]) label.textContent = txtPlaylist[action];
+                    if (!usePlaylist && txtLiked[action]) label.textContent = txtLiked[action];
+                });
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const buttons = document.querySelectorAll('a.btn');
-  buttons.forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      if (btn.classList.contains('disabled')) return;
-      const url = btn.getAttribute('href');
-      const label = btn.querySelector('span:last-child');
-      const orig = label ? label.textContent : '';
-      btn.classList.add('opacity-50','pointer-events-none','disabled');
-      if (label) label.textContent = '⏳';
-      
-      try {
-        const res = await fetch(url);
-        const text = await res.text();
-        // show result below button
-        let msg = document.createElement('div');
-        msg.innerHTML = text;
-        msg.className = 'text-sm text-green-400 mt-2';
-        btn.insertAdjacentElement('afterend', msg);
-      } catch (err) {
-        console.error(err);
-        alert('Fehler beim Starten: ' + err);
-      } finally {
-        setTimeout(() => {
-          btn.classList.remove('opacity-50','pointer-events-none','disabled');
-          if (label) label.textContent = orig;
-        }, 240000); // 4 Minuten Cooldown
-      }
-    });
-  });
-});
-</script>
+                updateLinks();
+            }
+
+            // Append selected playlist name to action links
+            function updateLinks() {
+                const selectedName = playlistSelect.options[playlistSelect.selectedIndex]?.text || "";
+                const encoded = encodeURIComponent(selectedName);
+
+                document.getElementById("btnAlt").href = "/Home/CreateAlternativeFavorites?playlistName=" + encoded;
+                document.getElementById("btnMix").href = "/Home/CreateFavMix?playlistName=" + encoded;
+                document.getElementById("btnClone").href = "/Home/CloneLikedSongs?playlistName=" + encoded;
+            }
+
+            sourceType.addEventListener("change", updateUI);
+            playlistSelect.addEventListener("change", updateLinks);
+
+            updateUI();
+        });
+    </script>
 </body>
-
 </html>
