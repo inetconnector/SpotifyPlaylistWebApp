@@ -28,8 +28,14 @@
   <value>Starting export for playlist</value>
 </data>
 
+	<data name="SpotifyToPlex_LiveExport" xml:space="preserve">
+    <value>Live Export</value>
+  </data>
 	<data name="SpotifyToPlex_LiveExportStatus" xml:space="preserve">
     <value>Live Export Status</value>
+  </data>
+	<data name="SpotifyToPlex_LiveExport" xml:space="preserve">
+    <value>Live Export</value>
   </data>
 	<data name="SpotifyToPlex_Initializing" xml:space="preserve">
     <value>Initializing…</value>

@@ -425,10 +425,9 @@ public class PlexService
     // ============================================================
     // 🔸 Add tracks to existing Plex playlist
     // ============================================================
-    public async Task AddTracksToPlaylistAsync(string plexBaseUrl, string plexToken, string playlistKey,
-        IEnumerable<string> ratingKeys, string? machineId = null)
+    public async Task AddTracksToPlaylistAsync(string plexBaseUrl, string plexToken, string playlistKey, IEnumerable<string> ratingKeys, string machineId)
     {
-        var serverId = string.IsNullOrWhiteSpace(machineId) ? "local" : machineId;
+        var serverId = string.IsNullOrWhiteSpace(machineId) ? throw new ArgumentException("machineId must not be empty when adding tracks.", nameof(machineId)) : machineId;
 
         foreach (var key in ratingKeys)
         {
@@ -543,10 +542,12 @@ public class PlexService
         {
             playlistKey = await CreatePlaylistAsync(plexBaseUrl, plexToken, name);
             Console.WriteLine($"[Plex Export] Created new playlist '{name}'");
-        }
+        } 
 
+        var (_, machineId) = await DiscoverServerAsync(plexToken);
+       
         if (foundKeys.Any())
-            await AddTracksToPlaylistAsync(plexBaseUrl, plexToken, playlistKey, foundKeys);
+            await AddTracksToPlaylistAsync(plexBaseUrl, plexToken, playlistKey, foundKeys, machineId);
 
         // Save to memory cache
         _missingCache[name] = combinedMissing;

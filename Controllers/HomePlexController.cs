@@ -123,7 +123,7 @@ public class HomePlexController : Controller
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30)); // timeout 30s
             var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault(spotifyToken));
-            var (baseUrl, _) = await plex.DiscoverServerAsync(plexToken);
+            var (baseUrl, machineId) = await plex.DiscoverServerAsync(plexToken);
 
             var (exportedName, addedCount, missing) =
                 await plex.ExportOnePlaylistAsync(spotify, playlistId, playlistName, baseUrl, plexToken);
@@ -169,7 +169,7 @@ public class HomePlexController : Controller
             }
 
             var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault(spotifyToken));
-            var (baseUrl, _) = await plex.DiscoverServerAsync(plexToken);
+            var (baseUrl, machineId) = await plex.DiscoverServerAsync(plexToken);
             var tracks = await plex.GetSpotifyPlaylistTracksAsync(spotify, playlistId);
 
             await writer.WriteLineAsync($"data: {L["SpotifyToPlex_Exporting"]}: '{playlistName}' ({tracks.Count} {L["SpotifyToPlex_Tracks"]})\n");
@@ -258,7 +258,7 @@ public class HomePlexController : Controller
             if (string.IsNullOrEmpty(plexToken))
                 return Json(new { success = false, message = "No Plex token." });
 
-            var (baseUrl, _) = await plex.DiscoverServerAsync(plexToken);
+            var (baseUrl, machineId) = await plex.DiscoverServerAsync(plexToken);
             var playlists = await plex.GetPlexPlaylistsAsync(baseUrl, plexToken);
 
             // Umwandeln in serialisierbare Objekte
@@ -283,7 +283,7 @@ public class HomePlexController : Controller
             if (string.IsNullOrEmpty(plexToken))
                 return Content("No Plex token available.");
 
-            var (baseUrl, _) = await plex.DiscoverServerAsync(plexToken);
+            var (baseUrl, machineId) = await plex.DiscoverServerAsync(plexToken);
             var xml = await plex.GetRawPlaylistsXmlAsync(baseUrl, plexToken);
 
             //return  Content($"{baseUrl}/playlists/all?X-Plex-Token={plexToken}", "application/xml");
@@ -309,7 +309,7 @@ public class HomePlexController : Controller
             if (string.IsNullOrEmpty(plexToken))
                 return Json(new { success = false, message = "No Plex token." });
 
-            var (baseUrl, _) = await plex.DiscoverServerAsync(plexToken);
+            var (baseUrl, machineId) = await plex.DiscoverServerAsync(plexToken);
             var xml = await plex.GetPlaylistTracksXmlAsync(baseUrl, plexToken, ratingKey);
 
             return Json(new { success = true, tracks = xml });
@@ -333,7 +333,7 @@ public class HomePlexController : Controller
             if (string.IsNullOrEmpty(plexToken))
                 return Json(new { success = false, message = "No Plex token." });
 
-            var (baseUrl, _) = await plex.DiscoverServerAsync(plexToken);
+            var (baseUrl, machineId) = await plex.DiscoverServerAsync(plexToken);
             await plex.DeletePlaylistAsync(baseUrl, plexToken, ratingKey);
 
             return Json(new { success = true });
@@ -370,7 +370,7 @@ public class HomePlexController : Controller
         try
         {
             var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault(spotifyToken));
-            var (baseUrl, _) = await plex.DiscoverServerAsync(plexToken);
+            var (baseUrl, machineId) = await plex.DiscoverServerAsync(plexToken);
             var playlists = await plex.GetAllSpotifyPlaylistsAsync(spotify);
             var results = new List<object>();
 
@@ -529,6 +529,26 @@ public class HomePlexController : Controller
         {
             return Json(new { success = false, message = ex.Message });
         }
+    }
+
+
+    // ============================================================
+    // 🔸 Simple text log endpoint for Live Export (last-run info)
+    // ============================================================
+    [HttpGet("Logs")]
+    public IActionResult Logs()
+    {
+        // For now, return the missing-track cache info if available
+        if (TempData.ContainsKey("MissingCsvPath"))
+        {
+            var path = TempData["MissingCsvPath"]?.ToString();
+            if (!string.IsNullOrWhiteSpace(path) && System.IO.File.Exists(path))
+            {
+                var txt = System.IO.File.ReadAllText(path);
+                return Content(txt, "text/plain; charset=utf-8");
+            }
+        }
+        return Content("No log available yet.", "text/plain; charset=utf-8");
     }
 
 }

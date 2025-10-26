@@ -3,6 +3,7 @@
 @using SpotifyPlaylistWebApp
 @await Html.PartialAsync("LanguageSwitcher")
 @inject IStringLocalizer<SharedResource> L
+@inject IJsonHelper Json
 @{
     Layout = null;
     var user = ViewBag?.User as string ?? "Spotify User";
@@ -180,27 +181,27 @@
 
         <!-- Hauptaktionen (ALLE 5 Buttons, mit Tooltips & .btn-Klasse für Cooldown) -->
         <div class="flex flex-wrap justify-center gap-7 mt-6 fade-in delay-2">
-            <a href="/Home/CloneLikedSongs" class="btn" data-tip="@L["Desc_Liked_Clone"]">
+            <a href="/Home/CloneLikedSongs" class="btn" data-tip=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Desc_Liked_Clone"].Value))>
                 <span class="icon">📜</span>
                 <span>@L["Btn_Liked_Clone"]</span>
             </a>
 
-            <a href="/Home/CreateAlternativeFavorites" class="btn" data-tip="@L["Desc_Alternative_Favorites"]">
+            <a href="/Home/CreateAlternativeFavorites" class="btn" data-tip=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Desc_Alternative_Favorites"].Value))>
                 <span class="icon">🎶</span>
                 <span>@L["Btn_Alternative_Favorites"]</span>
             </a>
 
-            <a href="/Home/CreateRecommendations" class="btn" data-tip="@L["Desc_Recommendations"]">
+            <a href="/Home/CreateRecommendations" class="btn" data-tip=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Desc_Recommendations"].Value))>
                 <span class="icon">✨</span>
                 <span>@L["Btn_Recommendations"]</span>
             </a>
 
-            <a href="/Home/CreateFavMix" class="btn" data-tip="@L["Desc_Liked_Shuffle"]">
+            <a href="/Home/CreateFavMix" class="btn" data-tip=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Desc_Liked_Shuffle"].Value))>
                 <span class="icon">🔀</span>
                 <span>@L["Btn_Liked_Shuffle"]</span>
             </a>
 
-            <a href="/Home/CreateTopList" class="btn" data-tip="@L["Desc_Most_Listened"]">
+            <a href="/Home/CreateTopList" class="btn" data-tip=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Desc_Most_Listened"].Value))>
                 <span class="icon">📈</span>
                 <span>@L["Btn_Most_Listened"]</span>
             </a>
@@ -224,7 +225,7 @@
             <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
                target="_blank" rel="noopener"
                class="inline-block transition-transform hover:scale-105">
-                <img src="/QR-Code.png" alt="@L["Attr_Dashboard_PayPal_QR_Code"]"
+                <img src="/QR-Code.png" alt=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Attr_Dashboard_PayPal_QR_Code"].Value))
                      class="w-36 h-36 rounded-2xl border border-white/20 shadow-md hover:border-emerald-400 hover:shadow-emerald-400/20 transition-all"/>
             </a>
             <p class="text-white/60 text-sm mt-3">@L["Dashboard_Scanne_den_QR_Code_zum_Spenden"]</p>
@@ -238,31 +239,31 @@
             <p class="text-white/70 text-sm mb-4">@L["Dashboard_Hilf_anderen_ihre_Spotify_Playlists_zu_optimiere"]</p>
             <div class="flex flex-wrap justify-center gap-3">
                 <a href="https://wa.me/?text=🎧%20InetConnector%20Playlist%20Generator™%20https://playlists.inetconnector.com"
-                   target="_blank" class="share-btn wa" title="@L["Attr_Dashboard_WhatsApp"]">
+                   target="_blank" class="share-btn wa" title=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Attr_Dashboard_WhatsApp"].Value))>
                     WA
                 </a>
                 <a href="https://t.me/share/url?url=https://playlists.inetconnector.com"
-                   target="_blank" class="share-btn tg" title="@L["Attr_Dashboard_Telegram"]">
+                   target="_blank" class="share-btn tg" title=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Attr_Dashboard_Telegram"].Value))>
                     TG
                 </a>
                 <a href="https://x.com/intent/tweet?text=🎧%20InetConnector%20Playlist%20Generator™%20https://playlists.inetconnector.com"
-                   target="_blank" class="share-btn x" title="@L["Attr_Dashboard_X_Twitter"]">
+                   target="_blank" class="share-btn x" title=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Attr_Dashboard_X_Twitter"].Value))>
                     𝕏
                 </a>
                 <a href="https://www.facebook.com/sharer/sharer.php?u=https://playlists.inetconnector.com"
-                   target="_blank" class="share-btn fb" title="@L["Attr_Dashboard_Facebook"]">
+                   target="_blank" class="share-btn fb" title=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Attr_Dashboard_Facebook"].Value))>
                     Fb
                 </a>
                 <a href="https://www.reddit.com/submit?url=https://playlists.inetconnector.com"
-                   target="_blank" class="share-btn rd" title="@L["Attr_Dashboard_Reddit"]">
+                   target="_blank" class="share-btn rd" title=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Attr_Dashboard_Reddit"].Value))>
                     R
                 </a>
                 <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://playlists.inetconnector.com"
-                   target="_blank" class="share-btn li" title="@L["Attr_Dashboard_LinkedIn"]">
+                   target="_blank" class="share-btn li" title=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Attr_Dashboard_LinkedIn"].Value))>
                     in
                 </a>
                 <a href="mailto:?subject=InetConnector%20Playlist%20Generator™&body=Hey,%20probier%20mal%20den%20InetConnector%20Playlist%20Generator™:%20https://playlists.inetconnector.com"
-                   class="share-btn em" title="@L["Attr_Dashboard_E_Mail"]">
+                   class="share-btn em" title=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Attr_Dashboard_E_Mail"].Value))>
                     ✉️
                 </a>
             </div>
