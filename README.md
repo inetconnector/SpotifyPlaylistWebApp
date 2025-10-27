@@ -186,5 +186,3 @@ if (type.Contains("audiobook") || type.Contains("podcast"))
 © 2025 **InetConnector / Daniel Frede**  
 Licensed for personal and educational use.  
 Commercial redistribution requires prior written permission.
-
----
