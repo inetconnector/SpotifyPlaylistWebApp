@@ -12,6 +12,21 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+	<data name="SpotifyToPlex_DeleteConfirm" xml:space="preserve">
+  <value>¿Borrar esta lista de reproducción de Plex?</value>
+</data>
+	<data name="NoTracksToAdd" xml:space="preserve">
+    <value>No hay pistas para añadir.</value>
+  </data>
+  <data name="TrackAdded" xml:space="preserve">
+    <value>OK – Pista añadida: {0}</value>
+  </data>
+  <data name="TrackAddFailed" xml:space="preserve">
+    <value>Error al añadir pista: {0} → {1}</value>
+  </data>
+  <data name="AllTracksProcessed" xml:space="preserve">
+    <value>Todas las pistas procesadas.</value>
+  </data>
   <data name="Datenschutz_Beim_Besuch_dieser_Website_werden_lediglich_die_" xml:space="preserve">
     <value>Al visitar este sitio web, solo se procesan los datos técnicamente necesarios (dirección IP, tipo de navegador, hora). Estos se utilizan únicamente para garantizar el funcionamiento correcto y no se combinan con otras fuentes de datos.</value>
   </data>
@@ -153,401 +168,686 @@
   <data name="Datenschutz_Bei_Fragen_oder_Anliegen_zum_Datenschutz_kannst_" xml:space="preserve">
     <value>Si tienes alguna pregunta o duda sobre la protección de datos, contacta con la dirección indicada en el aviso legal.</value>
   </data>
-
-	<data name="Dashboard_Source_LikedSongs" xml:space="preserve">
+  <data name="Dashboard_Source_LikedSongs" xml:space="preserve">
     <value>Canciones favoritas</value>
   </data>
-	<data name="Dashboard_Source_Label" xml:space="preserve">
+  <data name="Dashboard_Source_Label" xml:space="preserve">
     <value>Selecciona la fuente de la lista de reproducción</value>
   </data>
-	<data name="Dashboard_Source_Description" xml:space="preserve">
+  <data name="Dashboard_Source_Description" xml:space="preserve">
     <value>Selecciona si deseas usar tus canciones favoritas o una lista de reproducción existente de Spotify como fuente.</value>
   </data>
-	<data name="SpotifyToPlex_SourceType" xml:space="preserve">
+  <data name="SpotifyToPlex_SourceType" xml:space="preserve">
     <value>Tipo de fuente</value>
   </data>
-	<data name="SpotifyToPlex_SourceLiked" xml:space="preserve">
+  <data name="SpotifyToPlex_SourceLiked" xml:space="preserve">
     <value>❤️ Canciones favoritas</value>
   </data>
-	<data name="SpotifyToPlex_SourcePlaylist" xml:space="preserve">
+  <data name="SpotifyToPlex_SourcePlaylist" xml:space="preserve">
     <value>🎵 Lista de reproducción existente</value>
   </data>
-	<data name="SpotifyToPlex_StartExport" xml:space="preserve">
+  <data name="SpotifyToPlex_StartExport" xml:space="preserve">
     <value>Iniciar exportación</value>
   </data>
-	<data name="SpotifyToPlex_Searching" xml:space="preserve">
+  <data name="SpotifyToPlex_Searching" xml:space="preserve">
     <value>Buscando</value>
   </data>
-	<data name="SpotifyToPlex_Found" xml:space="preserve">
+  <data name="SpotifyToPlex_Found" xml:space="preserve">
     <value>Encontrado</value>
   </data>
-	<data name="SpotifyToPlex_MissingTrack" xml:space="preserve">
+  <data name="SpotifyToPlex_MissingTrack" xml:space="preserve">
     <value>No encontrado</value>
   </data>
-	<data name="SpotifyToPlex_Tracks" xml:space="preserve">
+  <data name="SpotifyToPlex_Tracks" xml:space="preserve">
     <value>pistas</value>
   </data>
-	<data name="SpotifyToPlex_Exporting" xml:space="preserve">
+  <data name="SpotifyToPlex_Exporting" xml:space="preserve">
     <value>Iniciando la exportación de la lista de reproducción</value>
   </data>
-	<data name="Btn_Playlist_Clone" xml:space="preserve">
+  <data name="Btn_Playlist_Clone" xml:space="preserve">
     <value>Clonar lista de reproducción</value>
   </data>
-	<data name="Btn_Alternative_Playlist" xml:space="preserve">
+  <data name="Btn_Alternative_Playlist" xml:space="preserve">
     <value>Crear lista de reproducción alternativa</value>
   </data>
-	<data name="Btn_Playlist_Shuffle" xml:space="preserve">
+  <data name="Btn_Playlist_Shuffle" xml:space="preserve">
     <value>Mezclar lista de reproducción</value>
   </data>
-	<data name="SpotifyToPlex_LiveExportStatus" xml:space="preserve">
+  <data name="SpotifyToPlex_LiveExportStatus" xml:space="preserve">
     <value>Estado de exportación en vivo</value>
   </data>
-	<data name="SpotifyToPlex_Initializing" xml:space="preserve">
+  <data name="SpotifyToPlex_Initializing" xml:space="preserve">
     <value>Inicializando…</value>
   </data>
-	<data name="SpotifyToPlex_Starting" xml:space="preserve">
+  <data name="SpotifyToPlex_Starting" xml:space="preserve">
     <value>Iniciando…</value>
   </data>
-	<data name="SpotifyToPlex_Done" xml:space="preserve">
+  <data name="SpotifyToPlex_Done" xml:space="preserve">
     <value>¡Hecho!</value>
   </data>
-	<data name="SpotifyToPlex_Added" xml:space="preserve">
+  <data name="SpotifyToPlex_Added" xml:space="preserve">
     <value>añadido</value>
   </data>
-	<data name="SpotifyToPlex_Missing" xml:space="preserve">
+  <data name="SpotifyToPlex_Missing" xml:space="preserve">
     <value>faltante</value>
   </data>
-	<data name="SpotifyToPlex_Total" xml:space="preserve">
+  <data name="SpotifyToPlex_Total" xml:space="preserve">
     <value>total</value>
   </data>
-	<data name="SpotifyToPlex_ConnectionLost" xml:space="preserve">
+  <data name="SpotifyToPlex_ConnectionLost" xml:space="preserve">
     <value>Conexión perdida.</value>
   </data>
-	<data name="SpotifyToPlex_Stopped" xml:space="preserve">
+  <data name="SpotifyToPlex_Stopped" xml:space="preserve">
     <value>Detenido.</value>
   </data>
-	<data name="SpotifyToPlex_DownloadMissingCsv" xml:space="preserve">
+  <data name="SpotifyToPlex_DownloadMissingCsv" xml:space="preserve">
     <value>Descargar las pistas faltantes como CSV</value>
   </data>
-	<data name="SpotifyToPlex_Ok" xml:space="preserve">
+  <data name="SpotifyToPlex_Ok" xml:space="preserve">
     <value>OK</value>
   </data>
-	<data name="SpotifyToPlex_Stop" xml:space="preserve">
+  <data name="SpotifyToPlex_Stop" xml:space="preserve">
     <value>Detener</value>
   </data>
-	<data name="PlexActions_PlexPlaylists_Title" xml:space="preserve">
+  <data name="PlexActions_PlexPlaylists_Title" xml:space="preserve">
     <value>Listas de reproducción de Plex existentes</value>
   </data>
-	<data name="PlexActions_LoadingPlexPlaylists" xml:space="preserve">
+  <data name="PlexActions_LoadingPlexPlaylists" xml:space="preserve">
     <value>Cargando listas de reproducción de Plex…</value>
   </data>
-	<data name="PlexActions_NoPlexPlaylists" xml:space="preserve">
+  <data name="PlexActions_NoPlexPlaylists" xml:space="preserve">
     <value>No se encontraron listas de reproducción de Plex.</value>
   </data>
-	<data name="PlexActions_LoadingTracks" xml:space="preserve">
+  <data name="PlexActions_LoadingTracks" xml:space="preserve">
     <value>Cargando pistas…</value>
   </data>
-	<data name="PlexActions_NoTracksFound" xml:space="preserve">
+  <data name="PlexActions_NoTracksFound" xml:space="preserve">
     <value>No se encontraron pistas en esta lista de reproducción.</value>
   </data>
-	<data name="PlexActions_ConfirmDelete" xml:space="preserve">
+  <data name="PlexActions_ConfirmDelete" xml:space="preserve">
     <value>¿Seguro que deseas eliminar esta lista de reproducción?</value>
   </data>
-	<data name="Playlist_Inhalt" xml:space="preserve">
+  <data name="Playlist_Inhalt" xml:space="preserve">
     <value>Contenido de la lista de reproducción</value>
   </data>
-	<data name="Plex_LoginFailed" xml:space="preserve">
+  <data name="Plex_LoginFailed" xml:space="preserve">
     <value>Error al iniciar sesión en Plex.</value>
   </data>
-	<data name="Plex_UserFetchFailed" xml:space="preserve">
+  <data name="Plex_UserFetchFailed" xml:space="preserve">
     <value>No se pudo obtener el usuario de Plex.</value>
   </data>
-	<data name="Plex_NoToken" xml:space="preserve">
+  <data name="Plex_NoToken" xml:space="preserve">
     <value>No se recibió un token válido de Plex.</value>
   </data>
-	<data name="Plex_Welcome" xml:space="preserve">
+  <data name="Plex_Welcome" xml:space="preserve">
     <value>¡Bienvenido, {0}!</value>
   </data>
-	<data name="Plex_StatusLoadError" xml:space="preserve">
+  <data name="Plex_StatusLoadError" xml:space="preserve">
     <value>Error al cargar las acciones de Plex.</value>
   </data>
-	<data name="Plex_DisconnectError" xml:space="preserve">
+  <data name="Plex_DisconnectError" xml:space="preserve">
     <value>Error al desconectar Plex.</value>
   </data>
-	<data name="Plex_StatusCheckError" xml:space="preserve">
+  <data name="Plex_StatusCheckError" xml:space="preserve">
     <value>Error al comprobar el estado de Plex.</value>
   </data>
-	<data name="Plex_LoginStartError" xml:space="preserve">
+  <data name="Plex_LoginStartError" xml:space="preserve">
     <value>No se pudo iniciar sesión en Plex.</value>
   </data>
-	<data name="Plex_PageLoadError" xml:space="preserve">
+  <data name="Plex_PageLoadError" xml:space="preserve">
     <value>Error al cargar la página Spotify→Plex.</value>
   </data>
-	<data name="Plex_ExportSummary" xml:space="preserve">
+  <data name="Plex_ExportSummary" xml:space="preserve">
     <value>Resumen de exportación de lista de reproducción</value>
   </data>
-	<data name="Plex_ExportedTracks" xml:space="preserve">
+  <data name="Plex_ExportedTracks" xml:space="preserve">
     <value>Pistas exportadas</value>
   </data>
-	<data name="Plex_MissingTracks" xml:space="preserve">
+  <data name="Plex_MissingTracks" xml:space="preserve">
     <value>Pistas faltantes</value>
   </data>
-	<data name="Plex_NoExportData" xml:space="preserve">
+  <data name="Plex_NoExportData" xml:space="preserve">
     <value>No se encontraron datos de exportación.</value>
   </data>
-	<data name="Plex_BackToOverview" xml:space="preserve">
+  <data name="Plex_BackToOverview" xml:space="preserve">
     <value>Volver a la vista general</value>
   </data>
-	<data name="PlexActions_SyncSpotifyPlaylistsWithPlex" xml:space="preserve">
+  <data name="PlexActions_SyncSpotifyPlaylistsWithPlex" xml:space="preserve">
     <value>Sincroniza tus listas de reproducción de Spotify automáticamente con tu biblioteca de Plex.</value>
   </data>
-	<data name="PlexActions_ExportPlaylists" xml:space="preserve">
+  <data name="PlexActions_ExportPlaylists" xml:space="preserve">
     <value>Exportar listas de reproducción</value>
   </data>
-	<data name="PlexActions_Disconnect" xml:space="preserve">
+  <data name="PlexActions_Disconnect" xml:space="preserve">
     <value>Desconectar enlace de Plex</value>
   </data>
-	<data name="PlexActions_AllPlaylistsExported" xml:space="preserve">
+  <data name="PlexActions_AllPlaylistsExported" xml:space="preserve">
     <value>¡Todas las listas de reproducción exportadas correctamente!</value>
   </data>
-	<data name="PlexActions_Info_Disconnected" xml:space="preserve">
+  <data name="PlexActions_Info_Disconnected" xml:space="preserve">
     <value>El enlace de Plex ha sido eliminado.</value>
   </data>
-	<data name="PlexActions_Title" xml:space="preserve">
+  <data name="PlexActions_Title" xml:space="preserve">
     <value>Spotify → Plex</value>
   </data>
-	<data name="PlexActions_ExportStarted" xml:space="preserve">
+  <data name="PlexActions_ExportStarted" xml:space="preserve">
     <value>Exportación en curso, por favor espera...</value>
   </data>
-	<data name="PlexActions_ExportFinished" xml:space="preserve">
+  <data name="PlexActions_ExportFinished" xml:space="preserve">
     <value>Exportación completada.</value>
   </data>
-
-	<data name="Datenschutz_Bismarckstr_6" xml:space="preserve"><value>Bismarckstr. 6</value></data>
-	<data name="Datenschutz_Daniel_Frede" xml:space="preserve"><value>Daniel Frede</value></data>
-	<data name="Datenschutz_Dashboard" xml:space="preserve"><value>Panel</value></data>
-	<data name="Datenschutz_Datenschutz" xml:space="preserve"><value>Privacidad</value></data>
-	<data name="Datenschutz_Datenschutzerkl_rung" xml:space="preserve"><value>Política de privacidad</value></data>
-	<data name="Datenschutz_Datenschutzerkl_rung_InetConnector_Playlist_Gene" xml:space="preserve"><value>Política de privacidad – InetConnector Playlist Generator™</value></data>
-	<data name="Datenschutz_Dein_Spotify_Benutzername_und_deine_ffentliche_N" xml:space="preserve"><value>Tu nombre de usuario de Spotify y tu ID pública</value></data>
-	<data name="Datenschutz_Deine_Top_Tracks_Lieblingssongs" xml:space="preserve"><value>Tus canciones más escuchadas (“favoritas”)</value></data>
-	<data name="Datenschutz_Die_Daten_werden_ausschlie_lich_verwendet_um_Spo" xml:space="preserve">
+  <data name="Datenschutz_Bismarckstr_6" xml:space="preserve">
+    <value>Bismarckstr. 6</value>
+  </data>
+  <data name="Datenschutz_Daniel_Frede" xml:space="preserve">
+    <value>Daniel Frede</value>
+  </data>
+  <data name="Datenschutz_Dashboard" xml:space="preserve">
+    <value>Panel</value>
+  </data>
+  <data name="Datenschutz_Datenschutz" xml:space="preserve">
+    <value>Privacidad</value>
+  </data>
+  <data name="Datenschutz_Datenschutzerkl_rung" xml:space="preserve">
+    <value>Política de privacidad</value>
+  </data>
+  <data name="Datenschutz_Datenschutzerkl_rung_InetConnector_Playlist_Gene" xml:space="preserve">
+    <value>Política de privacidad – InetConnector Playlist Generator™</value>
+  </data>
+  <data name="Datenschutz_Dein_Spotify_Benutzername_und_deine_ffentliche_N" xml:space="preserve">
+    <value>Tu nombre de usuario de Spotify y tu ID pública</value>
+  </data>
+  <data name="Datenschutz_Deine_Top_Tracks_Lieblingssongs" xml:space="preserve">
+    <value>Tus canciones más escuchadas (“favoritas”)</value>
+  </data>
+  <data name="Datenschutz_Die_Daten_werden_ausschlie_lich_verwendet_um_Spo" xml:space="preserve">
     <value>Los datos se utilizan exclusivamente para generar listas de reproducción de Spotify para ti. No se realiza ningún almacenamiento, análisis ni transmisión permanente a terceros. Tras finalizar la sesión, no se almacenan datos personales en el servidor.</value>
   </data>
-	<data name="Datenschutz_Diese_Anwendung" xml:space="preserve"><value>Esta aplicación (“</value></data>
-	<data name="Datenschutz_Diese_App_steht_in_keiner_offiziellen_Verbindung" xml:space="preserve">
+  <data name="Datenschutz_Diese_Anwendung" xml:space="preserve">
+    <value>Esta aplicación (“</value>
+  </data>
+  <data name="Datenschutz_Diese_App_steht_in_keiner_offiziellen_Verbindung" xml:space="preserve">
     <value>Esta aplicación no está afiliada oficialmente a Spotify AB. Spotify es una marca registrada de Spotify AB, Estocolmo, Suecia.</value>
   </data>
-	<data name="Datenschutz_Diese_Website_kann_optional_Google_Analytics_4_v" xml:space="preserve">
+  <data name="Datenschutz_Diese_Website_kann_optional_Google_Analytics_4_v" xml:space="preserve">
     <value>Este sitio web puede utilizar opcionalmente Google Analytics 4. Las direcciones IP se anonimizan antes de enviarse a los servidores de Google (anonimización de IP). Los datos se utilizan únicamente con fines estadísticos. Puedes desactivar la recopilación en la configuración de tu navegador.</value>
   </data>
-	<data name="Datenschutz_Du_hast_gem_Art_15_ff_DSGVO_jederzeit_das_Recht_" xml:space="preserve">
+  <data name="Datenschutz_Du_hast_gem_Art_15_ff_DSGVO_jederzeit_das_Recht_" xml:space="preserve">
     <value>De acuerdo con el Art. 15 y siguientes del RGPD, tienes derecho en todo momento a acceder, rectificar, suprimir, restringir el tratamiento y solicitar la portabilidad de tus datos personales.</value>
   </data>
-	<data name="Datenschutz_Du_kannst_den_Zugriff_jederzeit_ber_dein" xml:space="preserve"><value>Puedes revocar el acceso en cualquier momento a través de tu</value></data>
-	<data name="Datenschutz_E_Mail_info_at_inetconnector_com" xml:space="preserve"><value>Correo electrónico: info(at)inetconnector.com</value></data>
-	<data name="Datenschutz_Empfohlene_Songs_die_Spotify_anhand_deiner_H_rge" xml:space="preserve"><value>Canciones recomendadas generadas por Spotify según tus hábitos de escucha</value></data>
-	<data name="Datenschutz_Es_werden_keine_Cookies_keine_Tracking_Tools_und" xml:space="preserve">
+  <data name="Datenschutz_Du_kannst_den_Zugriff_jederzeit_ber_dein" xml:space="preserve">
+    <value>Puedes revocar el acceso en cualquier momento a través de tu</value>
+  </data>
+  <data name="Datenschutz_E_Mail_info_at_inetconnector_com" xml:space="preserve">
+    <value>Correo electrónico: info(at)inetconnector.com</value>
+  </data>
+  <data name="Datenschutz_Empfohlene_Songs_die_Spotify_anhand_deiner_H_rge" xml:space="preserve">
+    <value>Canciones recomendadas generadas por Spotify según tus hábitos de escucha</value>
+  </data>
+  <data name="Datenschutz_Es_werden_keine_Cookies_keine_Tracking_Tools_und" xml:space="preserve">
     <value>No se utilizan cookies, herramientas de seguimiento ni servicios de análisis externos. La aplicación utiliza únicamente la Spotify Web API. Todos los tokens se eliminan al finalizar la sesión.</value>
   </data>
-	<data name="Datenschutz_F_r_freiwillige_Spenden_wird_der_Dienst_PayPal_g" xml:space="preserve">
+  <data name="Datenschutz_F_r_freiwillige_Spenden_wird_der_Dienst_PayPal_g" xml:space="preserve">
     <value>Para donaciones voluntarias se utiliza el servicio PayPal (PayPal (Europe) S.à r.l. et Cie, S.C.A., Luxemburgo). Al hacer clic en el enlace o código QR de donación, serás redirigido al sitio web de PayPal. Se aplican las políticas de privacidad de PayPal:</value>
   </data>
-	<data name="Datenschutz_Google_Analytics_optional" xml:space="preserve"><value>Google Analytics (opcional)</value></data>
-	<data name="Datenschutz_Impressum" xml:space="preserve"><value>Aviso legal</value></data>
-	<data name="Datenschutz_InetConnector_Spotify_Tools" xml:space="preserve"><value>Herramientas Spotify de InetConnector</value></data>
-	<data name="Datenschutz_Letzte_Aktualisierung" xml:space="preserve"><value>Última actualización:</value></data>
-	<data name="Datenschutz_Oktober_2025" xml:space="preserve"><value>Octubre de 2025</value></data>
-	<data name="Datenschutz_Playlist_Generator_f_r_Spotify" xml:space="preserve"><value>Generador de listas de reproducción para Spotify®</value></data>
-	<data name="Datenschutz_Rechtliches" xml:space="preserve"><value>Información legal</value></data>
-	<data name="Datenschutz_Spenden_ber_PayPal" xml:space="preserve"><value>Donaciones a través de PayPal</value></data>
-	<data name="Datenschutz_Spotify_Konto" xml:space="preserve"><value>Cuenta de Spotify</value></data>
-	<data name="Datenschutz_Spotify_Web_API" xml:space="preserve"><value>Spotify Web API</value></data>
-	<data name="Datenschutz_Stand_15_Oktober_2025" xml:space="preserve"><value>Estado: 15 de octubre de 2025</value></data>
-	<data name="Datenschutz_Startseite" xml:space="preserve"><value>Inicio</value></data>
-	<data name="Datenschutz_Text" xml:space="preserve"><value>🛡️</value></data>
-	<data name="Datenschutz_Verantwortlich" xml:space="preserve"><value>Responsable</value></data>
-	<data name="Datenschutz_Verantwortlich_f_r_den_Betrieb_dieser_Anwendung_" xml:space="preserve"><value>El operador del dominio es responsable del funcionamiento de esta aplicación</value></data>
-	<data name="Datenschutz_Verantwortlich_im_Sinne_der_Datenschutzgesetze" xml:space="preserve"><value>Responsable según las leyes de protección de datos:</value></data>
-	<data name="Datenschutz_Welche_Daten_werden_verwendet" xml:space="preserve"><value>¿Qué datos se utilizan?</value></data>
-	<data name="Datenschutz_Widerruf_des_Zugriffs" xml:space="preserve"><value>Revocación del acceso</value></data>
-	<data name="Datenschutz_Wof_r_werden_die_Daten_genutzt" xml:space="preserve"><value>¿Para qué se utilizan los datos?</value></data>
-	<data name="Datenschutz_nutzt_die" xml:space="preserve"><value>”) utiliza la</value></data>
-	<data name="Datenschutz_playlists_inetconnector_com" xml:space="preserve"><value>playlists.inetconnector.com</value></data>
-	<data name="Datenschutz_um_personalisierte_Playlists_zu_erstellen_Dabei_" xml:space="preserve">
+  <data name="Datenschutz_Google_Analytics_optional" xml:space="preserve">
+    <value>Google Analytics (opcional)</value>
+  </data>
+  <data name="Datenschutz_Impressum" xml:space="preserve">
+    <value>Aviso legal</value>
+  </data>
+  <data name="Datenschutz_InetConnector_Spotify_Tools" xml:space="preserve">
+    <value>Herramientas Spotify de InetConnector</value>
+  </data>
+  <data name="Datenschutz_Letzte_Aktualisierung" xml:space="preserve">
+    <value>Última actualización:</value>
+  </data>
+  <data name="Datenschutz_Oktober_2025" xml:space="preserve">
+    <value>Octubre de 2025</value>
+  </data>
+  <data name="Datenschutz_Playlist_Generator_f_r_Spotify" xml:space="preserve">
+    <value>Generador de listas de reproducción para Spotify®</value>
+  </data>
+  <data name="Datenschutz_Rechtliches" xml:space="preserve">
+    <value>Información legal</value>
+  </data>
+  <data name="Datenschutz_Spenden_ber_PayPal" xml:space="preserve">
+    <value>Donaciones a través de PayPal</value>
+  </data>
+  <data name="Datenschutz_Spotify_Konto" xml:space="preserve">
+    <value>Cuenta de Spotify</value>
+  </data>
+  <data name="Datenschutz_Spotify_Web_API" xml:space="preserve">
+    <value>Spotify Web API</value>
+  </data>
+  <data name="Datenschutz_Stand_15_Oktober_2025" xml:space="preserve">
+    <value>Estado: 15 de octubre de 2025</value>
+  </data>
+  <data name="Datenschutz_Startseite" xml:space="preserve">
+    <value>Inicio</value>
+  </data>
+  <data name="Datenschutz_Text" xml:space="preserve">
+    <value>🛡️</value>
+  </data>
+  <data name="Datenschutz_Verantwortlich" xml:space="preserve">
+    <value>Responsable</value>
+  </data>
+  <data name="Datenschutz_Verantwortlich_f_r_den_Betrieb_dieser_Anwendung_" xml:space="preserve">
+    <value>El operador del dominio es responsable del funcionamiento de esta aplicación</value>
+  </data>
+  <data name="Datenschutz_Verantwortlich_im_Sinne_der_Datenschutzgesetze" xml:space="preserve">
+    <value>Responsable según las leyes de protección de datos:</value>
+  </data>
+  <data name="Datenschutz_Welche_Daten_werden_verwendet" xml:space="preserve">
+    <value>¿Qué datos se utilizan?</value>
+  </data>
+  <data name="Datenschutz_Widerruf_des_Zugriffs" xml:space="preserve">
+    <value>Revocación del acceso</value>
+  </data>
+  <data name="Datenschutz_Wof_r_werden_die_Daten_genutzt" xml:space="preserve">
+    <value>¿Para qué se utilizan los datos?</value>
+  </data>
+  <data name="Datenschutz_nutzt_die" xml:space="preserve">
+    <value>”) utiliza la</value>
+  </data>
+  <data name="Datenschutz_playlists_inetconnector_com" xml:space="preserve">
+    <value>playlists.inetconnector.com</value>
+  </data>
+  <data name="Datenschutz_um_personalisierte_Playlists_zu_erstellen_Dabei_" xml:space="preserve">
     <value>para crear listas de reproducción personalizadas. Tu cuenta de Spotify se conecta temporalmente para acceder a tus canciones y artistas favoritos.</value>
   </data>
-	<data name="Datenschutz_widerrufen" xml:space="preserve"><value>revocado.</value></data>
-	<data name="Datenschutz_www_paypal_com_privacy" xml:space="preserve"><value>www.paypal.com/privacy</value></data>
-	<!-- ===================== -->
-	<!--  ⚠️ Error messages ES -->
-	<!-- ===================== -->
-	<data name="Error_Details_anzeigen" xml:space="preserve"><value>Mostrar detalles</value></data>
-	<data name="Error_Ein_Fehler_ist_aufgetreten" xml:space="preserve"><value>🚨 Se ha producido un error</value></data>
-	<data name="Error_Fehler_InetConnector_Playlist_Generator" xml:space="preserve"><value>Error – InetConnector Playlist Generator™</value></data>
-	<data name="Error_Pfad" xml:space="preserve"><value>Ruta:</value></data>
-	<data name="Error_Zur_ck_zum_Dashboard" xml:space="preserve"><value>⬅️ Volver al panel</value></data>
-
-	<!-- ===================== -->
-	<!--  🧾 Impressum / Legal -->
-	<!-- ===================== -->
-	<data name="Impressum_97209_Veitsh_chheim" xml:space="preserve"><value>97209 Veitshöchheim</value></data>
-	<data name="Impressum_Angaben_gem_5_TMG_18_Abs_2_MStV" xml:space="preserve"><value>Información conforme a §5 TMG y §18 párr. 2 MStV:</value></data>
-	<data name="Impressum_Bismarckstrasse_6e" xml:space="preserve"><value>Bismarckstrasse 6</value></data>
-	<data name="Impressum_Daniel_Frede" xml:space="preserve"><value>Daniel Frede</value></data>
-	<data name="Impressum_Daniel_Frede_Veitsh_chheim_bei_W_rzburg" xml:space="preserve"><value>Daniel Frede, Veitshöchheim cerca de Würzburg</value></data>
-	<data name="Impressum_Datenschutzerkl_rung" xml:space="preserve"><value>Política de privacidad</value></data>
-	<data name="Impressum_Deutschland" xml:space="preserve"><value>Alemania</value></data>
-	<data name="Impressum_Die_Inhalte_unserer_Seiten_wurden_mit_gr_ter_Sor" xml:space="preserve">
+  <data name="Datenschutz_widerrufen" xml:space="preserve">
+    <value>revocado.</value>
+  </data>
+  <data name="Datenschutz_www_paypal_com_privacy" xml:space="preserve">
+    <value>www.paypal.com/privacy</value>
+  </data>
+  <!-- ===================== -->
+  <!--  ⚠️ Error messages ES -->
+  <!-- ===================== -->
+  <data name="Error_Details_anzeigen" xml:space="preserve">
+    <value>Mostrar detalles</value>
+  </data>
+  <data name="Error_Ein_Fehler_ist_aufgetreten" xml:space="preserve">
+    <value>🚨 Se ha producido un error</value>
+  </data>
+  <data name="Error_Fehler_InetConnector_Playlist_Generator" xml:space="preserve">
+    <value>Error – InetConnector Playlist Generator™</value>
+  </data>
+  <data name="Error_Pfad" xml:space="preserve">
+    <value>Ruta:</value>
+  </data>
+  <data name="Error_Zur_ck_zum_Dashboard" xml:space="preserve">
+    <value>⬅️ Volver al panel</value>
+  </data>
+  <!-- ===================== -->
+  <!--  🧾 Impressum / Legal -->
+  <!-- ===================== -->
+  <data name="Impressum_97209_Veitsh_chheim" xml:space="preserve">
+    <value>97209 Veitshöchheim</value>
+  </data>
+  <data name="Impressum_Angaben_gem_5_TMG_18_Abs_2_MStV" xml:space="preserve">
+    <value>Información conforme a §5 TMG y §18 párr. 2 MStV:</value>
+  </data>
+  <data name="Impressum_Bismarckstrasse_6e" xml:space="preserve">
+    <value>Bismarckstrasse 6</value>
+  </data>
+  <data name="Impressum_Daniel_Frede" xml:space="preserve">
+    <value>Daniel Frede</value>
+  </data>
+  <data name="Impressum_Daniel_Frede_Veitsh_chheim_bei_W_rzburg" xml:space="preserve">
+    <value>Daniel Frede, Veitshöchheim cerca de Würzburg</value>
+  </data>
+  <data name="Impressum_Datenschutzerkl_rung" xml:space="preserve">
+    <value>Política de privacidad</value>
+  </data>
+  <data name="Impressum_Deutschland" xml:space="preserve">
+    <value>Alemania</value>
+  </data>
+  <data name="Impressum_Die_Inhalte_unserer_Seiten_wurden_mit_gr_ter_Sor" xml:space="preserve">
     <value>El contenido de nuestras páginas ha sido creado con el máximo cuidado. Sin embargo, no podemos garantizar la exactitud, integridad o actualidad del contenido.  
 Como proveedor de servicios, somos responsables de nuestro propio contenido en estas páginas de acuerdo con la Sección 7 (1) de la Ley Alemana de Telemedios (TMG).</value>
   </data>
-	<data name="Impressum_Die_durch_die_Seitenbetreiber_erstellten_Inhalte" xml:space="preserve">
+  <data name="Impressum_Die_durch_die_Seitenbetreiber_erstellten_Inhalte" xml:space="preserve">
     <value>El contenido y las obras creadas por los operadores del sitio están sujetos a la legislación alemana sobre derechos de autor.  
 Las contribuciones de terceros están marcadas como tales. Cualquier reproducción, procesamiento, distribución o uso fuera de los límites de la ley de derechos de autor requiere el consentimiento por escrito del autor o creador correspondiente.</value>
   </data>
-	<data name="Impressum_E_Mail_kontakt_at_inetconnector_com" xml:space="preserve"><value>Correo electrónico: kontakt(at)inetconnector.com</value></data>
-	<data name="Impressum_Haftung_f_r_Inhalte" xml:space="preserve"><value>Responsabilidad por el contenido</value></data>
-	<data name="Impressum_Haftung_f_r_Links" xml:space="preserve"><value>Responsabilidad por los enlaces</value></data>
-	<data name="Impressum_Impressum" xml:space="preserve"><value>Aviso legal</value></data>
-	<data name="Impressum_Impressum_InetConnector_Playlist_Generator" xml:space="preserve"><value>Aviso legal – InetConnector Playlist Generator™</value></data>
-	<data name="Impressum_InetConnector_com" xml:space="preserve"><value>InetConnector.com</value></data>
-	<data name="Impressum_Unser_Angebot_enth_lt_Links_zu_externen_Websites" xml:space="preserve">
+  <data name="Impressum_E_Mail_kontakt_at_inetconnector_com" xml:space="preserve">
+    <value>Correo electrónico: kontakt(at)inetconnector.com</value>
+  </data>
+  <data name="Impressum_Haftung_f_r_Inhalte" xml:space="preserve">
+    <value>Responsabilidad por el contenido</value>
+  </data>
+  <data name="Impressum_Haftung_f_r_Links" xml:space="preserve">
+    <value>Responsabilidad por los enlaces</value>
+  </data>
+  <data name="Impressum_Impressum" xml:space="preserve">
+    <value>Aviso legal</value>
+  </data>
+  <data name="Impressum_Impressum_InetConnector_Playlist_Generator" xml:space="preserve">
+    <value>Aviso legal – InetConnector Playlist Generator™</value>
+  </data>
+  <data name="Impressum_InetConnector_com" xml:space="preserve">
+    <value>InetConnector.com</value>
+  </data>
+  <data name="Impressum_Unser_Angebot_enth_lt_Links_zu_externen_Websites" xml:space="preserve">
     <value>Nuestra oferta contiene enlaces a sitios web externos de terceros sobre los que no tenemos control.  
 Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos externos. El proveedor u operador respectivo de las páginas enlazadas es siempre responsable de su contenido.</value>
   </data>
-	<data name="Impressum_Urheberrecht" xml:space="preserve"><value>Derechos de autor</value></data>
-	<data name="Impressum_Verantwortlich_f_r_den_Inhalt" xml:space="preserve"><value>Responsable del contenido</value></data>
-	<data name="Impressum_Zur_Datenschutzerkl_rung" xml:space="preserve"><value>Ir a la política de privacidad</value></data>
-
-	<!-- ===================== -->
-	<!--  🏠 Index / Home Page -->
-	<!-- ===================== -->
-	<data name="Index_Datenschutz" xml:space="preserve"><value>Privacidad</value></data>
-	<data name="Index_Der_Dienst_wird_von" xml:space="preserve"><value>El servicio es operado por</value></data>
-	<data name="Index_Empfehlungen_basierend_auf_deinem_H_rverhalten" xml:space="preserve"><value>✨ Recomendaciones basadas en tus hábitos de escucha</value></data>
-	<data name="Index_Gef_llt_dir_dieses_Tool_Unterst_tze_die_Weiteren" xml:space="preserve">
+  <data name="Impressum_Urheberrecht" xml:space="preserve">
+    <value>Derechos de autor</value>
+  </data>
+  <data name="Impressum_Verantwortlich_f_r_den_Inhalt" xml:space="preserve">
+    <value>Responsable del contenido</value>
+  </data>
+  <data name="Impressum_Zur_Datenschutzerkl_rung" xml:space="preserve">
+    <value>Ir a la política de privacidad</value>
+  </data>
+  <!-- ===================== -->
+  <!--  🏠 Index / Home Page -->
+  <!-- ===================== -->
+  <data name="Index_Datenschutz" xml:space="preserve">
+    <value>Privacidad</value>
+  </data>
+  <data name="Index_Der_Dienst_wird_von" xml:space="preserve">
+    <value>El servicio es operado por</value>
+  </data>
+  <data name="Index_Empfehlungen_basierend_auf_deinem_H_rverhalten" xml:space="preserve">
+    <value>✨ Recomendaciones basadas en tus hábitos de escucha</value>
+  </data>
+  <data name="Index_Gef_llt_dir_dieses_Tool_Unterst_tze_die_Weiteren" xml:space="preserve">
     <value>¿Te gusta esta herramienta? Apoya su desarrollo con una pequeña donación. Cada contribución ayuda a mantener el Playlist Generator gratuito y sin publicidad.</value>
   </data>
-	<data name="Index_Impressum" xml:space="preserve"><value>Aviso legal</value></data>
-	<data name="Index_InetConnector" xml:space="preserve"><value>InetConnector</value></data>
-	<data name="Index_Jetzt_ber_PayPal_spenden" xml:space="preserve"><value>💸 Donar ahora mediante PayPal</value></data>
-	<data name="Index_Lieblingssongs" xml:space="preserve"><value>Canciones favoritas</value></data>
-	<data name="Index_Lieblingssongs_in_Originalreihenfolge_klonen" xml:space="preserve"><value>📜 Clonar canciones favoritas en el orden original</value></data>
-	<data name="Index_Mit_Spotify_verbinden" xml:space="preserve"><value>🔐 Conectar con Spotify</value></data>
-	<data name="Index_Mit_diesem_kostenlosen_Online_Tool_kannst_du_aut" xml:space="preserve"><value>Con esta herramienta gratuita en línea puedes crear automáticamente listas de reproducción de Spotify a partir de tus</value></data>
-	<data name="Index_Nach_dem_Login_mit_deinem_Spotify_Konto_greift_d" xml:space="preserve">
+  <data name="Index_Impressum" xml:space="preserve">
+    <value>Aviso legal</value>
+  </data>
+  <data name="Index_InetConnector" xml:space="preserve">
+    <value>InetConnector</value>
+  </data>
+  <data name="Index_Jetzt_ber_PayPal_spenden" xml:space="preserve">
+    <value>💸 Donar ahora mediante PayPal</value>
+  </data>
+  <data name="Index_Lieblingssongs" xml:space="preserve">
+    <value>Canciones favoritas</value>
+  </data>
+  <data name="Index_Lieblingssongs_in_Originalreihenfolge_klonen" xml:space="preserve">
+    <value>📜 Clonar canciones favoritas en el orden original</value>
+  </data>
+  <data name="Index_Mit_Spotify_verbinden" xml:space="preserve">
+    <value>🔐 Conectar con Spotify</value>
+  </data>
+  <data name="Index_Mit_diesem_kostenlosen_Online_Tool_kannst_du_aut" xml:space="preserve">
+    <value>Con esta herramienta gratuita en línea puedes crear automáticamente listas de reproducción de Spotify a partir de tus</value>
+  </data>
+  <data name="Index_Nach_dem_Login_mit_deinem_Spotify_Konto_greift_d" xml:space="preserve">
     <value>Después de iniciar sesión con tu cuenta de Spotify, la aplicación accede de forma segura a tus datos de escucha a través de la API web de Spotify y crea automáticamente listas de reproducción según tus preferencias. Puedes decidir si guardar tus canciones más escuchadas, tus favoritas o canciones recomendadas en un nuevo orden.</value>
   </data>
-	<data name="Index_Playlist_Generator_f_r_Spotify_Lieblingssongs_au" xml:space="preserve"><value>Generador de listas de reproducción para Spotify® – guarda automáticamente tus canciones favoritas</value></data>
-	<data name="Index_Scanne_den_QR_Code_zum_Spenden" xml:space="preserve"><value>Escanea el código QR para donar</value></data>
-	<data name="Index_Spenden" xml:space="preserve"><value>💚 Donar</value></data>
-	<data name="Index_Spotify_Playlist_Generator_by_InetConnector_Lieb" xml:space="preserve"><value>Generador de listas de reproducción para Spotify® de InetConnector – guarda y crea listas automáticamente</value></data>
-	<data name="Index_Text" xml:space="preserve"><value>🎧</value></data>
-	<data name="Index_Unterst_tze_das_Projekt" xml:space="preserve"><value>💚 Apoya el proyecto</value></data>
-	<data name="Index_Was_dieses_Tool_kann" xml:space="preserve"><value>Qué puede hacer esta herramienta</value></data>
-	<data name="Index_Wie_funktioniert_der_Spotify_Playlist_Generator" xml:space="preserve"><value>¿Cómo funciona el generador de listas de reproducción de Spotify?</value></data>
-	<data name="Index_Zuf_llige_Playlists_aus_Lieblingssongs_generiere" xml:space="preserve"><value>🎲 Generar listas de reproducción aleatorias de canciones favoritas</value></data>
-	<data name="Index_betrieben_und_nutzt_ausschlie_lich_offizielle_Sp" xml:space="preserve"><value>operado y utiliza únicamente interfaces oficiales de Spotify – sin riesgos, sin anuncios, sin costes ocultos.</value></data>
-	<data name="Index_erstellen_direkt_ber_die_offizielle_Spotify_Web_" xml:space="preserve"><value>crear – directamente a través de la API web oficial de Spotify.</value></data>
-	<data name="Index_meistgeh_rten_Tracks" xml:space="preserve"><value>pistas más escuchadas</value></data>
-	<data name="Index_oder" xml:space="preserve"><value>o</value></data>
-
-	<!-- ===================== -->
-	<!--  Misc Buttons / UI -->
-	<!-- ===================== -->
-	<data name="Cancel" xml:space="preserve"><value>Cancelar</value></data>
-	<data name="Dashboard" xml:space="preserve"><value>Panel</value></data>
-	<data name="English" xml:space="preserve"><value>Inglés</value></data>
-	<data name="German" xml:space="preserve"><value>Alemán</value></data>
-	<data name="Imprint" xml:space="preserve"><value>Aviso legal</value></data>
-	<data name="Language" xml:space="preserve"><value>Idioma</value></data>
-	<data name="Login" xml:space="preserve"><value>Iniciar sesión</value></data>
-	<data name="Logout" xml:space="preserve"><value>Cerrar sesión</value></data>
-	<data name="Privacy" xml:space="preserve"><value>Privacidad</value></data>
-	<data name="Save" xml:space="preserve"><value>Guardar</value></data>
-	<data name="Search" xml:space="preserve"><value>Buscar</value></data>
-	<data name="Welcome" xml:space="preserve"><value>Bienvenido</value></data>
-
-	<!-- ===================== -->
-	<!--  Spotify → Plex (ES) -->
-	<!-- ===================== -->
-	<data name="SpotifyToPlex_Title" xml:space="preserve"><value>Spotify a Plex</value></data>
-	<data name="SpotifyToPlex_Heading" xml:space="preserve"><value>Conecta tu cuenta Plex</value></data>
-	<data name="SpotifyToPlex_Connect" xml:space="preserve"><value>Conectar con Plex</value></data>
-	<data name="SpotifyToPlex_Disconnect" xml:space="preserve"><value>Desconectar enlace de Plex</value></data>
-	<data name="SpotifyToPlex_LoginTitle" xml:space="preserve"><value>Inicio de sesión en Plex</value></data>
-	<data name="SpotifyToPlex_LoginDesc" xml:space="preserve"><value>Abre el inicio de sesión de Plex y autoriza el acceso.</value></data>
-	<data name="SpotifyToPlex_Code" xml:space="preserve"><value>Código</value></data>
-	<data name="SpotifyToPlex_OpenPlexLogin" xml:space="preserve"><value>Abrir inicio de sesión de Plex</value></data>
-	<data name="SpotifyToPlex_Waiting" xml:space="preserve"><value>Esperando confirmación…</value></data>
-	<data name="SpotifyToPlex_Connected" xml:space="preserve"><value>¡Conectado! Redirigiendo…</value></data>
-	<data name="SpotifyToPlex_SelectPlaylist" xml:space="preserve"><value>Selecciona una lista de Spotify para exportar</value></data>
-	<data name="SpotifyToPlex_ServerDetected" xml:space="preserve"><value>Conectado al servidor Plex:</value></data>
-	<data name="SpotifyToPlex_SelectLabel" xml:space="preserve"><value>Lista de reproducción</value></data>
-	<data name="SpotifyToPlex_ExportNamePlaceholder" xml:space="preserve"><value>Opcional: nombre de lista Plex (vacío = “Spotify - Nombre”)</value></data>
-	<data name="SpotifyToPlex_Export" xml:space="preserve"><value>Exportar ahora</value></data>
-	<data name="SpotifyToPlex_Exported" xml:space="preserve"><value>Exportado a Plex:</value></data>
-	<data name="SpotifyToPlex_AddedCount" xml:space="preserve"><value>Pistas añadidas:</value></data>
-	<data name="SpotifyToPlex_NotFound" xml:space="preserve"><value>No se pudieron encontrar estas pistas:</value></data>
-	<data name="SpotifyToPlex_TokenExpired" xml:space="preserve"><value>El token de Plex ha expirado. Por favor, vuelve a conectarte.</value></data>
-	<data name="SpotifyToPlex_ExportAll" xml:space="preserve"><value>Exportar todo</value></data>
-	<data name="SpotifyToPlex_ExportAll_Done" xml:space="preserve"><value>Todas las listas exportadas</value></data>
-	<data name="SpotifyToPlex_TotalMissing" xml:space="preserve"><value>Pistas faltantes totales:</value></data>
-	<data name="SpotifyToPlex_NoMissing" xml:space="preserve"><value>No hay pistas faltantes</value></data>
-	<data name="SpotifyToPlex_Info" xml:space="preserve"><value>Esta conexión es segura y utiliza la autenticación oficial de PIN de Plex.</value></data>
-	<data name="SpotifyToPlex_Header" xml:space="preserve"><value>Conectar Spotify con Plex</value></data>
-	<data name="SpotifyToPlex_Intro" xml:space="preserve"><value>Sincroniza automáticamente tus listas de Spotify con tu biblioteca Plex.</value></data>
-	<data name="SpotifyToPlex_ExportStopped" xml:space="preserve"><value>Exportación cancelada.</value></data>
-	<data name="SpotifyToPlex_SyncAll" xml:space="preserve"><value>Sincronizar todas las listas</value></data>
-	<data name="SpotifyToPlex_LiveExport" xml:space="preserve"><value>Exportación en vivo</value></data>
-	<!-- 🎧 Playlist Generator / Buttons -->
-	<data name="Btn_Liked_Clone" xml:space="preserve"><value>Clonar canciones favoritas</value></data>
-	<data name="Desc_Liked_Clone" xml:space="preserve"><value>Crea una lista de reproducción con tus canciones guardadas.</value></data>
-
-	<data name="Btn_Alternative_Favorites" xml:space="preserve"><value>Crear canciones favoritas alternativas</value></data>
-	<data name="Desc_Alternative_Favorites" xml:space="preserve"><value>Genera canciones similares del mismo artista, sin duplicados.</value></data>
-
-	<data name="Btn_Recommendations" xml:space="preserve"><value>Crear recomendaciones</value></data>
-	<data name="Desc_Recommendations" xml:space="preserve"><value>Genera sugerencias basadas en tus canciones favoritas.</value></data>
-
-	<data name="Btn_Liked_Shuffle" xml:space="preserve"><value>Mezclar canciones favoritas</value></data>
-	<data name="Desc_Liked_Shuffle" xml:space="preserve"><value>Crea una mezcla aleatoria de tus canciones favoritas.</value></data>
-
-	<data name="Btn_Most_Listened" xml:space="preserve"><value>Canciones más escuchadas</value></data>
-	<data name="Desc_Most_Listened" xml:space="preserve"><value>Crea una lista de reproducción con tus canciones más escuchadas.</value></data>
-
-	<data name="Playlist_AlternativeFavorites" xml:space="preserve"><value>Canciones favoritas alternativas</value></data>
-	<data name="Playlist_LikedSongs" xml:space="preserve"><value>Canciones favoritas</value></data>
-
-	<!-- 🔗 Spotify → Plex -->
-	<data name="SpotifyToPlex_ExportAll_Summary" xml:space="preserve"><value>Listas de reproducción:</value></data>
-	<data name="SpotifyToPlex_ConnectButton" xml:space="preserve"><value>Conectar con Plex</value></data>
-	<data name="SpotifyToPlex_NoTracksFound" xml:space="preserve"><value>No se encontraron canciones.</value></data>
-	<data name="SpotifyToPlex_PlaylistContent" xml:space="preserve"><value>Contenido de la lista de reproducción</value></data>
-	<data name="SpotifyToPlex_LoadError" xml:space="preserve"><value>Error al cargar la lista de reproducción.</value></data>
-	<data name="SpotifyToPlex_Loading" xml:space="preserve"><value>Cargando…</value></data>
-
-	<!-- 🌐 Meta / OpenGraph / SEO -->
-	<data name="Meta_Description" xml:space="preserve">
+  <data name="Index_Playlist_Generator_f_r_Spotify_Lieblingssongs_au" xml:space="preserve">
+    <value>Generador de listas de reproducción para Spotify® – guarda automáticamente tus canciones favoritas</value>
+  </data>
+  <data name="Index_Scanne_den_QR_Code_zum_Spenden" xml:space="preserve">
+    <value>Escanea el código QR para donar</value>
+  </data>
+  <data name="Index_Spenden" xml:space="preserve">
+    <value>💚 Donar</value>
+  </data>
+  <data name="Index_Spotify_Playlist_Generator_by_InetConnector_Lieb" xml:space="preserve">
+    <value>Generador de listas de reproducción para Spotify® de InetConnector – guarda y crea listas automáticamente</value>
+  </data>
+  <data name="Index_Text" xml:space="preserve">
+    <value>🎧</value>
+  </data>
+  <data name="Index_Unterst_tze_das_Projekt" xml:space="preserve">
+    <value>💚 Apoya el proyecto</value>
+  </data>
+  <data name="Index_Was_dieses_Tool_kann" xml:space="preserve">
+    <value>Qué puede hacer esta herramienta</value>
+  </data>
+  <data name="Index_Wie_funktioniert_der_Spotify_Playlist_Generator" xml:space="preserve">
+    <value>¿Cómo funciona el generador de listas de reproducción de Spotify?</value>
+  </data>
+  <data name="Index_Zuf_llige_Playlists_aus_Lieblingssongs_generiere" xml:space="preserve">
+    <value>🎲 Generar listas de reproducción aleatorias de canciones favoritas</value>
+  </data>
+  <data name="Index_betrieben_und_nutzt_ausschlie_lich_offizielle_Sp" xml:space="preserve">
+    <value>operado y utiliza únicamente interfaces oficiales de Spotify – sin riesgos, sin anuncios, sin costes ocultos.</value>
+  </data>
+  <data name="Index_erstellen_direkt_ber_die_offizielle_Spotify_Web_" xml:space="preserve">
+    <value>crear – directamente a través de la API web oficial de Spotify.</value>
+  </data>
+  <data name="Index_meistgeh_rten_Tracks" xml:space="preserve">
+    <value>pistas más escuchadas</value>
+  </data>
+  <data name="Index_oder" xml:space="preserve">
+    <value>o</value>
+  </data>
+  <!-- ===================== -->
+  <!--  Misc Buttons / UI -->
+  <!-- ===================== -->
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="Dashboard" xml:space="preserve">
+    <value>Panel</value>
+  </data>
+  <data name="English" xml:space="preserve">
+    <value>Inglés</value>
+  </data>
+  <data name="German" xml:space="preserve">
+    <value>Alemán</value>
+  </data>
+  <data name="Imprint" xml:space="preserve">
+    <value>Aviso legal</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Idioma</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>Iniciar sesión</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Cerrar sesión</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Privacidad</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Buscar</value>
+  </data>
+  <data name="Welcome" xml:space="preserve">
+    <value>Bienvenido</value>
+  </data>
+  <!-- ===================== -->
+  <!--  Spotify → Plex (ES) -->
+  <!-- ===================== -->
+  <data name="SpotifyToPlex_Title" xml:space="preserve">
+    <value>Spotify a Plex</value>
+  </data>
+  <data name="SpotifyToPlex_Heading" xml:space="preserve">
+    <value>Conecta tu cuenta Plex</value>
+  </data>
+  <data name="SpotifyToPlex_Connect" xml:space="preserve">
+    <value>Conectar con Plex</value>
+  </data>
+  <data name="SpotifyToPlex_Disconnect" xml:space="preserve">
+    <value>Desconectar enlace de Plex</value>
+  </data>
+  <data name="SpotifyToPlex_LoginTitle" xml:space="preserve">
+    <value>Inicio de sesión en Plex</value>
+  </data>
+  <data name="SpotifyToPlex_LoginDesc" xml:space="preserve">
+    <value>Abre el inicio de sesión de Plex y autoriza el acceso.</value>
+  </data>
+  <data name="SpotifyToPlex_Code" xml:space="preserve">
+    <value>Código</value>
+  </data>
+  <data name="SpotifyToPlex_OpenPlexLogin" xml:space="preserve">
+    <value>Abrir inicio de sesión de Plex</value>
+  </data>
+  <data name="SpotifyToPlex_Waiting" xml:space="preserve">
+    <value>Esperando confirmación…</value>
+  </data>
+  <data name="SpotifyToPlex_Connected" xml:space="preserve">
+    <value>¡Conectado! Redirigiendo…</value>
+  </data>
+  <data name="SpotifyToPlex_SelectPlaylist" xml:space="preserve">
+    <value>Selecciona una lista de Spotify para exportar</value>
+  </data>
+  <data name="SpotifyToPlex_ServerDetected" xml:space="preserve">
+    <value>Conectado al servidor Plex:</value>
+  </data>
+  <data name="SpotifyToPlex_SelectLabel" xml:space="preserve">
+    <value>Lista de reproducción</value>
+  </data>
+  <data name="SpotifyToPlex_ExportNamePlaceholder" xml:space="preserve">
+    <value>Opcional: nombre de lista Plex (vacío = “Spotify - Nombre”)</value>
+  </data>
+  <data name="SpotifyToPlex_Export" xml:space="preserve">
+    <value>Exportar ahora</value>
+  </data>
+  <data name="SpotifyToPlex_Exported" xml:space="preserve">
+    <value>Exportado a Plex:</value>
+  </data>
+  <data name="SpotifyToPlex_AddedCount" xml:space="preserve">
+    <value>Pistas añadidas:</value>
+  </data>
+  <data name="SpotifyToPlex_NotFound" xml:space="preserve">
+    <value>No se pudieron encontrar estas pistas:</value>
+  </data>
+  <data name="SpotifyToPlex_TokenExpired" xml:space="preserve">
+    <value>El token de Plex ha expirado. Por favor, vuelve a conectarte.</value>
+  </data>
+  <data name="SpotifyToPlex_ExportAll" xml:space="preserve">
+    <value>Exportar todo</value>
+  </data>
+  <data name="SpotifyToPlex_ExportAll_Done" xml:space="preserve">
+    <value>Todas las listas exportadas</value>
+  </data>
+  <data name="SpotifyToPlex_TotalMissing" xml:space="preserve">
+    <value>Pistas faltantes totales:</value>
+  </data>
+  <data name="SpotifyToPlex_NoMissing" xml:space="preserve">
+    <value>No hay pistas faltantes</value>
+  </data>
+  <data name="SpotifyToPlex_Info" xml:space="preserve">
+    <value>Esta conexión es segura y utiliza la autenticación oficial de PIN de Plex.</value>
+  </data>
+  <data name="SpotifyToPlex_Header" xml:space="preserve">
+    <value>Conectar Spotify con Plex</value>
+  </data>
+  <data name="SpotifyToPlex_Intro" xml:space="preserve">
+    <value>Sincroniza automáticamente tus listas de Spotify con tu biblioteca Plex.</value>
+  </data>
+  <data name="SpotifyToPlex_ExportStopped" xml:space="preserve">
+    <value>Exportación cancelada.</value>
+  </data>
+  <data name="SpotifyToPlex_SyncAll" xml:space="preserve">
+    <value>Sincronizar todas las listas</value>
+  </data>
+  <data name="SpotifyToPlex_LiveExport" xml:space="preserve">
+    <value>Exportación en vivo</value>
+  </data>
+  <!-- 🎧 Playlist Generator / Buttons -->
+  <data name="Btn_Liked_Clone" xml:space="preserve">
+    <value>Clonar canciones favoritas</value>
+  </data>
+  <data name="Desc_Liked_Clone" xml:space="preserve">
+    <value>Crea una lista de reproducción con tus canciones guardadas.</value>
+  </data>
+  <data name="Btn_Alternative_Favorites" xml:space="preserve">
+    <value>Crear canciones favoritas alternativas</value>
+  </data>
+  <data name="Desc_Alternative_Favorites" xml:space="preserve">
+    <value>Genera canciones similares del mismo artista, sin duplicados.</value>
+  </data>
+  <data name="Btn_Recommendations" xml:space="preserve">
+    <value>Crear recomendaciones</value>
+  </data>
+  <data name="Desc_Recommendations" xml:space="preserve">
+    <value>Genera sugerencias basadas en tus canciones favoritas.</value>
+  </data>
+  <data name="Btn_Liked_Shuffle" xml:space="preserve">
+    <value>Mezclar canciones favoritas</value>
+  </data>
+  <data name="Desc_Liked_Shuffle" xml:space="preserve">
+    <value>Crea una mezcla aleatoria de tus canciones favoritas.</value>
+  </data>
+  <data name="Btn_Most_Listened" xml:space="preserve">
+    <value>Canciones más escuchadas</value>
+  </data>
+  <data name="Desc_Most_Listened" xml:space="preserve">
+    <value>Crea una lista de reproducción con tus canciones más escuchadas.</value>
+  </data>
+  <data name="Playlist_AlternativeFavorites" xml:space="preserve">
+    <value>Canciones favoritas alternativas</value>
+  </data>
+  <data name="Playlist_LikedSongs" xml:space="preserve">
+    <value>Canciones favoritas</value>
+  </data>
+  <!-- 🔗 Spotify → Plex -->
+  <data name="SpotifyToPlex_ExportAll_Summary" xml:space="preserve">
+    <value>Listas de reproducción:</value>
+  </data>
+  <data name="SpotifyToPlex_ConnectButton" xml:space="preserve">
+    <value>Conectar con Plex</value>
+  </data>
+  <data name="SpotifyToPlex_NoTracksFound" xml:space="preserve">
+    <value>No se encontraron canciones.</value>
+  </data>
+  <data name="SpotifyToPlex_PlaylistContent" xml:space="preserve">
+    <value>Contenido de la lista de reproducción</value>
+  </data>
+  <data name="SpotifyToPlex_LoadError" xml:space="preserve">
+    <value>Error al cargar la lista de reproducción.</value>
+  </data>
+  <data name="SpotifyToPlex_Loading" xml:space="preserve">
+    <value>Cargando…</value>
+  </data>
+  <!-- 🌐 Meta / OpenGraph / SEO -->
+  <data name="Meta_Description" xml:space="preserve">
     <value>Crea automáticamente listas de reproducción para Spotify a partir de tus canciones favoritas o las más escuchadas. Gratis, seguro y basado en la API web de Spotify. Desarrollado por InetConnector.</value>
   </data>
-
-	<data name="Meta_Keywords" xml:space="preserve">
+  <data name="Meta_Keywords" xml:space="preserve">
     <value>Generador de listas de reproducción de Spotify, crear playlist, guardar canciones favoritas, API de Spotify, herramienta musical, creador de playlists, InetConnector</value>
   </data>
-
-	<data name="OG_Title" xml:space="preserve"><value>Generador de listas de reproducción para Spotify® de InetConnector</value></data>
-	<data name="OG_Description" xml:space="preserve"><value>Genera automáticamente listas de Spotify a partir de tus canciones favoritas o principales – gratis y seguro.</value></data>
-
-	<data name="Twitter_Title" xml:space="preserve"><value>Generador de listas de reproducción para Spotify®</value></data>
-	<data name="Twitter_Description" xml:space="preserve"><value>Crea automáticamente listas de reproducción de Spotify a partir de tus canciones favoritas.</value></data>
-
-	<data name="Schema_Name" xml:space="preserve"><value>Generador de listas de reproducción de Spotify</value></data>
-	<data name="Schema_Description" xml:space="preserve"><value>Crea automáticamente listas de Spotify a partir de tus canciones favoritas o más escuchadas usando la API web de Spotify.</value></data>
-
-	<!-- 🏠 Página principal -->
-	<data name="Index_PageTitle" xml:space="preserve"><value>Página de inicio</value></data>
-	<data name="Index_All_Rights_Reserved" xml:space="preserve"><value>Todos los derechos reservados</value></data>
-
+  <data name="OG_Title" xml:space="preserve">
+    <value>Generador de listas de reproducción para Spotify® de InetConnector</value>
+  </data>
+  <data name="OG_Description" xml:space="preserve">
+    <value>Genera automáticamente listas de Spotify a partir de tus canciones favoritas o principales – gratis y seguro.</value>
+  </data>
+  <data name="Twitter_Title" xml:space="preserve">
+    <value>Generador de listas de reproducción para Spotify®</value>
+  </data>
+  <data name="Twitter_Description" xml:space="preserve">
+    <value>Crea automáticamente listas de reproducción de Spotify a partir de tus canciones favoritas.</value>
+  </data>
+  <data name="Schema_Name" xml:space="preserve">
+    <value>Generador de listas de reproducción de Spotify</value>
+  </data>
+  <data name="Schema_Description" xml:space="preserve">
+    <value>Crea automáticamente listas de Spotify a partir de tus canciones favoritas o más escuchadas usando la API web de Spotify.</value>
+  </data>
+  <!-- 🏠 Página principal -->
+  <data name="Index_PageTitle" xml:space="preserve">
+    <value>Página de inicio</value>
+  </data>
+  <data name="Index_All_Rights_Reserved" xml:space="preserve">
+    <value>Todos los derechos reservados</value>
+  </data>
+  <data name="SpotifyToPlex_RenamePlaylist" xml:space="preserve">
+    <value>Renombrar lista de reproducción de Plex</value>
+  </data>
+  <data name="SpotifyToPlex_RenamePrompt" xml:space="preserve">
+    <value>Introduce el nuevo nombre:</value>
+  </data>
+  <data name="SpotifyToPlex_AddFailed" xml:space="preserve">
+    <value>Error al agregar a la lista de reproducción de Plex.</value>
+  </data>
+  <data name="SpotifyToPlex_NowExporting" xml:space="preserve">
+    <value>Exportación en curso…</value>
+  </data> 
 </root>

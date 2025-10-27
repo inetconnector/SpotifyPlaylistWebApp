@@ -112,6 +112,13 @@
                     ?
                 </button>
 
+                <!-- ✏️ Rename button -->
+                <button type="button" id="btnRenamePlex"
+                        class="px-3 bg-blue-500 hover:brightness-110 rounded-lg text-white font-bold text-lg shadow-lg"
+                        title="@L["SpotifyToPlex_RenamePlaylist"]">
+                    ✏️
+                </button>
+
                 <button type="button" id="btnDeletePlex"
                         class="px-3 bg-red-600 hover:brightness-110 rounded-lg text-white font-bold text-lg shadow-lg"
                         title="@L["SpotifyToPlex_DeletePlaylist"]">
@@ -168,7 +175,8 @@
             LoadError: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_LoadError"].Value)),
             LoadingTracks: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_LoadingTracks"].Value)),
             ExportStopped: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_ExportStopped"].Value)),
-            NowExporting: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_NowExporting"].Value))
+            NowExporting: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_NowExporting"].Value)),
+            DeleteConfirm: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_DeleteConfirm"].Value))
         };
 
         let liveEvt = null;
@@ -179,6 +187,7 @@
             const idInput = document.getElementById("selectedPlaylistId");
             const closeModalBtn = document.getElementById("closeModal");
             const modal = document.getElementById("playlistModal");
+
 
             if (closeModalBtn && modal) {
                 closeModalBtn.addEventListener("click", () => modal.classList.add("hidden"));
@@ -194,26 +203,6 @@
                 const opt = select.options[select.selectedIndex];
                 nameInput.value = opt.text;
                 idInput.value = opt.value;
-            });
-
-            // Spotify Playlist anzeigen
-            document.getElementById("btnShowPlaylist")?.addEventListener("click", async () => {
-                const playlistId = select.value;
-                const listDiv = document.getElementById("playlistTracks");
-                listDiv.innerHTML = `<div class='text-center text-gray-400'>${T.Loading}</div>`;
-                modal.classList.remove("hidden");
-
-                try {
-                    const res = await fetch(`/HomePlex/GetPlaylistTracks?playlistId=${encodeURIComponent(playlistId)}`);
-                    const data = await res.json();
-                    listDiv.innerHTML = data.success
-                        ? (data.tracks.length
-                            ? data.tracks.map(t => `<div>🎵 <b>${t.title}</b> – ${t.artist}</div>`).join("")
-                            : `<div class='text-gray-400'>${T.NoTracksFound}</div>`)
-                        : `<div class='text-red-400'>${data.message}</div>`;
-                } catch {
-                    listDiv.innerHTML = `<div class='text-red-400'>${T.LoadError}</div>`;
-                }
             });
 
             // Live Export Button
@@ -267,17 +256,28 @@
 
             if (liveEvt) { try { liveEvt.close(); } catch { } }
 
-            liveEvt = new EventSource(`/HomePlex/ExportOneLive?playlistId=${encodeURIComponent(playlistId)}&playlistName=${encodeURIComponent(playlistName)}`);
+            liveEvt = new EventSource(
+                `/HomePlex/ExportOneLive?playlistId=${encodeURIComponent(playlistId)}&playlistName=${encodeURIComponent(playlistName)}`
+            );
 
             liveEvt.onmessage = (e) => {
                 const data = e.data || "";
+
+                if (data.startsWith("✅")) {
+                    appendLiveLog(`<div class="text-green-400">${data}</div>`);
+                    return;
+                }
+                if (data.startsWith("❌")) {
+                    appendLiveLog(`<div class="text-red-400">${data}</div>`);
+                    return;
+                }
+
                 if (data.startsWith("progress:")) {
                     const parts = data.split(":");
                     const added = parseInt(parts[1] || "0");
                     const miss = parseInt(parts[2] || "0");
                     const total = parseInt(parts[3] || "0");
-                    const done = added + miss;
-                    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+                    const pct = total > 0 ? Math.round(((added + miss) / total) * 100) : 0;
                     bar.style.width = pct + "%";
                     progress.textContent = `✅ ${added} ${T.Added}   ❌ ${miss} ${T.Missing}   (${pct}%)`;
                     return;
@@ -291,21 +291,24 @@
                     const parts = data.split(":");
                     const added = parseInt(parts[1] || "0");
                     const miss = parseInt(parts[2] || "0");
-                    const total = parseInt(parts[3] || "0");
+                    const failed = parseInt(parts[3] || "0");
+                    const total = parseInt(parts[4] || "0");
+
                     bar.style.width = "100%";
                     progress.innerHTML = `<b>${T.Done}</b>`;
                     summary.classList.remove("hidden");
-                    summary.innerHTML = `✅ ${added} ${T.Added} &nbsp;|&nbsp; ❌ ${miss} ${T.Missing} &nbsp;|&nbsp; 🎵 ${total} ${T.Total}`;
+                    summary.innerHTML =
+                        `✅ ${added} ${T.Added} &nbsp;|&nbsp; ❌ ${miss} ${T.Missing} &nbsp;|&nbsp; ⚠️ ${failed} failed &nbsp;|&nbsp; 🎵 ${total} ${T.Total}`;
                     document.getElementById("downloadMissingContainer")?.classList.remove("hidden");
                     try { liveEvt.close(); } catch { }
                     liveEvt = null;
                     return;
                 }
-                if (data.startsWith("ERROR")) {
-                    appendLiveLog("<span class='text-red-400'>❌ " + data + "</span>");
-                } else {
-                    appendLiveLog(data);
-                }
+
+
+                appendLiveLog(data.startsWith("ERROR")
+                    ? `<span class='text-red-400'>❌ ${data}</span>`
+                    : data);
             };
 
             liveEvt.onerror = () => {
@@ -321,48 +324,191 @@
             log.scrollTop = log.scrollHeight;
         }
 
-        document.getElementById("btnCloseLive")?.addEventListener("click", () => {
-            const modal = document.getElementById("liveExportModal");
-            if (modal) {
-                modal.style.transition = "opacity 0.4s ease";
-                modal.style.opacity = "0";
-                setTimeout(() => {
-                    modal.classList.add("hidden");
-                    modal.style.opacity = "1";
-                }, 400);
-            }
-        });
+        // ============================================================
+        // 🔸 Global click handler for all dynamic buttons (? / 🗑️ / OK / Stop)
+        // ============================================================
+        document.addEventListener("click", async (ev) => {
+            const target = ev.target;
 
-        document.getElementById("btnStopLive")?.addEventListener("click", () => {
-            try {
-                if (typeof liveEvt !== "undefined" && liveEvt) {
-                    liveEvt.close();
-                    liveEvt = null;
+            // Show Spotify playlist modal (?)
+            if (target.id === "btnShowPlaylist") {
+                const select = document.getElementById("playlistSelect");
+                const playlistId = select?.value;
+                const listDiv = document.getElementById("playlistTracks");
+                const modal = document.getElementById("playlistModal");
+                if (!playlistId || !listDiv || !modal) return;
+
+                listDiv.innerHTML = `<div class='text-center text-gray-400'>${T.Loading}</div>`;
+                modal.classList.remove("hidden");
+
+                try {
+                    const res = await fetch(`/HomePlex/GetPlaylistTracks?playlistId=${encodeURIComponent(playlistId)}`);
+                    const data = await res.json();
+                    listDiv.innerHTML = data.success
+                        ? (data.tracks.length
+                            ? data.tracks.map(t => `<div>🎵 <b>${t.title}</b> – ${t.artist}</div>`).join("")
+                            : `<div class='text-gray-400'>${T.NoTracksFound}</div>`)
+                        : `<div class='text-red-400'>${data.message}</div>`;
+                } catch {
+                    listDiv.innerHTML = `<div class='text-red-400'>${T.LoadError}</div>`;
                 }
-            } catch (e) {
-                console.warn("EventSource close failed", e);
+            }
+                    // 🔹 Rename Plex playlist (✏️) → nur Reload, keine Zwischen-Loads mit altem Key
+            if (target.id === "btnRenamePlex") {
+                const plexSelect = document.getElementById("plexSelect");
+                const ratingKey = plexSelect?.value;
+                if (!ratingKey) return alert("No Plex playlist selected.");
+
+                const currentName = plexSelect.options[plexSelect.selectedIndex].text;
+                const newName = prompt(T.RenamePrompt ?? "Enter new name:", currentName);
+                if (!newName || newName.trim() === currentName.trim()) return;
+
+                // UI in "busy" setzen, Interaktionen verhindern
+                plexSelect.disabled = true;
+                plexSelect.innerHTML = `<option>${T.Loading}</option>`;
+                document.getElementById("btnShowPlexPlaylist")?.setAttribute("disabled", "disabled");
+                document.getElementById("btnDeletePlex")?.setAttribute("disabled", "disabled");
+                document.getElementById("btnRenamePlex")?.setAttribute("disabled", "disabled");
+
+                try {
+                    const res = await fetch(`/HomePlex/RenamePlexPlaylist`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ ratingKey, newName })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        alert("✅ " + data.message);
+                        // Kein weiterer Fetch mit altem ratingKey → direkt Full-Reload
+                        setTimeout(() => window.location.reload(), 400);
+                    } else {
+                        alert("❌ " + data.message);
+                        // Falls fehlgeschlagen, UI wieder freigeben
+                        plexSelect.disabled = false;
+                        ["btnShowPlexPlaylist","btnDeletePlex","btnRenamePlex"].forEach(id =>
+                            document.getElementById(id)?.removeAttribute("disabled"));
+                    }
+                } catch {
+                    alert("❌ " + T.LoadError);
+                    plexSelect.disabled = false;
+                    ["btnShowPlexPlaylist","btnDeletePlex","btnRenamePlex"].forEach(id =>
+                        document.getElementById(id)?.removeAttribute("disabled"));
+                }
             }
 
-            const log = document.getElementById("liveLog");
-            if (log) {
-                log.innerHTML += `<div class='text-yellow-400'>⏹ ${T.ExportStopped}</div>`;
-                log.scrollTop = log.scrollHeight;
+            // 🔹 Delete Plex playlist (🗑️) → direkt Full-Reload, kein Zwischen-Load
+            if (target.id === "btnDeletePlex") {
+                const plexSelect = document.getElementById("plexSelect");
+                const ratingKey = plexSelect?.value;
+                if (!ratingKey) return alert("No Plex playlist selected.");
+                if (!confirm(T.DeleteConfirm)) return;
+
+                // Busy-UI
+                plexSelect.disabled = true;
+                plexSelect.innerHTML = `<option>${T.Loading}</option>`;
+                document.getElementById("btnShowPlexPlaylist")?.setAttribute("disabled", "disabled");
+                document.getElementById("btnDeletePlex")?.setAttribute("disabled", "disabled");
+                document.getElementById("btnRenamePlex")?.setAttribute("disabled", "disabled");
+
+                try {
+                    const res = await fetch(`/HomePlex/DeletePlexPlaylist?ratingKey=${encodeURIComponent(ratingKey)}`, {
+                        method: "DELETE"
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        alert("✅ " + data.message);
+                        // Wichtig: kein loadPlexPlaylistsDropdown() → alter Key wäre ungültig
+                        setTimeout(() => window.location.reload(), 400);
+                    } else {
+                        alert("❌ " + data.message);
+                        // UI freigeben, falls fehlgeschlagen
+                        plexSelect.disabled = false;
+                        ["btnShowPlexPlaylist","btnDeletePlex","btnRenamePlex"].forEach(id =>
+                            document.getElementById(id)?.removeAttribute("disabled"));
+                    }
+                } catch {
+                    alert("❌ " + T.LoadError);
+                    plexSelect.disabled = false;
+                    ["btnShowPlexPlaylist","btnDeletePlex","btnRenamePlex"].forEach(id =>
+                        document.getElementById(id)?.removeAttribute("disabled"));
+                }
             }
 
-            const progress = document.getElementById("liveProgress");
-            if (progress) progress.textContent = `⏹ ${T.ExportStopped}`;
 
-            const modal = document.getElementById("liveExportModal");
-            if (modal) {
-                modal.style.transition = "opacity 0.4s ease";
-                modal.style.opacity = "0";
-                setTimeout(() => {
-                    modal.classList.add("hidden");
-                    modal.style.opacity = "1";
-                }, 400);
+
+            // Show Plex playlist modal (?)
+            if (target.id === "btnShowPlexPlaylist") {
+                const plexSelect = document.getElementById("plexSelect");
+                const ratingKey = plexSelect?.value;
+                if (!ratingKey) return alert("No Plex playlist selected.");
+
+                try {
+                    const res = await fetch(`/HomePlex/GetPlexPlaylistTracks?ratingKey=${encodeURIComponent(ratingKey)}`);
+                    const data = await res.json();
+                    const modal = document.getElementById("playlistModal");
+                    const listDiv = document.getElementById("playlistTracks");
+                    if (modal && listDiv) {
+                        listDiv.innerHTML = data.tracks?.length
+                            ? data.tracks.map(t => `<div>🎵 <b>${t.title}</b> – ${t.artist}</div>`).join("")
+                            : `<div class='text-gray-400'>${T.NoTracksFound}</div>`;
+                        modal.classList.remove("hidden");
+                    }
+                } catch {
+                    alert(T.LoadError);
+                }
             }
+             
+                    // OK → close modal + refresh
+            if (target.id === "btnCloseLive") {
+                const modal = document.getElementById("liveExportModal");
+                if (modal) {
+                    modal.style.transition = "opacity 0.4s ease";
+                    modal.style.opacity = "0";
+                    setTimeout(() => {
+                        modal.classList.add("hidden");
+                        modal.style.opacity = "1";
+                        // 🔁 Refresh after close
+                        setTimeout(() => window.location.reload(), 500);
+                    }, 400);
+                }
+            }
+
+            // Stop → cancel export + refresh
+            if (target.id === "btnStopLive") {
+                try {
+                    if (typeof liveEvt !== "undefined" && liveEvt) {
+                        liveEvt.close();
+                        liveEvt = null;
+                    }
+                } catch (e) {
+                    console.warn("EventSource close failed", e);
+                }
+
+                const log = document.getElementById("liveLog");
+                if (log) {
+                    log.innerHTML += `<div class='text-yellow-400'>⏹ ${T.ExportStopped}</div>`;
+                    log.scrollTop = log.scrollHeight;
+                }
+
+                const progress = document.getElementById("liveProgress");
+                if (progress) progress.textContent = `⏹ ${T.ExportStopped}`;
+
+                const modal = document.getElementById("liveExportModal");
+                if (modal) {
+                    modal.style.transition = "opacity 0.4s ease";
+                    modal.style.opacity = "0";
+                    setTimeout(() => {
+                        modal.classList.add("hidden");
+                        modal.style.opacity = "1";
+                        // 🔁 Full refresh after stop
+                        setTimeout(() => window.location.reload(), 500);
+                    }, 400);
+                }
+            }
+
         });
     </script>
+
 
 @* ================================
        MODAL: Live Export Status

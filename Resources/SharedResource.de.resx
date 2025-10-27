@@ -12,6 +12,21 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+	<data name="SpotifyToPlex_DeleteConfirm" xml:space="preserve">
+  <value>Diese Plex-Playlist wirklich löschen?</value>
+</data>
+	<data name="NoTracksToAdd" xml:space="preserve">
+    <value>Keine Titel zum Hinzufügen.</value>
+  </data>
+  <data name="TrackAdded" xml:space="preserve">
+    <value>OK – Titel hinzugefügt: {0}</value>
+  </data>
+  <data name="TrackAddFailed" xml:space="preserve">
+    <value>Fehler beim Hinzufügen: {0} → {1}</value>
+  </data>
+  <data name="AllTracksProcessed" xml:space="preserve">
+    <value>Alle Titel verarbeitet.</value>
+  </data>
   <data name="Dashboard_Source_LikedSongs" xml:space="preserve">
   <value>Lieblingssongs</value>
 </data>
@@ -825,4 +840,16 @@
   <data name="SpotifyToPlex_LiveExport" xml:space="preserve">
     <value>Live Export</value>
   </data>
+  <data name="SpotifyToPlex_RenamePlaylist" xml:space="preserve">
+    <value>Plex-Playlist umbenennen</value>
+  </data>
+  <data name="SpotifyToPlex_RenamePrompt" xml:space="preserve">
+    <value>Neuen Name eingeben:</value>
+  </data>  <data name="SpotifyToPlex_AddFailed" xml:space="preserve">
+    <value>Hinzufügen zur Plex-Playlist fehlgeschlagen.</value>
+  </data>
+  <data name="SpotifyToPlex_NowExporting" xml:space="preserve">
+    <value>Export läuft …</value>
+  </data>
+
 </root>

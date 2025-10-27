@@ -12,6 +12,21 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+	<data name="SpotifyToPlex_DeleteConfirm" xml:space="preserve">
+  <value>Really delete this Plex playlist?</value>
+</data>
+	<data name="NoTracksToAdd" xml:space="preserve">
+    <value>No tracks to add.</value>
+  </data>
+  <data name="TrackAdded" xml:space="preserve">
+    <value>OK – Track added: {0}</value>
+  </data>
+  <data name="TrackAddFailed" xml:space="preserve">
+    <value>Error adding track: {0} → {1}</value>
+  </data>
+  <data name="AllTracksProcessed" xml:space="preserve">
+    <value>All tracks processed.</value>
+  </data>
   <data name="Dashboard_Source_LikedSongs" xml:space="preserve">
   <value>Liked Songs</value>
 </data>
@@ -809,4 +824,17 @@ Third-party contributions are marked as such. Duplication, processing, distribut
   <data name="Playlist_Inhalt" xml:space="preserve">
     <value>Playlist content</value>
   </data>
+  <data name="SpotifyToPlex_RenamePlaylist" xml:space="preserve">
+    <value>Rename Plex playlist</value>
+  </data>
+  <data name="SpotifyToPlex_RenamePrompt" xml:space="preserve">
+    <value>Enter new name:</value>
+  </data>
+  <data name="SpotifyToPlex_AddFailed" xml:space="preserve">
+    <value>Adding to Plex playlist failed.</value>
+  </data>
+  <data name="SpotifyToPlex_NowExporting" xml:space="preserve">
+    <value>Export in progress…</value>
+  </data>
+
 </root>
