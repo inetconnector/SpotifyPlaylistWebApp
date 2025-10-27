@@ -196,18 +196,18 @@ public class HomeController : Controller
             if ((int)apiEx.Response.StatusCode == 403)
             {
                 var msg = $"""
-                       ℹ️ {_localizer["Spotify403_Info_Line1"]}<br>
-                       {_localizer["Spotify403_Info_Line2"]}<br><br>
-                       {_localizer["Spotify403_Info_Contact"]} <strong>info@inetconnector.com</strong><br>
-                       {_localizer["Spotify403_Info_Action"]}
-                       """;
+                           ℹ️ {_localizer["Spotify403_Info_Line1"]}<br>
+                           {_localizer["Spotify403_Info_Line2"]}<br><br>
+                           {_localizer["Spotify403_Info_Contact"]} <strong>info@inetconnector.com</strong><br>
+                           {_localizer["Spotify403_Info_Action"]}
+                           """;
                 return Info(msg);
             }
 
             return Error($"""
-                      🚨 Spotify API error ({(int)apiEx.Response.StatusCode}): {apiEx.Message}<br>
-                      <small>{apiEx.Response.Body}</small>
-                      """);
+                          🚨 Spotify API error ({(int)apiEx.Response.StatusCode}): {apiEx.Message}<br>
+                          <small>{apiEx.Response.Body}</small>
+                          """);
         }
         catch (Exception ex)
         {
@@ -229,28 +229,28 @@ public class HomeController : Controller
     public IActionResult CreateTopMix()
     {
         var selectedPlaylistName = HttpContext.Request.Query["playlistName"].FirstOrDefault();
-        return StartPlaylistJob(GetToken(), "Top-Mix", "[TopMix]", useLikedSongs: false, shuffled: true, selectedPlaylistName);
+        return StartPlaylistJob(GetToken(), "Top-Mix", "[TopMix]", false, true, selectedPlaylistName);
     }
 
     [HttpGet]
     public IActionResult CreateTopList()
     {
         var selectedPlaylistName = HttpContext.Request.Query["playlistName"].FirstOrDefault();
-        return StartPlaylistJob(GetToken(), "Top-Liste", "[TopList]", useLikedSongs: false, shuffled: false, selectedPlaylistName);
+        return StartPlaylistJob(GetToken(), "Top-Liste", "[TopList]", false, false, selectedPlaylistName);
     }
 
     [HttpGet]
     public IActionResult CreateFavMix()
     {
         var selectedPlaylistName = HttpContext.Request.Query["playlistName"].FirstOrDefault();
-        return StartPlaylistJob(GetToken(), "Favoriten-Mix", "[FavMix]", useLikedSongs: true, shuffled: true, selectedPlaylistName);
+        return StartPlaylistJob(GetToken(), "Favoriten-Mix", "[FavMix]", true, true, selectedPlaylistName);
     }
 
     [HttpGet]
     public IActionResult CreateFavList()
     {
         var selectedPlaylistName = HttpContext.Request.Query["playlistName"].FirstOrDefault();
-        return StartPlaylistJob(GetToken(), "Favoriten-Liste", "[FavList]", useLikedSongs: true, shuffled: false, selectedPlaylistName);
+        return StartPlaylistJob(GetToken(), "Favoriten-Liste", "[FavList]", true, false, selectedPlaylistName);
     }
 
     [HttpGet]
@@ -289,7 +289,6 @@ public class HomeController : Controller
 
                     var selectedPlaylistName = HttpContext.Request.Query["playlistName"].FirstOrDefault();
                     await GenerateRecommendationsAsync(spotify, me.Id, selectedPlaylistName);
-
                 },
                 async () =>
                 {
@@ -316,7 +315,8 @@ public class HomeController : Controller
     // 🔸 Cooldown & Startlogik
     // ============================
 
-    private IActionResult StartPlaylistJob(string token, string namePrefix, string logTag, bool useLikedSongs, bool shuffled, string? basePlaylistName = null)
+    private IActionResult StartPlaylistJob(string token, string namePrefix, string logTag, bool useLikedSongs,
+        bool shuffled, string? basePlaylistName = null)
 
     {
         if (string.IsNullOrWhiteSpace(token))
@@ -335,8 +335,8 @@ public class HomeController : Controller
                         ["Action"] = logTag
                     });
 
-                    await GeneratePlaylistAsync(spotify, me.Id, namePrefix, shuffled, useLikedSongs, _logger, basePlaylistName);
-
+                    await GeneratePlaylistAsync(spotify, me.Id, namePrefix, shuffled, useLikedSongs, _logger,
+                        basePlaylistName);
                 },
                 async () =>
                 {
@@ -504,13 +504,13 @@ public class HomeController : Controller
     // 🔸 Playlist-Logik
     // ============================
     private static async Task GeneratePlaylistAsync(
-    SpotifyClient spotify,
-    string userId,
-    string namePrefix,
-    bool shuffled,
-    bool useLikedSongs,
-    ILogger logger,
-    string? basePlaylistName = null)
+        SpotifyClient spotify,
+        string userId,
+        string namePrefix,
+        bool shuffled,
+        bool useLikedSongs,
+        ILogger logger,
+        string? basePlaylistName = null)
     {
         var allTracks = new List<FullTrack>();
         const int pageSize = 50;
@@ -528,7 +528,8 @@ public class HomeController : Controller
 
                 if (src != null)
                 {
-                    var items = await spotify.Playlists.GetItems(src.Id, new PlaylistGetItemsRequest { Limit = pageSize });
+                    var items = await spotify.Playlists.GetItems(src.Id,
+                        new PlaylistGetItemsRequest { Limit = pageSize });
                     while (true)
                     {
                         foreach (var i in items.Items)
@@ -545,7 +546,8 @@ public class HomeController : Controller
                 }
                 else
                 {
-                    logger.LogWarning("GeneratePlaylistAsync: Playlist '{Name}' not found. Falling back to default source.",
+                    logger.LogWarning(
+                        "GeneratePlaylistAsync: Playlist '{Name}' not found. Falling back to default source.",
                         basePlaylistName);
                 }
             }
@@ -556,21 +558,18 @@ public class HomeController : Controller
             if (allTracks.Count == 0)
             {
                 if (useLikedSongs)
-                {
-                    for (var offset = 0; ; offset += pageSize)
+                    for (var offset = 0;; offset += pageSize)
                     {
                         var saved = await spotify.Library.GetTracks(new LibraryTracksRequest
-                        { Limit = pageSize, Offset = offset });
+                            { Limit = pageSize, Offset = offset });
                         if (saved.Items == null || saved.Items.Count == 0) break;
 
                         allTracks.AddRange(saved.Items.Select(i => i.Track).Where(t => t != null)!);
                         if (saved.Items.Count < pageSize) break;
                         await Task.Delay(ApiDelay);
                     }
-                }
                 else
-                {
-                    for (var offset = 0; ; offset += pageSize)
+                    for (var offset = 0;; offset += pageSize)
                     {
                         var top = await spotify.Personalization.GetTopTracks(new PersonalizationTopRequest
                         {
@@ -584,7 +583,6 @@ public class HomeController : Controller
                         if (top.Items.Count < pageSize) break;
                         await Task.Delay(ApiDelay);
                     }
-                }
             }
 
             // ────────────────────────────────────────────────
@@ -617,7 +615,8 @@ public class HomeController : Controller
             var playlist = await spotify.Playlists.Create(userId, new PlaylistCreateRequest(playlistName)
             {
                 Public = false,
-                Description = $"Automatically generated mix based on {(basePlaylistName ?? (useLikedSongs ? "Liked Songs" : "Top Tracks"))}"
+                Description =
+                    $"Automatically generated mix based on {basePlaylistName ?? (useLikedSongs ? "Liked Songs" : "Top Tracks")}"
             });
 
             // ────────────────────────────────────────────────
@@ -642,7 +641,8 @@ public class HomeController : Controller
         }
     }
 
-    private async Task GenerateAlternativeFavoritesAsync(SpotifyClient spotify, string userId, string? basePlaylistName = null)
+    private async Task GenerateAlternativeFavoritesAsync(SpotifyClient spotify, string userId,
+        string? basePlaylistName = null)
     {
         try
         {
@@ -653,9 +653,10 @@ public class HomeController : Controller
             if (string.IsNullOrWhiteSpace(basePlaylistName))
             {
                 // --- Default: use liked songs
-                for (var offset = 0; ; offset += pageSize)
+                for (var offset = 0;; offset += pageSize)
                 {
-                    var liked = await spotify.Library.GetTracks(new LibraryTracksRequest { Limit = pageSize, Offset = offset });
+                    var liked = await spotify.Library.GetTracks(new LibraryTracksRequest
+                        { Limit = pageSize, Offset = offset });
                     if (liked.Items == null || liked.Items.Count == 0) break;
 
                     baseTracks.AddRange(liked.Items.Select(i => i.Track).Where(t => t != null)!);
@@ -678,18 +679,18 @@ public class HomeController : Controller
 
                 if (basePlaylist == null)
                 {
-                    _logger.LogWarning("AlternativeFavorites: Playlist '{Name}' not found, fallback to liked songs.", basePlaylistName);
+                    _logger.LogWarning("AlternativeFavorites: Playlist '{Name}' not found, fallback to liked songs.",
+                        basePlaylistName);
                     return;
                 }
 
-                var playlistItems = await spotify.Playlists.GetItems(basePlaylist.Id, new PlaylistGetItemsRequest { Limit = pageSize });
+                var playlistItems = await spotify.Playlists.GetItems(basePlaylist.Id,
+                    new PlaylistGetItemsRequest { Limit = pageSize });
                 while (true)
                 {
                     foreach (var item in playlistItems.Items)
-                    {
                         if (item.Track is FullTrack track)
                             baseTracks.Add(track);
-                    }
 
                     if (string.IsNullOrEmpty(playlistItems.Next)) break;
                     playlistItems = await spotify.NextPage(playlistItems);
@@ -698,7 +699,8 @@ public class HomeController : Controller
 
                 if (baseTracks.Count == 0)
                 {
-                    _logger.LogWarning("AlternativeFavorites: Selected playlist '{Name}' contains no tracks.", basePlaylistName);
+                    _logger.LogWarning("AlternativeFavorites: Selected playlist '{Name}' contains no tracks.",
+                        basePlaylistName);
                     return;
                 }
             }
@@ -722,10 +724,11 @@ public class HomeController : Controller
                             !usedUris.Contains(t.Uri) && t.Id != track.Id);
                     replacementUri = fromAlbum?.Uri;
                 }
-                catch { }
+                catch
+                {
+                }
 
                 if (replacementUri == null)
-                {
                     try
                     {
                         // Try same artist
@@ -740,8 +743,9 @@ public class HomeController : Controller
                             replacementUri = fromArtist?.Uri;
                         }
                     }
-                    catch { }
-                }
+                    catch
+                    {
+                    }
 
                 var finalUri = replacementUri ?? track.Uri;
                 if (usedUris.Add(finalUri))
@@ -759,7 +763,7 @@ public class HomeController : Controller
             var playlist = await spotify.Playlists.Create(userId, new PlaylistCreateRequest(title)
             {
                 Public = false,
-                Description = $"Alternative version of {(basePlaylistName ?? "Liked Songs")}"
+                Description = $"Alternative version of {basePlaylistName ?? "Liked Songs"}"
             });
 
             for (var i = 0; i < altUris.Count; i += 100)
@@ -780,7 +784,8 @@ public class HomeController : Controller
     }
 
 
-    private async Task GenerateRecommendationsAsync(SpotifyClient spotify, string userId, string? basePlaylistName = null)
+    private async Task GenerateRecommendationsAsync(SpotifyClient spotify, string userId,
+        string? basePlaylistName = null)
     {
         try
         {
@@ -814,18 +819,18 @@ public class HomeController : Controller
 
                 if (basePlaylist == null)
                 {
-                    _logger.LogWarning("Recommendations: Playlist '{Name}' not found, fallback to top tracks.", basePlaylistName);
+                    _logger.LogWarning("Recommendations: Playlist '{Name}' not found, fallback to top tracks.",
+                        basePlaylistName);
                     return;
                 }
 
-                var playlistItems = await spotify.Playlists.GetItems(basePlaylist.Id, new PlaylistGetItemsRequest { Limit = pageSize });
+                var playlistItems = await spotify.Playlists.GetItems(basePlaylist.Id,
+                    new PlaylistGetItemsRequest { Limit = pageSize });
                 while (true)
                 {
                     foreach (var item in playlistItems.Items)
-                    {
                         if (item.Track is FullTrack track)
                             seedTracks.Add(track);
-                    }
 
                     if (string.IsNullOrEmpty(playlistItems.Next)) break;
                     playlistItems = await spotify.NextPage(playlistItems);
@@ -834,7 +839,8 @@ public class HomeController : Controller
 
                 if (seedTracks.Count == 0)
                 {
-                    _logger.LogWarning("Recommendations: Selected playlist '{Name}' contains no tracks.", basePlaylistName);
+                    _logger.LogWarning("Recommendations: Selected playlist '{Name}' contains no tracks.",
+                        basePlaylistName);
                     return;
                 }
             }
@@ -881,7 +887,7 @@ public class HomeController : Controller
             var playlist = await spotify.Playlists.Create(userId, new PlaylistCreateRequest(title)
             {
                 Public = false,
-                Description = $"Recommended songs based on {(basePlaylistName ?? "Top Tracks")}"
+                Description = $"Recommended songs based on {basePlaylistName ?? "Top Tracks"}"
             });
 
             var uris = recs.Tracks
@@ -910,7 +916,6 @@ public class HomeController : Controller
             _logger.LogError(ex, "Unhandled error in GenerateRecommendationsAsync.");
         }
     }
-
 
 
     // ============================

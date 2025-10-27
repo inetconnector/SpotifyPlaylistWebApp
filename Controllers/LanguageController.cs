@@ -11,13 +11,16 @@ public class LanguageController : Controller
         if (string.IsNullOrEmpty(culture))
             culture = "en-US";
 
-        // ✅ Nur erlaubte Kulturen
-        var allowed = new[] { "de-DE", "en-US" };
+        // ✅ Allowed cultures (including Spanish)
+        var allowed = new[] { "de-DE", "en-US", "es-ES" };
         if (!allowed.Contains(culture))
             culture = "en-US";
 
-        // ✅ Cookie für 1 Jahr setzen (global gültig)
-        var cookieValue = CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture, culture));
+        // ✅ Set cookie for 1 year (globally valid)
+        var cookieValue = CookieRequestCultureProvider.MakeCookieValue(
+            new RequestCulture(culture, culture)
+        );
+
         Response.Cookies.Append(
             CookieRequestCultureProvider.DefaultCookieName,
             cookieValue,
@@ -28,10 +31,11 @@ public class LanguageController : Controller
                 Path = "/"
             });
 
-        // ✅ Zurück zur vorherigen Seite
+        // ✅ Redirect back to the previous local page if available
         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             return LocalRedirect(returnUrl);
 
+        // ✅ Default fallback: go to home page
         return RedirectToAction("Index", "Home");
     }
 }

@@ -43,7 +43,7 @@ builder.Services.AddHttpClient<PlexService>();
 // =====================================================
 // 🔹 Localization Setup
 // =====================================================
-var supportedCultures = new[] { new CultureInfo("de-DE"), new CultureInfo("en-US") };
+var supportedCultures = new[] { new CultureInfo("de-DE"), new CultureInfo("en-US"), new CultureInfo("es-ES") };
 
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {

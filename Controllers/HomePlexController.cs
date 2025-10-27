@@ -1,10 +1,11 @@
+using System.Reflection;
+using System.Text.Json;
+using System.Xml;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using SpotifyAPI.Web;
 using SpotifyPlaylistWebApp.Services;
-using System.Reflection;
-using System.Text.Json;
-using System.Linq;
+
 namespace SpotifyPlaylistWebApp.Controllers;
 
 [Route("Home")]
@@ -142,6 +143,7 @@ public class HomePlexController : Controller
             return RedirectToAction("SpotifyToPlex");
         }
     }
+
     // ============================================================
     // 🔸 Live Export — localized event messages
     // ============================================================
@@ -171,7 +173,8 @@ public class HomePlexController : Controller
             var (baseUrl, machineId) = await plex.DiscoverServerAsync(plexToken);
             var tracks = await plex.GetSpotifyPlaylistTracksAsync(spotify, playlistId);
 
-            await writer.WriteLineAsync($"data: {L["SpotifyToPlex_Exporting"]}: '{playlistName}' ({tracks.Count} {L["SpotifyToPlex_Tracks"]})\n");
+            await writer.WriteLineAsync(
+                $"data: {L["SpotifyToPlex_Exporting"]}: '{playlistName}' ({tracks.Count} {L["SpotifyToPlex_Tracks"]})\n");
             await writer.FlushAsync();
 
             int added = 0, missing = 0, total = tracks.Count;
@@ -184,7 +187,7 @@ public class HomePlexController : Controller
             var plexPlaylistKey = await plex.CreatePlaylistAsync(baseUrl, plexToken, playlistTitle);
             if (string.IsNullOrEmpty(plexPlaylistKey))
             {
-                await writer.WriteLineAsync($"data: ERROR Could not create Plex playlist.\n");
+                await writer.WriteLineAsync("data: ERROR Could not create Plex playlist.\n");
                 await writer.FlushAsync();
                 return;
             }
@@ -195,14 +198,16 @@ public class HomePlexController : Controller
                 await writer.WriteLineAsync($"data: 🔍 {L["SpotifyToPlex_Searching"]}: {artist} — {title}\n");
                 await writer.FlushAsync();
 
-                var found = await plex.SearchTracksOnPlexAsync(baseUrl, plexToken, new() { (title, artist) });
+                var found = await plex.SearchTracksOnPlexAsync(baseUrl, plexToken,
+                    new List<(string Title, string Artist)> { (title, artist) });
                 var match = found.FirstOrDefault();
 
                 if (!string.IsNullOrEmpty(match.RatingKey))
                 {
                     added++;
                     // ✅ add this track to the newly created Plex playlist
-                    await plex.AddTracksToPlaylistAsync(baseUrl, plexToken, plexPlaylistKey, new[] { match.RatingKey }, machineId);
+                    await plex.AddTracksToPlaylistAsync(baseUrl, plexToken, plexPlaylistKey, new[] { match.RatingKey },
+                        machineId);
 
                     await writer.WriteLineAsync($"data: ✅ {L["SpotifyToPlex_Found"]}: {artist} — {title}\n");
                 }
@@ -396,7 +401,7 @@ public class HomePlexController : Controller
             var (baseUrl, machineId) = await plex.DiscoverServerAsync(plexToken);
             var playlists = await plex.GetAllSpotifyPlaylistsAsync(spotify);
             var results = new List<object>();
-              
+
             foreach (var item in playlists)
             {
                 var id = item.Value;
@@ -530,20 +535,18 @@ public class HomePlexController : Controller
             var resp = await client.GetAsync(url);
 
             if (!resp.IsSuccessStatusCode)
-            {
                 return Json(new
                 {
                     success = false,
                     message = $"Plex API error {resp.StatusCode} at {url}"
                 });
-            }
 
             var xml = await resp.Content.ReadAsStringAsync();
-            var doc = new System.Xml.XmlDocument();
+            var doc = new XmlDocument();
             doc.LoadXml(xml);
 
             var tracks = new List<object>();
-            foreach (System.Xml.XmlNode node in doc.SelectNodes("//Track"))
+            foreach (XmlNode node in doc.SelectNodes("//Track"))
             {
                 var title = node.Attributes["title"]?.Value ?? "";
                 var artist = node.Attributes["grandparentTitle"]?.Value ?? "";
@@ -576,7 +579,7 @@ public class HomePlexController : Controller
                 return Content(txt, "text/plain; charset=utf-8");
             }
         }
+
         return Content("No log available yet.", "text/plain; charset=utf-8");
     }
-
 }
