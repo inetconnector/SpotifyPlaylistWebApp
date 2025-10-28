@@ -202,9 +202,11 @@ public class HomePlexController : Controller
                 {
                     // 🔹 nutze match.ServerMachineId statt defaultMachineId
                     bool ok = await plex.AddTracksToPlaylistAsync(
-                        baseUrl, plexToken, plexPlaylistKey,
-                        new[] { match.RatingKey },
-                        match.ServerMachineId ?? defaultMachineId,
+                        baseUrl,
+                        plexToken,
+                        plexPlaylistKey,
+                        ratingKeys: new[] { match.RatingKey },
+                        machineId: defaultMachineId,  // z. B. "1d5dbe61de7945092117b02bd069cba2b094bd4e"
                         exportId);
 
                     if (ok)

@@ -4,10 +4,10 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using LukeHagar.PlexAPI.SDK;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Localization;
 using SpotifyAPI.Web;
-
 namespace SpotifyPlaylistWebApp.Services;
 
 /// <summary>
@@ -362,10 +362,7 @@ public class PlexService
         Console.WriteLine($"[Plex Library] SectionKey={key}");
         return key!;
     }
-
-    // ============================================================
-    // 🔸 Verbesserte Track-Suche (Section + Fuzzy + Fallback)
-    // ============================================================
+     
     // ============================================================
     // 🔸 Verbesserte Track-Suche (mit SectionKey + ServerMachineId)
     // ============================================================
@@ -431,13 +428,20 @@ public class PlexService
                         {
                             Key = (string?)t.Attribute("ratingKey"),
                             T = Normalize((string?)t.Attribute("title") ?? ""),
-                            A = Normalize((string?)t.Attribute("grandparentTitle") ??
-                                          (string?)t.Attribute("parentTitle") ?? ""),
+                            A = Normalize(
+                                (string?)t.Attribute("grandparentTitle")
+                                ?? (string?)t.Attribute("originalTitle")
+                                ?? (string?)t.Attribute("parentTitle")
+                                ?? (string?)t.Element("GrandparentTitle")
+                                ?? (string?)t.Element("ParentTitle")
+                                ?? ""
+                            ),
                             Section = (string?)t.Ancestors("MediaContainer").FirstOrDefault()
                                 ?.Attribute("librarySectionID"),
                             ServerId = (string?)t.Ancestors("MediaContainer").FirstOrDefault()
                                 ?.Attribute("machineIdentifier")
                         })
+                        .Where(c => !string.IsNullOrWhiteSpace(c.A) && c.A != "Various Artists")
                         .Select(c => new
                         {
                             c.Key,
@@ -450,12 +454,13 @@ public class PlexService
                         .OrderBy(x => x.Score)
                         .FirstOrDefault();
 
-                    if (candidates != null && candidates.Score < 6)
+                    if (candidates != null && candidates.Score < 3)
                     {
                         ratingKey = candidates.Key;
                         foundSection = candidates.Section ?? sectionKey;
                         foundMachineId = candidates.ServerId ?? machineId;
                     }
+ 
                 }
                 catch
                 {
@@ -539,93 +544,60 @@ public class PlexService
         return v1[b.Length];
     }
 
-    // ============================================================
-    // 🔸 Add tracks to existing Plex playlist (Batch + SSE + bool)
-    // ============================================================
-    // ============================================================
-    // 🔸 Add tracks to existing Plex playlist (final, stable version)
-    // ============================================================
     public async Task<bool> AddTracksToPlaylistAsync(
-        string plexBaseUrl,
-        string plexToken,
-        string playlistKey,
-        IEnumerable<string> ratingKeys,
-        string machineId,
-        string exportId = "")
+    string plexBaseUrl,
+    string plexToken,
+    string playlistKey,
+    IEnumerable<string> ratingKeys,
+    string machineId,
+    string exportId = "")
     {
-        if (string.IsNullOrWhiteSpace(machineId) || machineId.Equals("unknown", StringComparison.OrdinalIgnoreCase))
-            throw new ArgumentException("machineId must not be empty or 'unknown'.", nameof(machineId));
+        if (string.IsNullOrWhiteSpace(machineId))
+            throw new ArgumentException("machineId must not be empty.", nameof(machineId));
 
-        var keys = ratingKeys?.ToList() ?? new List<string>();
+        var keys = ratingKeys?.Where(k => !string.IsNullOrWhiteSpace(k)).Distinct().ToList() ?? new();
         if (keys.Count == 0)
         {
-            Console.WriteLine("[Plex AddTracks] ⚠️ No keys to add.");
-            if (!string.IsNullOrEmpty(exportId))
-                await SendSseAsync(exportId, _localizer["NoTracksToAdd"]);
+            Console.WriteLine("[Plex AddTracks] ⚠️ No track keys provided.");
             return false;
         }
 
-        var allOk = true;
-        var index = 0;
+        bool allOk = true;
+        using var client = new HttpClient();
 
         foreach (var key in keys)
         {
-            index++;
+            var uri = $"{plexBaseUrl}/playlists/{playlistKey}/items" +
+                      $"?uri=server://{machineId}/com.plexapp.plugins.library/library/metadata/{key}" +
+                      $"&type=audio&X-Plex-Token={Uri.EscapeDataString(plexToken)}";
 
-            // ✅ Plex-konforme URI
-            var plexUri = $"library://{machineId}/com.plexapp.plugins.library/library/metadata/{key}";
-            var encodedUri = WebUtility.UrlEncode(plexUri);
-
-            // 🔹 Vollständige API-URL (korrekt für Plex v1/v2)
-            var url = $"{plexBaseUrl}/playlists/{playlistKey}/items?uri={encodedUri}";
-
-            using var req = new HttpRequestMessage(HttpMethod.Post, url);
-            req.Headers.Add("X-Plex-Token", plexToken);
+            var req = new HttpRequestMessage(HttpMethod.Put, uri);
             req.Headers.Add("Accept", "application/json");
+            req.Headers.Add("X-Plex-Client-Identifier", "inetconnector-spotify-to-plex");
+            req.Headers.Add("X-Plex-Product", "SpotifyToPlex");
+            req.Headers.Add("X-Plex-Version", "1.0");
+            req.Headers.Add("X-Plex-Platform", "Web");
+            req.Headers.Add("X-Plex-Platform-Version", "ASP.NET-Core");
+            req.Headers.Add("X-Plex-Device", "InetConnector Cloud");
+            req.Headers.Add("X-Plex-Device-Name", "SpotifyToPlex WebApp");
 
-            Console.WriteLine($"[Plex AddTracks] ({index}/{keys.Count}) POST {url}");
+            Console.WriteLine($"[Plex AddTracks] ➕ Adding track {key} …");
 
-            try
+            var res = await client.SendAsync(req);
+            var msg = await res.Content.ReadAsStringAsync();
+
+            if (!res.IsSuccessStatusCode || !msg.Contains("\"leafCountAdded\":1"))
             {
-                var res = await _http.SendAsync(req);
-                var msg = await res.Content.ReadAsStringAsync();
-
-                if (!res.IsSuccessStatusCode)
-                {
-                    allOk = false;
-                    Console.WriteLine($"[Plex AddTracks] ❌ {res.StatusCode}: {msg}");
-
-                    if (!string.IsNullOrEmpty(exportId))
-                    {
-                        var failMsg = $"{_localizer["TrackAddFailed"]}: {res.StatusCode}";
-                        await SendSseAsync(exportId, $"❌ {failMsg}");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine($"[Plex AddTracks] ✅ Added track {key}");
-
-                    if (!string.IsNullOrEmpty(exportId))
-                    {
-                        var okMsg = _localizer["TrackAdded"];
-                        await SendSseAsync(exportId, $"✅ {okMsg} ({key})");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
+                Console.WriteLine($"[Plex AddTracks] ❌ Failed ({res.StatusCode}): {msg}");
                 allOk = false;
-                Console.WriteLine($"[Plex AddTracks] ⚠️ Exception while adding {key}: {ex.Message}");
-
-                if (!string.IsNullOrEmpty(exportId))
-                    await SendSseAsync(exportId, $"❌ Exception: {ex.Message}");
+            }
+            else
+            {
+                Console.WriteLine($"[Plex AddTracks] ✅ Added track {key} to playlist {playlistKey}");
             }
         }
 
-        if (!string.IsNullOrEmpty(exportId))
-            await SendSseAsync(exportId, _localizer["AllTracksProcessed"]);
-
-        Console.WriteLine($"[Plex AddTracks] Completed. Success={allOk}");
+        Console.WriteLine($"[Plex AddTracks] Done. Success = {allOk}");
         return allOk;
     }
 

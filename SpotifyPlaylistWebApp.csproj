@@ -11,6 +11,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Services\ImportPlaylistFromJsonAsync.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="LukeHagar.PlexAPI.SDK" Version="0.16.1" />
 		<PackageReference Include="SpotifyAPI.Web" Version="7.0.0" />
 	</ItemGroup>
 
