@@ -362,17 +362,20 @@ public class PlexService
         Console.WriteLine($"[Plex Library] SectionKey={key}");
         return key!;
     }
-     
+
     // ============================================================
     // 🔸 Verbesserte Track-Suche (mit SectionKey + ServerMachineId)
+    // ============================================================
+    // ============================================================
+    // 🔸 Präzise Track-Suche auf Plex (fokussiert auf grandparentTitle)
     // ============================================================
     public async Task<List<(string Title, string Artist, string? RatingKey, string SectionKey, string ServerMachineId)>>
         SearchTracksOnPlexAsync(string plexBaseUrl, string plexToken, List<(string Title, string Artist)> tracks)
     {
-        var results =
-            new List<(string Title, string Artist, string? RatingKey, string SectionKey, string ServerMachineId)>();
+        var results = new List<(string Title, string Artist, string? RatingKey, string SectionKey, string ServerMachineId)>();
+
         var sectionKey = await GetMusicSectionKeyAsync(plexBaseUrl, plexToken);
-        var (_, machineId) = await DiscoverServerAsync(plexToken);
+        var (_, defaultMachineId) = await DiscoverServerAsync(plexToken);
 
         foreach (var (titleRaw, artistRaw) in tracks)
         {
@@ -380,43 +383,42 @@ public class PlexService
             var artist = artistRaw ?? "";
             string? ratingKey = null;
             var foundSection = sectionKey;
-            var foundMachineId = machineId;
+            var foundMachineId = defaultMachineId;
 
             try
             {
                 // 1️⃣ Exakte Suche innerhalb der Musik-Section
-                var url1 =
-                    $"{plexBaseUrl}/library/sections/{sectionKey}/all" +
-                    $"?type=10&track.title={Uri.EscapeDataString(title)}" +
-                    $"&artist={Uri.EscapeDataString(artist)}&X-Plex-Token={plexToken}";
+                var url1 = $"{plexBaseUrl}/library/sections/{sectionKey}/all" +
+                           $"?type=10&track.title={Uri.EscapeDataString(title)}" +
+                           $"&artist={Uri.EscapeDataString(artist)}&X-Plex-Token={plexToken}";
 
                 var xml1 = await _http.GetStringAsync(url1);
                 var doc1 = XDocument.Parse(xml1);
-                var trackNode = doc1.Descendants("Track").FirstOrDefault();
+                var trackNode = doc1.Descendants("Track")
+                    .FirstOrDefault(t =>
+                        string.Equals(
+                            (string?)t.Attribute("grandparentTitle") ?? "",
+                            artist,
+                            StringComparison.OrdinalIgnoreCase));
 
                 if (trackNode != null)
                 {
                     ratingKey = trackNode.Attribute("ratingKey")?.Value;
-                    foundSection =
-                        trackNode.Ancestors("MediaContainer").FirstOrDefault()?.Attribute("librarySectionID")?.Value ??
-                        sectionKey;
-                    foundMachineId =
-                        trackNode.Ancestors("MediaContainer").FirstOrDefault()?.Attribute("machineIdentifier")?.Value ??
-                        machineId;
+                    foundSection = trackNode.Ancestors("MediaContainer").FirstOrDefault()?.Attribute("librarySectionID")?.Value ?? sectionKey;
+                    foundMachineId = trackNode.Ancestors("MediaContainer").FirstOrDefault()?.Attribute("machineIdentifier")?.Value ?? defaultMachineId;
+
+                    Console.WriteLine($"[ExactMatch] ✅ {artist} – {title} ({ratingKey})");
                 }
             }
-            catch
-            {
-                /* ignorieren */
-            }
+            catch { /* ignore */ }
 
-            // 2️⃣ Fuzzy-Suche als Fallback
+            // 2️⃣ Fuzzy-Suche als Fallback (nur grandparentTitle!)
             if (ratingKey == null)
+            {
                 try
                 {
                     var q = Uri.EscapeDataString($"{artist} {title}");
-                    var url2 =
-                        $"{plexBaseUrl}/library/sections/{sectionKey}/search?type=10&query={q}&X-Plex-Token={plexToken}";
+                    var url2 = $"{plexBaseUrl}/library/sections/{sectionKey}/search?type=10&query={q}&X-Plex-Token={plexToken}";
                     var xml2 = await _http.GetStringAsync(url2);
                     var doc2 = XDocument.Parse(xml2);
 
@@ -427,29 +429,20 @@ public class PlexService
                         .Select(t => new
                         {
                             Key = (string?)t.Attribute("ratingKey"),
-                            T = Normalize((string?)t.Attribute("title") ?? ""),
-                            A = Normalize(
-                                (string?)t.Attribute("grandparentTitle")
-                                ?? (string?)t.Attribute("originalTitle")
-                                ?? (string?)t.Attribute("parentTitle")
-                                ?? (string?)t.Element("GrandparentTitle")
-                                ?? (string?)t.Element("ParentTitle")
-                                ?? ""
-                            ),
-                            Section = (string?)t.Ancestors("MediaContainer").FirstOrDefault()
-                                ?.Attribute("librarySectionID"),
-                            ServerId = (string?)t.Ancestors("MediaContainer").FirstOrDefault()
-                                ?.Attribute("machineIdentifier")
+                            Title = (string?)t.Attribute("title") ?? "",
+                            Artist = (string?)t.Attribute("grandparentTitle") ?? "",
+                            Section = (string?)t.Ancestors("MediaContainer").FirstOrDefault()?.Attribute("librarySectionID"),
+                            ServerId = (string?)t.Ancestors("MediaContainer").FirstOrDefault()?.Attribute("machineIdentifier")
                         })
-                        .Where(c => !string.IsNullOrWhiteSpace(c.A) && c.A != "Various Artists")
+                        .Where(c => !string.IsNullOrWhiteSpace(c.Artist) && !c.Artist.Equals("Various Artists", StringComparison.OrdinalIgnoreCase))
                         .Select(c => new
                         {
                             c.Key,
-                            c.T,
-                            c.A,
+                            c.Title,
+                            c.Artist,
                             c.Section,
                             c.ServerId,
-                            Score = Levenshtein(c.T, wantedT) + Levenshtein(c.A, wantedA)
+                            Score = Levenshtein(Normalize(c.Title), wantedT) + Levenshtein(Normalize(c.Artist), wantedA)
                         })
                         .OrderBy(x => x.Score)
                         .FirstOrDefault();
@@ -458,41 +451,42 @@ public class PlexService
                     {
                         ratingKey = candidates.Key;
                         foundSection = candidates.Section ?? sectionKey;
-                        foundMachineId = candidates.ServerId ?? machineId;
-                    }
- 
-                }
-                catch
-                {
-                    /* ignorieren */
-                }
+                        foundMachineId = candidates.ServerId ?? defaultMachineId;
 
-            // 3️⃣ Globaler Fallback
+                        Console.WriteLine($"[FuzzyMatch] 🎯 {artist} – {title} → {candidates.Artist} – {candidates.Title} (Score={candidates.Score})");
+                    }
+                }
+                catch { /* ignore */ }
+            }
+
+            // 3️⃣ Globaler Fallback (wenn nichts gefunden)
             if (ratingKey == null)
+            {
                 try
                 {
                     var q = Uri.EscapeDataString($"{artist} {title}");
                     var url3 = $"{plexBaseUrl}/search?query={q}&type=10&X-Plex-Token={plexToken}";
                     var xml3 = await _http.GetStringAsync(url3);
                     var doc3 = XDocument.Parse(xml3);
-                    var track = doc3.Descendants("Track").FirstOrDefault();
+                    var track = doc3.Descendants("Track")
+                        .FirstOrDefault(t => string.Equals((string?)t.Attribute("grandparentTitle") ?? "", artist, StringComparison.OrdinalIgnoreCase));
+
                     if (track != null)
                     {
                         ratingKey = track.Attribute("ratingKey")?.Value;
-                        foundSection =
-                            track.Ancestors("MediaContainer").FirstOrDefault()?.Attribute("librarySectionID")?.Value ??
-                            sectionKey;
-                        foundMachineId =
-                            track.Ancestors("MediaContainer").FirstOrDefault()?.Attribute("machineIdentifier")?.Value ??
-                            machineId;
+                        foundSection = track.Ancestors("MediaContainer").FirstOrDefault()?.Attribute("librarySectionID")?.Value ?? sectionKey;
+                        foundMachineId = track.Ancestors("MediaContainer").FirstOrDefault()?.Attribute("machineIdentifier")?.Value ?? defaultMachineId;
+
+                        Console.WriteLine($"[Fallback] ✅ {artist} – {title} ({ratingKey})");
                     }
                 }
-                catch
-                {
-                    /* ignorieren */
-                }
+                catch { /* ignore */ }
+            }
 
             results.Add((titleRaw, artistRaw, ratingKey, foundSection, foundMachineId));
+
+            if (ratingKey == null)
+                Console.WriteLine($"[NoMatch] ❌ {artist} – {title}");
         }
 
         return results;
