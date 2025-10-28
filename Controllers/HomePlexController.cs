@@ -167,13 +167,13 @@ public class HomePlexController : Controller
             var plexToken = HttpContext.Session.GetString("PlexAuthToken");
             if (spotifyToken == null || plexToken == null)
             {
-                await writer.WriteLineAsync($"data: ERROR {L["SpotifyToPlex_TokenExpired"]}\n\n");
+                await plex.SendSseAsync(exportId, $"data: ERROR {L["SpotifyToPlex_TokenExpired"]}\n\n");
                 await writer.FlushAsync();
                 return;
             }
 
             var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault(spotifyToken));
-            var (baseUrl, machineId) = await plex.DiscoverServerAsync(plexToken);
+            var (baseUrl, defaultMachineId) = await plex.DiscoverServerAsync(plexToken);
             var tracks = await plex.GetSpotifyPlaylistTracksAsync(spotify, playlistId);
 
             await plex.SendSseAsync(exportId, $"{L["SpotifyToPlex_Exporting"]}: '{playlistName}' ({tracks.Count} {L["SpotifyToPlex_Tracks"]})");
@@ -192,14 +192,20 @@ public class HomePlexController : Controller
             foreach (var (title, artist) in tracks)
             {
                 await plex.SendSseAsync(exportId, $"🔍 {L["SpotifyToPlex_Searching"]}: {artist} — {title}");
+
+                // 🔸 Suche liefert jetzt Section + ServerMachineId
                 var found = await plex.SearchTracksOnPlexAsync(baseUrl, plexToken,
                     new List<(string Title, string Artist)> { (title, artist) });
                 var match = found.FirstOrDefault();
 
                 if (!string.IsNullOrEmpty(match.RatingKey))
                 {
-                    bool ok = await plex.AddTracksToPlaylistAsync(baseUrl, plexToken, plexPlaylistKey,
-                        new[] { match.RatingKey }, machineId, exportId);
+                    // 🔹 nutze match.ServerMachineId statt defaultMachineId
+                    bool ok = await plex.AddTracksToPlaylistAsync(
+                        baseUrl, plexToken, plexPlaylistKey,
+                        new[] { match.RatingKey },
+                        match.ServerMachineId ?? defaultMachineId,
+                        exportId);
 
                     if (ok)
                     {
@@ -235,7 +241,7 @@ public class HomePlexController : Controller
             await writer.FlushAsync();
         }
     }
-     
+
     // ==============================================================
     // 🔸 Download Missing Songs CSV
     // - Uses in-memory cache (_missingCache) from PlexService

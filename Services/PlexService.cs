@@ -1,15 +1,15 @@
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Localization;
-using SpotifyAPI.Web;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Localization;
+using SpotifyAPI.Web;
 
 namespace SpotifyPlaylistWebApp.Services;
- 
+
 /// <summary>
 ///     Handles Spotify → Plex playlist export and synchronization.
 ///     All tokens and missing-track cache are stored in memory only.
@@ -29,25 +29,26 @@ public class PlexService
     //     Stored as lines: "Artist — Album — Title"  (Album optional)
     private static readonly Dictionary<string, List<string>> _missingCache = new();
 
-    private readonly HttpClient _http;
-
-    private readonly IStringLocalizer<PlexService> _localizer;
-    public PlexService(IStringLocalizer<PlexService> localizer, IHttpClientFactory httpClientFactory)
-    {
-        _localizer = localizer;
-        _http = httpClientFactory.CreateClient(); 
-        _http.DefaultRequestHeaders.Add("Accept", "application/xml");
-        _http.DefaultRequestHeaders.Add("User-Agent", "SpotifyToPlex/1.0");
-        _http.DefaultRequestHeaders.Add("X-Plex-Product", "SpotifyToPlex");
-        _http.DefaultRequestHeaders.Add("X-Plex-Device", "WebApp");
-    }
     // ============================================================
     // 🔸 SSE (Server-Sent Events) Support for live export feedback
     // ============================================================
     private static readonly ConcurrentDictionary<string, StreamWriter> _sseStreams = new();
 
+    private readonly HttpClient _http;
+    private readonly IStringLocalizer<SharedResource> _localizer;
+
+    public PlexService(IStringLocalizer<SharedResource> localizer, IHttpClientFactory httpClientFactory)
+    {
+        _localizer = localizer;
+        _http = httpClientFactory.CreateClient();
+        _http.DefaultRequestHeaders.Add("Accept", "application/xml");
+        _http.DefaultRequestHeaders.Add("User-Agent", "SpotifyToPlex/1.0");
+        _http.DefaultRequestHeaders.Add("X-Plex-Product", "SpotifyToPlex");
+        _http.DefaultRequestHeaders.Add("X-Plex-Device", "WebApp");
+    }
+
     /// <summary>
-    /// Sends a single SSE message (text line) to the given export session.
+    ///     Sends a single SSE message (text line) to the given export session.
     /// </summary>
     internal async Task SendSseAsync(string exportId, string message)
     {
@@ -55,7 +56,6 @@ public class PlexService
             return;
 
         if (_sseStreams.TryGetValue(exportId, out var writer))
-        {
             try
             {
                 await writer.WriteAsync($"data: {message}\n\n");
@@ -65,11 +65,10 @@ public class PlexService
             {
                 Console.WriteLine($"[SSE] ❌ Failed to send message: {ex.Message}");
             }
-        }
     }
 
     /// <summary>
-    /// Registers a new SSE stream for a given export session.
+    ///     Registers a new SSE stream for a given export session.
     /// </summary>
     public static void RegisterSseStream(string exportId, StreamWriter writer)
     {
@@ -77,15 +76,21 @@ public class PlexService
     }
 
     /// <summary>
-    /// Unregisters and closes an SSE stream after export completes.
+    ///     Unregisters and closes an SSE stream after export completes.
     /// </summary>
     public static void UnregisterSseStream(string exportId)
     {
         if (_sseStreams.TryRemove(exportId, out var writer))
-        {
-            try { writer.Dispose(); } catch { /* ignored */ }
-        }
+            try
+            {
+                writer.Dispose();
+            }
+            catch
+            {
+                /* ignored */
+            }
     }
+
     // ============================================================
     // 🔸 Public helpers for the missing-cache (so du brauchst keine Reflection mehr)
     // ============================================================
@@ -211,17 +216,14 @@ public class PlexService
         return null;
     }
 
-    // ============================================================
-    // 🔸 Discover Plex servers linked to the user
-    // ============================================================
     public async Task<(string BaseUrl, string MachineId)> DiscoverServerAsync(string plexToken)
     {
         var xml = await _http.GetStringAsync($"https://plex.tv/api/resources?includeHttps=1&X-Plex-Token={plexToken}");
         var doc = XDocument.Parse(xml);
 
         var server = doc.Descendants("Device")
-            .FirstOrDefault(d =>
-                ((string?)d.Attribute("provides") ?? "").Contains("server", StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(d => ((string?)d.Attribute("provides") ?? "")
+                .Contains("server", StringComparison.OrdinalIgnoreCase));
 
         if (server == null)
             throw new Exception("No Plex server found in this account.");
@@ -237,18 +239,38 @@ public class PlexService
         var baseUrl = connection.Attribute("uri")?.Value ?? throw new Exception("No server URI found.");
         var machineId = server.Attribute("machineIdentifier")?.Value;
 
-        if (string.IsNullOrWhiteSpace(machineId))
-        {
-            var idFromServer = await GetServerIdentityAsync(baseUrl, plexToken);
-            if (!string.IsNullOrWhiteSpace(idFromServer))
-                machineId = idFromServer;
-            else
-                machineId = "unknown";
-        }
+        // 🩹 Wenn Plex keine Machine-ID liefert, hole sie direkt vom Server
+        if (string.IsNullOrWhiteSpace(machineId) || machineId.Equals("unknown", StringComparison.OrdinalIgnoreCase))
+            try
+            {
+                var xmlInfo = await _http.GetStringAsync($"{baseUrl}/?X-Plex-Token={plexToken}");
+                var docInfo = XDocument.Parse(xmlInfo);
+                machineId = docInfo.Root?.Attribute("machineIdentifier")?.Value ?? "unknown";
+
+                Console.WriteLine($"[Plex Discover] MachineIdentifier fetched from server: {machineId}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Plex Discover] ⚠️ Failed to fetch local machineIdentifier: {ex.Message}");
+
+                // Versuch 2: Fallback aus plex.direct-Host
+                var host = new Uri(baseUrl).Host;
+                var maybeId = host.Split('.').FirstOrDefault();
+                if (!string.IsNullOrEmpty(maybeId) && maybeId.Length > 10)
+                {
+                    machineId = maybeId;
+                    Console.WriteLine($"[Plex Discover] Fallback machineId extracted from baseUrl: {machineId}");
+                }
+                else
+                {
+                    machineId = "unknown";
+                }
+            }
 
         Console.WriteLine($"[Plex Discover] Server={baseUrl}, Machine={machineId}");
-        return (baseUrl, machineId);
+        return (baseUrl, machineId ?? "unknown");
     }
+
 
     // ============================================================
     // 🔸 Fetch Plex playlists
@@ -344,21 +366,28 @@ public class PlexService
     // ============================================================
     // 🔸 Verbesserte Track-Suche (Section + Fuzzy + Fallback)
     // ============================================================
-    public async Task<List<(string Title, string Artist, string? RatingKey)>> SearchTracksOnPlexAsync(
-        string plexBaseUrl, string plexToken, List<(string Title, string Artist)> tracks)
+    // ============================================================
+    // 🔸 Verbesserte Track-Suche (mit SectionKey + ServerMachineId)
+    // ============================================================
+    public async Task<List<(string Title, string Artist, string? RatingKey, string SectionKey, string ServerMachineId)>>
+        SearchTracksOnPlexAsync(string plexBaseUrl, string plexToken, List<(string Title, string Artist)> tracks)
     {
-        var results = new List<(string Title, string Artist, string? RatingKey)>();
+        var results =
+            new List<(string Title, string Artist, string? RatingKey, string SectionKey, string ServerMachineId)>();
         var sectionKey = await GetMusicSectionKeyAsync(plexBaseUrl, plexToken);
+        var (_, machineId) = await DiscoverServerAsync(plexToken);
 
         foreach (var (titleRaw, artistRaw) in tracks)
         {
             var title = titleRaw ?? "";
             var artist = artistRaw ?? "";
             string? ratingKey = null;
+            var foundSection = sectionKey;
+            var foundMachineId = machineId;
 
-            // 1️⃣ Exakte Filtersuche innerhalb des Music-Sections
             try
             {
+                // 1️⃣ Exakte Suche innerhalb der Musik-Section
                 var url1 =
                     $"{plexBaseUrl}/library/sections/{sectionKey}/all" +
                     $"?type=10&track.title={Uri.EscapeDataString(title)}" +
@@ -366,14 +395,25 @@ public class PlexService
 
                 var xml1 = await _http.GetStringAsync(url1);
                 var doc1 = XDocument.Parse(xml1);
-                ratingKey = doc1.Descendants("Track").FirstOrDefault()?.Attribute("ratingKey")?.Value;
+                var trackNode = doc1.Descendants("Track").FirstOrDefault();
+
+                if (trackNode != null)
+                {
+                    ratingKey = trackNode.Attribute("ratingKey")?.Value;
+                    foundSection =
+                        trackNode.Ancestors("MediaContainer").FirstOrDefault()?.Attribute("librarySectionID")?.Value ??
+                        sectionKey;
+                    foundMachineId =
+                        trackNode.Ancestors("MediaContainer").FirstOrDefault()?.Attribute("machineIdentifier")?.Value ??
+                        machineId;
+                }
             }
             catch
             {
                 /* ignorieren */
             }
 
-            // 2️⃣ Falls nichts gefunden → freie Section-Suche mit Fuzzy-Matching
+            // 2️⃣ Fuzzy-Suche als Fallback
             if (ratingKey == null)
                 try
                 {
@@ -392,29 +432,37 @@ public class PlexService
                             Key = (string?)t.Attribute("ratingKey"),
                             T = Normalize((string?)t.Attribute("title") ?? ""),
                             A = Normalize((string?)t.Attribute("grandparentTitle") ??
-                                          (string?)t.Attribute("parentTitle") ?? "")
+                                          (string?)t.Attribute("parentTitle") ?? ""),
+                            Section = (string?)t.Ancestors("MediaContainer").FirstOrDefault()
+                                ?.Attribute("librarySectionID"),
+                            ServerId = (string?)t.Ancestors("MediaContainer").FirstOrDefault()
+                                ?.Attribute("machineIdentifier")
                         })
                         .Select(c => new
                         {
                             c.Key,
                             c.T,
                             c.A,
-                            score = Levenshtein(c.T, wantedT) + Levenshtein(c.A, wantedA)
+                            c.Section,
+                            c.ServerId,
+                            Score = Levenshtein(c.T, wantedT) + Levenshtein(c.A, wantedA)
                         })
-                        .OrderBy(x => x.score)
-                        .Take(3)
-                        .ToList();
+                        .OrderBy(x => x.Score)
+                        .FirstOrDefault();
 
-                    var best = candidates.FirstOrDefault();
-                    if (best != null && best.score < 6)
-                        ratingKey = best.Key;
+                    if (candidates != null && candidates.Score < 6)
+                    {
+                        ratingKey = candidates.Key;
+                        foundSection = candidates.Section ?? sectionKey;
+                        foundMachineId = candidates.ServerId ?? machineId;
+                    }
                 }
                 catch
                 {
                     /* ignorieren */
                 }
 
-            // 3️⃣ Fallback – globale Suche (wenn alles andere versagt)
+            // 3️⃣ Globaler Fallback
             if (ratingKey == null)
                 try
                 {
@@ -422,14 +470,24 @@ public class PlexService
                     var url3 = $"{plexBaseUrl}/search?query={q}&type=10&X-Plex-Token={plexToken}";
                     var xml3 = await _http.GetStringAsync(url3);
                     var doc3 = XDocument.Parse(xml3);
-                    ratingKey = doc3.Descendants("Track").FirstOrDefault()?.Attribute("ratingKey")?.Value;
+                    var track = doc3.Descendants("Track").FirstOrDefault();
+                    if (track != null)
+                    {
+                        ratingKey = track.Attribute("ratingKey")?.Value;
+                        foundSection =
+                            track.Ancestors("MediaContainer").FirstOrDefault()?.Attribute("librarySectionID")?.Value ??
+                            sectionKey;
+                        foundMachineId =
+                            track.Ancestors("MediaContainer").FirstOrDefault()?.Attribute("machineIdentifier")?.Value ??
+                            machineId;
+                    }
                 }
                 catch
                 {
                     /* ignorieren */
                 }
 
-            results.Add((titleRaw, artistRaw, ratingKey));
+            results.Add((titleRaw, artistRaw, ratingKey, foundSection, foundMachineId));
         }
 
         return results;
@@ -481,66 +539,96 @@ public class PlexService
         return v1[b.Length];
     }
 
+    // ============================================================
+    // 🔸 Add tracks to existing Plex playlist (Batch + SSE + bool)
+    // ============================================================
+    // ============================================================
+    // 🔸 Add tracks to existing Plex playlist (final, stable version)
+    // ============================================================
     public async Task<bool> AddTracksToPlaylistAsync(
-        string plexBaseUrl, string plexToken, string playlistKey,
-        IEnumerable<string> ratingKeys, string machineId, string exportId = "")
+        string plexBaseUrl,
+        string plexToken,
+        string playlistKey,
+        IEnumerable<string> ratingKeys,
+        string machineId,
+        string exportId = "")
     {
-        if (string.IsNullOrWhiteSpace(machineId))
-            throw new ArgumentException("machineId must not be empty.", nameof(machineId));
+        if (string.IsNullOrWhiteSpace(machineId) || machineId.Equals("unknown", StringComparison.OrdinalIgnoreCase))
+            throw new ArgumentException("machineId must not be empty or 'unknown'.", nameof(machineId));
 
-        var keys = ratingKeys?.ToList() ?? new();
+        var keys = ratingKeys?.ToList() ?? new List<string>();
         if (keys.Count == 0)
+        {
+            Console.WriteLine("[Plex AddTracks] ⚠️ No keys to add.");
+            if (!string.IsNullOrEmpty(exportId))
+                await SendSseAsync(exportId, _localizer["NoTracksToAdd"]);
             return false;
+        }
 
-        bool allOk = true;
+        var allOk = true;
+        var index = 0;
 
         foreach (var key in keys)
         {
-            // ✅ Richtiger Plex-URI für Playlist-Hinzufügen:
-            var uri = $"library://{machineId}/item/{key}";
+            index++;
 
-            // ✅ POST mit "uri=" im Body, nicht in der Query
-            var url = $"{plexBaseUrl}/playlists/{playlistKey}/items?X-Plex-Token={plexToken}";
-            var content = new FormUrlEncodedContent(new Dictionary<string, string>
-        {
-            { "uri", uri }
-        });
+            // ✅ Plex-konforme URI
+            var plexUri = $"library://{machineId}/com.plexapp.plugins.library/library/metadata/{key}";
+            var encodedUri = WebUtility.UrlEncode(plexUri);
 
-            Console.WriteLine($"[Plex AddTracks] → POST {url} ({uri})");
+            // 🔹 Vollständige API-URL (korrekt für Plex v1/v2)
+            var url = $"{plexBaseUrl}/playlists/{playlistKey}/items?uri={encodedUri}";
+
+            using var req = new HttpRequestMessage(HttpMethod.Post, url);
+            req.Headers.Add("X-Plex-Token", plexToken);
+            req.Headers.Add("Accept", "application/json");
+
+            Console.WriteLine($"[Plex AddTracks] ({index}/{keys.Count}) POST {url}");
 
             try
             {
-                var res = await _http.PostAsync(url, content);
+                var res = await _http.SendAsync(req);
                 var msg = await res.Content.ReadAsStringAsync();
 
                 if (!res.IsSuccessStatusCode)
                 {
                     allOk = false;
-                    Console.WriteLine($"❌ Plex responded {res.StatusCode}: {msg}");
+                    Console.WriteLine($"[Plex AddTracks] ❌ {res.StatusCode}: {msg}");
+
                     if (!string.IsNullOrEmpty(exportId))
-                        await SendSseAsync(exportId, $"❌ TrackAddFailed {res.StatusCode}: {uri}");
+                    {
+                        var failMsg = $"{_localizer["TrackAddFailed"]}: {res.StatusCode}";
+                        await SendSseAsync(exportId, $"❌ {failMsg}");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine($"✅ Added track {key}");
+                    Console.WriteLine($"[Plex AddTracks] ✅ Added track {key}");
+
                     if (!string.IsNullOrEmpty(exportId))
-                        await SendSseAsync(exportId, $"✅ TrackAdded {key}");
+                    {
+                        var okMsg = _localizer["TrackAdded"];
+                        await SendSseAsync(exportId, $"✅ {okMsg} ({key})");
+                    }
                 }
             }
             catch (Exception ex)
             {
                 allOk = false;
-                Console.WriteLine($"[Plex AddTracks] Exception: {ex.Message}");
+                Console.WriteLine($"[Plex AddTracks] ⚠️ Exception while adding {key}: {ex.Message}");
+
                 if (!string.IsNullOrEmpty(exportId))
-                    await SendSseAsync(exportId, $"❌ Exception while adding track {key}: {ex.Message}");
+                    await SendSseAsync(exportId, $"❌ Exception: {ex.Message}");
             }
         }
 
         if (!string.IsNullOrEmpty(exportId))
             await SendSseAsync(exportId, _localizer["AllTracksProcessed"]);
 
+        Console.WriteLine($"[Plex AddTracks] Completed. Success={allOk}");
         return allOk;
     }
+
 
     // ============================================================
     // 🔸 Get Plex Server Identity (machineIdentifier, version, claimed)
@@ -655,15 +743,22 @@ public class PlexService
         oldMissing ??= new List<string>();
 
         var tracks = await GetSpotifyPlaylistTracksAsync(spotify, spotifyPlaylistId);
-        var searchCandidates = tracks.Where(t => !oldMissing.Contains($"{t.Artist} — {t.Title}")).ToList();
+        var searchCandidates = tracks
+            .Where(t => !oldMissing.Contains($"{t.Artist} — {t.Title}"))
+            .ToList();
 
         Console.WriteLine(
             $"[Plex Export] Searching {searchCandidates.Count} new tracks, reusing {oldMissing.Count} missing.");
 
+        // 🔸 Search returns RatingKey + SectionKey + ServerMachineId
         var matches = await SearchTracksOnPlexAsync(plexBaseUrl, plexToken, searchCandidates);
 
-        var foundKeys = matches.Where(m => m.RatingKey != null).Select(m => m.RatingKey!).ToList();
-        var newlyMissing = matches.Where(m => m.RatingKey == null).Select(m => $"{m.Artist} — {m.Title}").ToList();
+        var found = matches.Where(m => m.RatingKey != null).ToList();
+        var foundKeys = found.Select(m => m.RatingKey!).ToList();
+        var newlyMissing = matches
+            .Where(m => m.RatingKey == null)
+            .Select(m => $"{m.Artist} — {m.Title}")
+            .ToList();
 
         // Merge old + new missing and deduplicate
         var combinedMissing = oldMissing.Concat(newlyMissing).Distinct().OrderBy(x => x).ToList();
@@ -683,19 +778,40 @@ public class PlexService
             Console.WriteLine($"[Plex Export] Created new playlist '{name}'");
         }
 
-        var (_, machineId) = await DiscoverServerAsync(plexToken);
+        // 🔸 MachineId-Fallback
+        var (_, defaultMachineId) = await DiscoverServerAsync(plexToken);
 
-        if (foundKeys.Any())
+        // 🔹 Gruppiere Treffer nach MachineId → effizienter Batch-Upload
+        var groupedByServer = found.GroupBy(m => m.ServerMachineId ?? defaultMachineId);
+
+        var addedCount = 0;
+
+        foreach (var group in groupedByServer)
         {
-            var success = await AddTracksToPlaylistAsync(plexBaseUrl, plexToken, playlistKey, foundKeys, machineId);
+            var groupKeys = group.Select(m => m.RatingKey!).ToList();
+            var machineId = group.Key;
+
+            Console.WriteLine($"[Plex Export] Adding {groupKeys.Count} tracks from machine {machineId}...");
+            var success = await AddTracksToPlaylistAsync(plexBaseUrl, plexToken, playlistKey, groupKeys, machineId);
+
+            if (success)
+            {
+                addedCount += groupKeys.Count;
+                Console.WriteLine($"[Plex Export] ✅ {groupKeys.Count} added from server {machineId}");
+            }
+            else
+            {
+                Console.WriteLine($"[Plex Export] ⚠️ Some tracks failed for server {machineId}");
+            }
         }
 
         // Save to memory cache
         _missingCache[name] = combinedMissing;
 
-        Console.WriteLine($"[Plex Export] {name}: +{foundKeys.Count} added, {combinedMissing.Count} still missing.");
-        return (name, foundKeys.Count, combinedMissing);
+        Console.WriteLine($"[Plex Export] {name}: +{addedCount} added, {combinedMissing.Count} still missing.");
+        return (name, addedCount, combinedMissing);
     }
+
 
     // ============================================================
     // 🔸 Get tracks (XML → readable list) from Plex playlist
@@ -781,5 +897,4 @@ public class PlexService
         Console.WriteLine($"[Plex] Created playlist '{name}' key={key}");
         return key;
     }
-
 }
