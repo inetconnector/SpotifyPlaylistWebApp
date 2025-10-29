@@ -605,6 +605,9 @@ public class PlexService
         return v1[b.Length];
     }
 
+    // ============================================================
+    // 🔸 Optimized AddTracksToPlaylistAsync — Batch Upload Version
+    // ============================================================
     public async Task<bool> AddTracksToPlaylistAsync(
         string plexBaseUrl,
         string plexToken,
@@ -616,50 +619,78 @@ public class PlexService
         if (string.IsNullOrWhiteSpace(machineId))
             throw new ArgumentException("machineId must not be empty.", nameof(machineId));
 
-        var keys = ratingKeys?.Where(k => !string.IsNullOrWhiteSpace(k)).Distinct().ToList() ?? new List<string>();
+        var keys = ratingKeys?
+            .Where(k => !string.IsNullOrWhiteSpace(k))
+            .Distinct()
+            .ToList() ?? new List<string>();
+
         if (keys.Count == 0)
         {
             Console.WriteLine("[Plex AddTracks] ⚠️ No track keys provided.");
             return false;
         }
 
-        var allOk = true;
+        const int chunkSize = 50; // safe batch size for Plex
+        var total = keys.Count;
+        var success = true;
+        var processed = 0;
+
         using var client = new HttpClient();
+        client.DefaultRequestHeaders.Add("Accept", "application/json");
+        client.DefaultRequestHeaders.Add("X-Plex-Client-Identifier", "inetconnector-spotify-to-plex");
+        client.DefaultRequestHeaders.Add("X-Plex-Product", "SpotifyToPlex");
+        client.DefaultRequestHeaders.Add("X-Plex-Version", "1.0");
+        client.DefaultRequestHeaders.Add("X-Plex-Platform", "Web");
+        client.DefaultRequestHeaders.Add("X-Plex-Platform-Version", "ASP.NET-Core");
+        client.DefaultRequestHeaders.Add("X-Plex-Device", "InetConnector Cloud");
+        client.DefaultRequestHeaders.Add("X-Plex-Device-Name", "SpotifyToPlex WebApp");
 
-        foreach (var key in keys)
+        for (int i = 0; i < total; i += chunkSize)
         {
-            var uri = $"{plexBaseUrl}/playlists/{playlistKey}/items" +
-                      $"?uri=server://{machineId}/com.plexapp.plugins.library/library/metadata/{key}" +
-                      $"&type=audio&X-Plex-Token={Uri.EscapeDataString(plexToken)}";
+            var batch = keys.Skip(i).Take(chunkSize).ToList();
+            var uris = batch.Select(k =>
+                $"server://{machineId}/com.plexapp.plugins.library/library/metadata/{k}");
+            var uriString = string.Join(",", uris);
 
-            var req = new HttpRequestMessage(HttpMethod.Put, uri);
-            req.Headers.Add("Accept", "application/json");
-            req.Headers.Add("X-Plex-Client-Identifier", "inetconnector-spotify-to-plex");
-            req.Headers.Add("X-Plex-Product", "SpotifyToPlex");
-            req.Headers.Add("X-Plex-Version", "1.0");
-            req.Headers.Add("X-Plex-Platform", "Web");
-            req.Headers.Add("X-Plex-Platform-Version", "ASP.NET-Core");
-            req.Headers.Add("X-Plex-Device", "InetConnector Cloud");
-            req.Headers.Add("X-Plex-Device-Name", "SpotifyToPlex WebApp");
+            var url =
+                $"{plexBaseUrl}/playlists/{playlistKey}/items" +
+                $"?uri={Uri.EscapeDataString(uriString)}" +
+                $"&type=audio&X-Plex-Token={Uri.EscapeDataString(plexToken)}";
 
-            Console.WriteLine($"[Plex AddTracks] ➕ Adding track {key} …");
+            Console.WriteLine($"[Plex AddTracks] ➕ Adding {batch.Count} tracks ({i + 1}–{i + batch.Count} of {total}) …");
 
+            var req = new HttpRequestMessage(HttpMethod.Put, url);
             var res = await client.SendAsync(req);
             var msg = await res.Content.ReadAsStringAsync();
 
-            if (!res.IsSuccessStatusCode || !msg.Contains("\"leafCountAdded\":1"))
+            if (!res.IsSuccessStatusCode || (!msg.Contains("\"leafCountAdded\"") && !msg.Contains("\"size\"")))
             {
-                Console.WriteLine($"[Plex AddTracks] ❌ Failed ({res.StatusCode}): {msg}");
-                allOk = false;
+                Console.WriteLine($"[Plex AddTracks] ❌ Batch failed ({res.StatusCode}): {msg}");
+                success = false;
             }
             else
             {
-                Console.WriteLine($"[Plex AddTracks] ✅ Added track {key} to playlist {playlistKey}");
+                Console.WriteLine($"[Plex AddTracks] ✅ Added {batch.Count} tracks to playlist {playlistKey}");
             }
+
+            processed += batch.Count;
+
+            // Optional: progress event back to browser (if using SSE)
+            if (!string.IsNullOrEmpty(exportId))
+            {
+                try
+                {
+                    await SendSseAsync(exportId, $"progress:{processed}:0:{total}");
+                }
+                catch { /* ignore SSE errors */ }
+            }
+
+            // tiny delay avoids Plex rate-limit throttling
+            await Task.Delay(200);
         }
 
-        Console.WriteLine($"[Plex AddTracks] Done. Success = {allOk}");
-        return allOk;
+        Console.WriteLine($"[Plex AddTracks] Done. Added {processed}/{total} tracks. Success={success}");
+        return success;
     }
 
 

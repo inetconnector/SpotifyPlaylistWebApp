@@ -12,6 +12,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+	<data name="SpotifyToPlex_LiveExportAll" xml:space="preserve">
+  <value>Alle Playlists exportieren (Live)</value>
+</data>
+	<data name="SpotifyToPlex_AllPlaylistsExported" xml:space="preserve">
+  <value>✅ Alle Spotify-Playlists wurden erfolgreich exportiert.</value>
+</data>
+	<data name="SpotifyToPlex_PlaylistProgress" xml:space="preserve">
+  <value>Exportiere Playlist {0} von {1}</value>
+</data>
+	<data name="SpotifyToPlex_AllDone" xml:space="preserve">
+  <value>Alle Exporte abgeschlossen</value>
+</data>
+
 	<data name="Job_Error_Preparation" xml:space="preserve">
   <value>Interner Fehler bei der Vorbereitung. Bitte erneut versuchen.</value>
 </data>

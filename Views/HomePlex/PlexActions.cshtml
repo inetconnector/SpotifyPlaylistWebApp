@@ -98,6 +98,12 @@
             ⚡ @L["SpotifyToPlex_LiveExport"]
         </button>
 
+        <button type="button" id="btnLiveExportAll"
+                class="w-full py-3.5 bg-gradient-to-r from-blue-400 to-blue-700
+               text-white font-semibold rounded-xl shadow hover:brightness-110 mb-3">
+            🌐 @L["SpotifyToPlex_LiveExportAll"]
+        </button>
+
         <hr class="my-8 border-gray-700">
 
         @* ================================
@@ -133,7 +139,11 @@
                     🗑️
                 </button>
             </div>
+            
+
         </div>
+
+ 
 
         @* Disconnect *@
         <form method="post" action="/HomePlex/DisconnectPlex">
@@ -203,21 +213,21 @@
                 nameInput.value = opt.text;
                 idInput.value = opt.value;
             });
-
-            // ============================================================
-            // 🔸 FIXED: Live Export Button – playlistName defined & sanitized
-            // ============================================================
+             
             document.getElementById("btnLiveExport")?.addEventListener("click", () => {
                 const playlistSelect = document.getElementById("playlistSelect");
                 if (!playlistSelect) return;
 
                 const playlistId = playlistSelect.value;
-                let playlistName = playlistSelect.options[playlistSelect.selectedIndex].text;
-
-                // 🧹 Remove any "(...)" part (e.g. "(❗13 missing)") before sending
+                let playlistName = playlistSelect.options[playlistSelect.selectedIndex].text; 
                 playlistName = playlistName.replace(/\s*\([^)]*\)\s*$/g, "");
 
                 startLiveExport(playlistId, playlistName);
+            });
+
+            document.getElementById("btnLiveExportAll")?.addEventListener("click", () => {
+                const evt = new EventSource("/HomePlex/ExportAllLive");
+                evt.onmessage = (e) => appendLiveLog(e.data);
             });
 
             // ============================================================
