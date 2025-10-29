@@ -12,6 +12,18 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+	<data name="Job_Error_Preparation" xml:space="preserve">
+  <value>Error interno durante la preparación. Inténtalo de nuevo.</value>
+</data>
+
+	<data name="Job_Warn_Cooldown" xml:space="preserve">
+  <value>⏳ Espera {0} antes de iniciar esta acción nuevamente.</value>
+</data>
+
+	<data name="Job_Success_Started" xml:space="preserve">
+  <value>✅ {0} iniciado.<br/>Revisa Spotify® en 1–2 minutos.</value>
+</data>
+
 	<data name="SpotifyToPlex_DeleteConfirm" xml:space="preserve">
   <value>¿Borrar esta lista de reproducción de Plex?</value>
 </data>
@@ -21,7 +33,20 @@
   <data name="TrackAdded" xml:space="preserve">
     <value>OK – Pista añadida: {0}</value>
   </data>
-  <data name="TrackAddFailed" xml:space="preserve">
+	<data name="SpotifyToPlex_ExportAbortedOrFinished" xml:space="preserve">
+  <value>La exportación ha finalizado.</value>
+</data>
+	<data name="SpotifyToPlex_Continuing" xml:space="preserve">
+  <value>Continuando la exportación …</value>
+</data>
+	<data name="SpotifyToPlex_CreatingPlaylist" xml:space="preserve">
+  <value>Creando lista de reproducción en Plex …</value>
+</data>
+	<data name="Playlist_CopyOfLikedSongs" xml:space="preserve">
+  <value>Copia de tus canciones que te gustan</value>
+</data>
+
+	<data name="TrackAddFailed" xml:space="preserve">
     <value>Error al añadir pista: {0} → {1}</value>
   </data>
   <data name="AllTracksProcessed" xml:space="preserve">
@@ -167,9 +192,6 @@
   </data>
   <data name="Datenschutz_Bei_Fragen_oder_Anliegen_zum_Datenschutz_kannst_" xml:space="preserve">
     <value>Si tienes alguna pregunta o duda sobre la protección de datos, contacta con la dirección indicada en el aviso legal.</value>
-  </data>
-  <data name="Dashboard_Source_LikedSongs" xml:space="preserve">
-    <value>Canciones favoritas</value>
   </data>
   <data name="Dashboard_Source_Label" xml:space="preserve">
     <value>Selecciona la fuente de la lista de reproducción</value>
@@ -849,5 +871,29 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
   </data>
   <data name="SpotifyToPlex_NowExporting" xml:space="preserve">
     <value>Exportación en curso…</value>
-  </data> 
+  </data>
+  <data name="SpotifyToPlex_MissingCacheLoaded" xml:space="preserve">
+  <value>Se ha cargado la caché de faltantes para este servidor.</value>
+</data>
+  <data name="SpotifyToPlex_MissingCacheSaved" xml:space="preserve">
+  <value>La caché de faltantes se ha guardado.</value>
+</data>
+  <data name="SpotifyToPlex_MissingCacheRemoved" xml:space="preserve">
+  <value>Se eliminó la entrada de faltantes de la caché.</value>
+</data> 
+  <data name="SpotifyToPlex_DownloadMissing" xml:space="preserve">
+  <value>Descargar pistas faltantes</value>
+</data>
+  <data name="SpotifyToPlex_NoMissingTracks" xml:space="preserve">
+  <value>No hay pistas faltantes para esta lista de reproducción.</value>
+</data>
+  <data name="SpotifyToPlex_MissingCount" xml:space="preserve">
+  <value>{0} faltantes</value>
+</data>
+  <data name="SpotifyToPlex_MissingCsvTitle" xml:space="preserve">
+  <value>Pistas faltantes (Exportar)</value>
+</data>
+  <data name="Dashboard_Source_LikedSongs" xml:space="preserve">
+  <value>Canciones favoritas</value> 
+</data>
 </root>

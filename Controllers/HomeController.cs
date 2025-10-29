@@ -258,66 +258,20 @@ public class HomeController : Controller
     {
         return StartAlternativeFavoritesJob(GetToken());
     }
-
+     
     // === Alias für CloneLikedSongs (gleiche Funktion wie CreateFavList)
     [HttpGet]
     public IActionResult CloneLikedSongs()
     {
-        return StartLikedCloneJob(GetToken());
+        return StartLikedCloneJob();
     }
-
-    // === Empfehlungen (neue Logik mit Spotify-Empfehlungen)
-    [HttpGet]
-    public IActionResult CreateRecommendations()
-    {
-        var token = GetToken();
-        if (string.IsNullOrWhiteSpace(token))
-            return Warn("⚠️ Bitte zuerst einloggen.");
-
-        try
-        {
-            var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token));
-
-            return RunJob(async () =>
-                {
-                    var me = await spotify.UserProfile.Current();
-                    using var scope = _logger.BeginScope(new Dictionary<string, object?>
-                    {
-                        ["UserId"] = me.Id,
-                        ["Action"] = "[Recommendations]"
-                    });
-
-                    var selectedPlaylistName = HttpContext.Request.Query["playlistName"].FirstOrDefault();
-                    await GenerateRecommendationsAsync(spotify, me.Id, selectedPlaylistName);
-                },
-                async () =>
-                {
-                    var me = await new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token)).UserProfile
-                        .Current();
-                    return $"{me.Id}_[Recommendations]";
-                },
-                _localizer["Playlist_Recommendations"],
-                "[Recommendations]");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Empfehlungen konnten nicht gestartet werden.");
-            return Error($"Fehler beim Starten von '{_localizer["Playlist_Recommendations"]}': {ex.Message}");
-        }
-    }
-
     private string GetToken()
     {
         return HttpContext.Session.GetString(SessionTokenKey) ?? string.Empty;
     }
 
-    // ============================
-    // 🔸 Cooldown & Startlogik
-    // ============================
-
     private IActionResult StartPlaylistJob(string token, string namePrefix, string logTag, bool useLikedSongs,
-        bool shuffled, string? basePlaylistName = null)
-
+    bool shuffled, string? basePlaylistName = null)
     {
         if (string.IsNullOrWhiteSpace(token))
             return Warn("⚠️ Bitte zuerst einloggen.");
@@ -327,22 +281,17 @@ public class HomeController : Controller
             var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token));
 
             return RunJob(async () =>
-                {
-                    var me = await spotify.UserProfile.Current();
-                    using var scope = _logger.BeginScope(new Dictionary<string, object?>
-                    {
-                        ["UserId"] = me.Id,
-                        ["Action"] = logTag
-                    });
-
-                    await GeneratePlaylistAsync(spotify, me.Id, namePrefix, shuffled, useLikedSongs, _logger,
-                        basePlaylistName);
-                },
+            {
+                var me = await spotify.UserProfile.Current();
+                await GeneratePlaylistAsync(spotify, me.Id, namePrefix, shuffled, useLikedSongs, _logger,
+                    basePlaylistName);
+            },
                 async () =>
                 {
-                    var me = await new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token)).UserProfile
-                        .Current();
-                    return $"{me.Id}_{logTag}";
+                    var me = await new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token))
+                        .UserProfile.Current();
+                    var pl = basePlaylistName ?? (useLikedSongs ? "LikedSongs" : "TopTracks");
+                    return $"{me.Id}_{logTag}_{pl}";
                 },
                 namePrefix,
                 logTag);
@@ -351,67 +300,6 @@ public class HomeController : Controller
         {
             _logger.LogError(ex, "{Action} konnte nicht gestartet werden.", namePrefix);
             return Error($"Fehler beim Starten von {namePrefix}: {ex.Message}");
-        }
-    }
-
-    private IActionResult StartLikedCloneJob(string token)
-    {
-        if (string.IsNullOrWhiteSpace(token))
-            return Warn("⚠️ Bitte zuerst einloggen.");
-        try
-        {
-            var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token));
-            return RunJob(async () =>
-                {
-                    var me = await spotify.UserProfile.Current();
-                    using var scope = _logger.BeginScope(new Dictionary<string, object?>
-                    {
-                        ["UserId"] = me.Id,
-                        ["Action"] = "[LikedClone]"
-                    });
-
-                    // 1) Hole alle geliketen Tracks
-                    var liked = await spotify.Library.GetTracks(new LibraryTracksRequest { Limit = 50 });
-                    var tracks = new List<string>();
-                    while (true)
-                    {
-                        tracks.AddRange(liked.Items.Where(i => i.Track != null).Select(i => i.Track.Uri));
-                        if (string.IsNullOrEmpty(liked.Next)) break;
-                        liked = await spotify.NextPage(liked);
-                        await Task.Delay(ApiDelay);
-                    }
-
-                    // 2) Neue Playlist anlegen "Lieblingssongs YYYY-MM-DD"
-                    var today = DateTime.UtcNow.ToString("yyyy-MM-dd");
-                    var playlistName = $"Lieblingssongs {today}";
-                    var newPl = await spotify.Playlists.Create(me.Id, new PlaylistCreateRequest(playlistName)
-                    {
-                        Public = false,
-                        Description = "Kopie der 'Liked Songs'"
-                    });
-
-                    // 3) In Blöcken hinzufügen
-                    for (var i = 0; i < tracks.Count; i += 100)
-                    {
-                        var chunk = tracks.Skip(i).Take(100).ToList();
-                        if (chunk.Count == 0) break;
-                        await spotify.Playlists.AddItems(newPl.Id, new PlaylistAddItemsRequest(chunk));
-                        await Task.Delay(ApiDelay);
-                    }
-                },
-                async () =>
-                {
-                    var me = await new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token)).UserProfile
-                        .Current();
-                    return $"{me.Id}_[LikedClone]";
-                },
-                "Lieblingssongs",
-                "[LikedClone]");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "{Action} konnte nicht gestartet werden.", "Lieblingssongs");
-            return Error($"Fehler beim Starten von Lieblingssongs: {ex.Message}");
         }
     }
 
@@ -424,26 +312,19 @@ public class HomeController : Controller
         try
         {
             var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token));
-
-            // Read selected playlist name from query string (if any)
             var selectedPlaylistName = HttpContext.Request.Query["playlistName"].FirstOrDefault();
 
             return RunJob(async () =>
-                {
-                    var me = await spotify.UserProfile.Current();
-                    using var scope = _logger.BeginScope(new Dictionary<string, object?>
-                    {
-                        ["UserId"] = me.Id,
-                        ["Action"] = "[AltFavorites]"
-                    });
-
-                    await GenerateAlternativeFavoritesAsync(spotify, me.Id, selectedPlaylistName);
-                },
+            {
+                var me = await spotify.UserProfile.Current();
+                await GenerateAlternativeFavoritesAsync(spotify, me.Id, selectedPlaylistName);
+            },
                 async () =>
                 {
                     var me = await new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token))
                         .UserProfile.Current();
-                    return $"{me.Id}_[AltFavorites]";
+                    var pl = selectedPlaylistName ?? "LikedSongs";
+                    return $"{me.Id}_[AltFavorites]_{pl}";
                 },
                 _localizer["Playlist_AlternativeFavorites"],
                 "[AltFavorites]");
@@ -453,51 +334,171 @@ public class HomeController : Controller
             _logger.LogError(ex, "Alternative Favorites konnten nicht gestartet werden.");
             return Error($"Fehler beim Starten von '{_localizer["Playlist_AlternativeFavorites"]}': {ex.Message}");
         }
+    } 
+    private IActionResult StartLikedCloneJob()
+    {
+        var token = GetToken();
+        if (string.IsNullOrWhiteSpace(token))
+            return Warn("⚠️ Bitte zuerst einloggen.");
+
+        try
+        {
+            var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token));
+            var selectedPlaylistName = HttpContext.Request.Query["playlistName"].FirstOrDefault() ?? "LikedSongs";
+
+            return RunJob(async () =>
+            {
+                var me = await spotify.UserProfile.Current();
+                var liked = await spotify.Library.GetTracks(new LibraryTracksRequest { Limit = 50 });
+                var tracks = new List<string>();
+                while (true)
+                {
+                    tracks.AddRange(liked.Items.Where(i => i.Track != null).Select(i => i.Track.Uri));
+                    if (string.IsNullOrEmpty(liked.Next)) break;
+                    liked = await spotify.NextPage(liked);
+                    await Task.Delay(ApiDelay);
+                }
+
+                var today = DateTime.UtcNow.ToString("yyyy-MM-dd");
+                var playlistName = $"Lieblingssongs {today}";
+                var newPl = await spotify.Playlists.Create(me.Id, new PlaylistCreateRequest(playlistName)
+                {
+                    Public = false,
+                    Description = _localizer["Playlist_CopyOfLikedSongs"]  
+                });
+
+                for (var i = 0; i < tracks.Count; i += 100)
+                {
+                    var chunk = tracks.Skip(i).Take(100).ToList();
+                    if (chunk.Count == 0) break;
+                    await spotify.Playlists.AddItems(newPl.Id, new PlaylistAddItemsRequest(chunk));
+                    await Task.Delay(ApiDelay);
+                }
+            },
+                async () =>
+                {
+                    var me = await new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token))
+                        .UserProfile.Current();
+                    return $"{me.Id}_[LikedClone]_{selectedPlaylistName}";
+                },
+                "Lieblingssongs",
+                "[LikedClone]");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{Action} konnte nicht gestartet werden.", "Lieblingssongs");
+            return Error($"Fehler beim Starten von Lieblingssongs: {ex.Message}");
+        }
     }
 
 
-    private IActionResult RunJob(Func<Task> job, Func<Task<string>> computeCooldownKeyAsync, string actionName,
+    private IActionResult CreateRecommendations()
+    {
+        var token = GetToken();
+        if (string.IsNullOrWhiteSpace(token))
+            return Warn("⚠️ Bitte zuerst einloggen.");
+
+        try
+        {
+            var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token));
+            var selectedPlaylistName = HttpContext.Request.Query["playlistName"].FirstOrDefault();
+
+            return RunJob(async () =>
+            {
+                var me = await spotify.UserProfile.Current();
+                await GenerateRecommendationsAsync(spotify, me.Id, selectedPlaylistName);
+            },
+                async () =>
+                {
+                    var me = await new SpotifyClient(SpotifyClientConfig.CreateDefault().WithToken(token))
+                        .UserProfile.Current();
+                    var pl = selectedPlaylistName ?? "TopTracks";
+                    return $"{me.Id}_[Recommendations]_{pl}";
+                },
+                _localizer["Playlist_Recommendations"],
+                "[Recommendations]");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Empfehlungen konnten nicht gestartet werden.");
+            return Error($"Fehler beim Starten von '{_localizer["Playlist_Recommendations"]}': {ex.Message}");
+        }
+    }
+
+
+    // ============================
+    // 🔸 Cooldown & Startlogik
+    // ============================
+
+
+    /// <summary>
+    /// Executes a background playlist job with per-playlist cooldown protection.
+    /// </summary>
+    private IActionResult RunJob(
+        Func<Task> job,
+        Func<Task<string>> computeCooldownKeyAsync,
+        string actionName,
         string logTag)
     {
         string key;
         try
         {
+            // 🔹 Build a unique cooldown key (playlist-specific)
             key = computeCooldownKeyAsync().GetAwaiter().GetResult();
+            if (string.IsNullOrWhiteSpace(key))
+                throw new InvalidOperationException("Cooldown key is empty.");
+
+            // Use a consistent prefix similar to the frontend format
+            key = $"cooldown:{actionName}:{Uri.EscapeDataString(key)}";
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Cooldown-Key konnte nicht ermittelt werden.");
-            return Error("Interner Fehler bei der Vorbereitung. Bitte erneut versuchen.");
+            _logger.LogError(ex, "Failed to compute cooldown key.");
+            // ⚠️ Localized internal preparation error
+            return Error(_localizer["Job_Error_Preparation"].Value);
         }
 
         lock (_lastActions)
         {
-            if (_lastActions.TryGetValue(key, out var last) && DateTime.UtcNow - last < CooldownDuration)
+            if (_lastActions.TryGetValue(key, out var last) &&
+                DateTime.UtcNow - last < CooldownDuration)
             {
                 var remaining = CooldownDuration - (DateTime.UtcNow - last);
-                return Warn(
-                    $"⏳ Bitte warte {remaining.Minutes}:{remaining.Seconds:D2} Minuten, bevor du diese Aktion erneut startest.");
+
+                // Format remaining time
+                string timeMsg = remaining.TotalMinutes >= 1
+                    ? $"{(int)remaining.TotalMinutes}:{remaining.Seconds:D2} min"
+                    : $"{remaining.Seconds} sec";
+
+                // ⏳ Localized cooldown message
+                return Warn(string.Format(_localizer["Job_Warn_Cooldown"].Value, timeMsg));
             }
 
+            // 🕓 Register current action timestamp
             _lastActions[key] = DateTime.UtcNow;
         }
 
+        // 🔧 Start background task asynchronously
         _ = Task.Run(async () =>
         {
             using var scope = _logger.BeginScope($"PlaylistJob:{key}");
             try
             {
-                _logger.LogInformation("{LogTag} Job gestartet.", logTag);
+                _logger.LogInformation("{LogTag} job started.", logTag);
                 await job();
-                _logger.LogInformation("{LogTag} Job erfolgreich abgeschlossen.", logTag);
+                _logger.LogInformation("{LogTag} job completed successfully.", logTag);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "{LogTag} Fehler im Hintergrundjob.", logTag);
+                _logger.LogError(ex, "{LogTag} error inside background job.", logTag);
             }
         });
 
-        return OkMessage($"✅ {actionName} gestartet.<br>Bitte in 1–2 Minuten in Spotify® prüfen.");
+        // ✅ Localized success message
+        return OkMessage(string.Format(
+            _localizer["Job_Success_Started"].Value,
+            actionName
+        ));
     }
 
     // ============================

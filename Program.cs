@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
 using SpotifyPlaylistWebApp.Services;
-using Microsoft.Extensions.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +47,8 @@ builder.Services.AddScoped<IPlexTokenStore, PlexTokenStore>();
 
 // Register default HttpClient factory (for API calls)
 builder.Services.AddHttpClient();
+builder.Services.AddSingleton<MissingCacheStore>();
+builder.Services.AddHostedService<MissingCacheCleanupService>();
 
 // Register PlexService with localization and HttpClient support
 builder.Services.AddTransient<PlexService>();
@@ -101,7 +102,17 @@ app.UseAuthorization();
 
 // Default route mapping
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    "default",
+    "{controller=Home}/{action=Index}/{id?}");
 
+PlexService.CleanupOldMissingCache(); // at Startup
+
+Task.Run(async () =>
+{
+    while (true)
+    {
+        PlexService.CleanupOldMissingCache();
+        await Task.Delay(TimeSpan.FromHours(6));
+    }
+});
 app.Run();

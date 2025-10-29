@@ -12,6 +12,53 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+	<data name="Job_Error_Preparation" xml:space="preserve">
+  <value>Interner Fehler bei der Vorbereitung. Bitte erneut versuchen.</value>
+</data>
+	<data name="SpotifyToPlex_ExportAbortedOrFinished" xml:space="preserve">
+  <value>Der Export wurde beendet.</value>
+</data>
+	<data name="SpotifyToPlex_Continuing" xml:space="preserve">
+  <value>Fortsetzung des Exports …</value>
+</data>
+	<data name="SpotifyToPlex_CreatingPlaylist" xml:space="preserve">
+  <value>Erstelle Playlist in Plex …</value>
+</data>
+	<data name="Playlist_CopyOfLikedSongs" xml:space="preserve">
+  <value>Kopie deiner Lieblingssongs</value>
+</data>
+
+
+	<data name="Job_Warn_Cooldown" xml:space="preserve">
+  <value>⏳ Bitte warte {0}, bevor du diese Aktion erneut startest.</value>
+</data>
+
+	<data name="Job_Success_Started" xml:space="preserve">
+  <value>✅ {0} gestartet.<br/>Bitte in 1–2 Minuten in Spotify® prüfen.</value>
+</data>
+	
+	<data name="SpotifyToPlex_MissingCacheLoaded" xml:space="preserve">
+  <value>Fehlender Cache für diesen Server geladen.</value>
+</data>
+	<data name="SpotifyToPlex_MissingCacheSaved" xml:space="preserve">
+  <value>Fehlender Cache wurde gespeichert.</value>
+</data>
+	<data name="SpotifyToPlex_MissingCacheRemoved" xml:space="preserve">
+  <value>Eintrag für fehlende Titel entfernt.</value>
+</data> 
+	<data name="SpotifyToPlex_DownloadMissing" xml:space="preserve">
+  <value>Fehlende Titel herunterladen</value>
+</data>
+	<data name="SpotifyToPlex_NoMissingTracks" xml:space="preserve">
+  <value>Keine fehlenden Titel für diese Playlist vorhanden.</value>
+</data>
+	<data name="SpotifyToPlex_MissingCount" xml:space="preserve">
+  <value>{0} fehlend</value>
+</data>
+	<data name="SpotifyToPlex_MissingCsvTitle" xml:space="preserve">
+  <value>Fehlende Titel (Export)</value>
+</data>
+
 	<data name="SpotifyToPlex_DeleteConfirm" xml:space="preserve">
   <value>Diese Plex-Playlist wirklich löschen?</value>
 </data>
@@ -27,9 +74,6 @@
   <data name="AllTracksProcessed" xml:space="preserve">
     <value>Alle Titel verarbeitet.</value>
   </data>
-  <data name="Dashboard_Source_LikedSongs" xml:space="preserve">
-  <value>Lieblingssongs</value>
-</data>
   <data name="Dashboard_Source_Label" xml:space="preserve">
   <value>Wähle die Playlist-Quelle</value>
 </data>
@@ -851,5 +895,7 @@
   <data name="SpotifyToPlex_NowExporting" xml:space="preserve">
     <value>Export läuft …</value>
   </data>
-
+  <data name="Dashboard_Source_LikedSongs" xml:space="preserve">
+  <value>Lieblingssongs</value> 
+</data> 
 </root>

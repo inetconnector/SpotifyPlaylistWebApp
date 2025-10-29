@@ -12,6 +12,48 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+	<data name="Job_Error_Preparation" xml:space="preserve">
+  <value>Internal error during preparation. Please try again.</value>
+</data>
+
+	<data name="Job_Warn_Cooldown" xml:space="preserve">
+  <value>⏳ Please wait {0} before starting this action again.</value>
+</data>
+	<data name="SpotifyToPlex_ExportAbortedOrFinished" xml:space="preserve">
+  <value>The export has finished.</value>
+</data>
+	<data name="SpotifyToPlex_Continuing" xml:space="preserve">
+  <value>Continuing export …</value>
+</data>
+	<data name="SpotifyToPlex_CreatingPlaylist" xml:space="preserve">
+  <value>Creating playlist in Plex …</value>
+</data>
+
+	<data name="Job_Success_Started" xml:space="preserve">
+  <value>✅ {0} started.<br/>Please check Spotify® in 1–2 minutes.</value>
+</data>
+
+	<data name="SpotifyToPlex_MissingCacheLoaded" xml:space="preserve">
+  <value>Missing cache for this server loaded.</value>
+</data>
+	<data name="SpotifyToPlex_MissingCacheSaved" xml:space="preserve">
+  <value>Missing cache has been saved.</value>
+</data>
+	<data name="SpotifyToPlex_MissingCacheRemoved" xml:space="preserve">
+  <value>Removed missing entry from cache.</value>
+</data> 
+	<data name="SpotifyToPlex_DownloadMissing" xml:space="preserve">
+  <value>Download missing tracks</value>
+</data>
+	<data name="SpotifyToPlex_NoMissingTracks" xml:space="preserve">
+  <value>No missing tracks for this playlist.</value>
+</data>
+	<data name="SpotifyToPlex_MissingCount" xml:space="preserve">
+  <value>{0} missing</value>
+</data>
+	<data name="SpotifyToPlex_MissingCsvTitle" xml:space="preserve">
+  <value>Missing Tracks (Export)</value>
+</data> 
 	<data name="SpotifyToPlex_DeleteConfirm" xml:space="preserve">
   <value>Really delete this Plex playlist?</value>
 </data>
@@ -27,9 +69,6 @@
   <data name="AllTracksProcessed" xml:space="preserve">
     <value>All tracks processed.</value>
   </data>
-  <data name="Dashboard_Source_LikedSongs" xml:space="preserve">
-  <value>Liked Songs</value>
-</data>
   <data name="Dashboard_Source_Label" xml:space="preserve">
   <value>Select Playlist Source</value>
 </data>
@@ -96,6 +135,9 @@
   <data name="SpotifyToPlex_Total" xml:space="preserve">
     <value>total</value>
   </data>
+	<data name="Playlist_CopyOfLikedSongs" xml:space="preserve">
+  <value>Copy of your Liked Songs</value>
+</data>
   <data name="SpotifyToPlex_ConnectionLost" xml:space="preserve">
     <value>Connection lost.</value>
   </data>
@@ -836,5 +878,7 @@ Third-party contributions are marked as such. Duplication, processing, distribut
   <data name="SpotifyToPlex_NowExporting" xml:space="preserve">
     <value>Export in progress…</value>
   </data>
-
+  <data name="Dashboard_Source_LikedSongs" xml:space="preserve">
+  <value>Liked Songs</value> 
+</data>
 </root>

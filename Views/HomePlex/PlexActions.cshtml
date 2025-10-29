@@ -89,6 +89,14 @@
                 </button>
             </div>
         </div>
+         
+        @* Live Export (SSE) *@
+        <button type="button" id="btnLiveExport"
+                class="w-full py-3.5 bg-gradient-to-r from-green-400 to-emerald-600
+                                           text-black font-semibold rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)]
+                                           hover:brightness-110 active:translate-y-[1px] transition-all duration-150 mb-3">
+            ⚡ @L["SpotifyToPlex_LiveExport"]
+        </button>
 
         <hr class="my-8 border-gray-700">
 
@@ -126,14 +134,6 @@
                 </button>
             </div>
         </div>
-
-        @* Live Export (SSE) *@
-        <button type="button" id="btnLiveExport"
-                class="w-full py-3.5 bg-gradient-to-r from-green-400 to-emerald-600
-                                           text-black font-semibold rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)]
-                                           hover:brightness-110 active:translate-y-[1px] transition-all duration-150 mb-3">
-            ⚡ @L["SpotifyToPlex_LiveExport"]
-        </button>
 
         @* Disconnect *@
         <form method="post" action="/HomePlex/DisconnectPlex">
@@ -210,11 +210,68 @@
                 const playlistSelect = document.getElementById("playlistSelect");
                 if (!playlistSelect) return;
                 const playlistId = playlistSelect.value;
-                const playlistName = playlistSelect.options[playlistSelect.selectedIndex].text;
+                const playlistSelect.options[playlistSelect.selectedIndex].text; 
                 startLiveExport(playlistId, playlistName);
             });
 
             loadPlexPlaylistsDropdown();
+
+            // restore previous selections
+            try {
+                const savedSpotify = localStorage.getItem("selectedSpotifyPlaylistId");
+                const savedPlex = localStorage.getItem("selectedPlexPlaylistKey");
+                const ps = document.getElementById("playlistSelect");
+                const px = document.getElementById("plexSelect");
+                if (ps && savedSpotify && [...ps.options].some(o => o.value === savedSpotify)) {
+                    ps.value = savedSpotify;
+                }
+                if (px && savedPlex) {
+                    // options loaded async; apply after loadPlexPlaylistsDropdown finishes too
+                    const applyPlex = () => {
+                        if ([...px.options].some(o => o.value === savedPlex)) px.value = savedPlex;
+                    };
+                    setTimeout(applyPlex, 500);
+                    setTimeout(applyPlex, 1500);
+                }
+            } catch {}
+
+            // persist on change
+            document.getElementById("playlistSelect")?.addEventListener("change", (e) => {
+                localStorage.setItem("selectedSpotifyPlaylistId", e.target.value);
+            });
+            document.getElementById("plexSelect")?.addEventListener("change", (e) => {
+                localStorage.setItem("selectedPlexPlaylistKey", e.target.value);
+            });
+
+            // fetch missing-cache state to hint UI
+            try {
+                fetch("/HomePlex/GetMissingCacheState")
+                    .then(r => r.ok ? r.json() : null)
+                    .then(data => {
+                        if (!data) return;
+                        const ps = document.getElementById("playlistSelect");
+                        if (!ps) return;
+                        for (const [name, info] of Object.entries(data)) {
+                            // attempt to find by name and annotate
+                            const opt = [...ps.options].find(o => o.text === name);
+                            if (opt && info.count > 0) {
+                                opt.text = `${opt.text}  (❗${info.count} missing)`;
+                            }
+                        }
+                    }).catch(()=>{});
+            } catch {}
+
+            for (const [name, info] of Object.entries(data)) {
+                const opt = [...ps.options].find(o => o.text === name);
+                if (opt && info.count > 0) {
+                    opt.text = `${opt.text} (❗${info.count})`;
+                    // If currentName playlistId is selected → Show Download-Button
+                    if (ps.value === opt.value) {
+                        document.getElementById("downloadMissingContainer")?.classList.remove("hidden");
+                    }
+                }
+            }
+
         });
 
         async function loadPlexPlaylistsDropdown() {
@@ -299,7 +356,13 @@
                     summary.classList.remove("hidden");
                     summary.innerHTML =
                         `✅ ${added} ${T.Added} &nbsp;|&nbsp; ❌ ${miss} ${T.Missing} &nbsp;|&nbsp; ⚠️ ${failed} failed &nbsp;|&nbsp; 🎵 ${total} ${T.Total}`;
-                    document.getElementById("downloadMissingContainer")?.classList.remove("hidden");
+
+                    if (miss > 0) {
+                        const dl = document.getElementById("downloadMissingContainer");
+                        dl?.classList.remove("hidden");
+                        dl.querySelector("button")?.setAttribute("data-playlist", currentPlaylistName);
+                    }
+
                     try { liveEvt.close(); } catch { }
                     liveEvt = null;
                     return;

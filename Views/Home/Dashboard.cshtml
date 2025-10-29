@@ -1,5 +1,4 @@
 @using System.Globalization
-@using System.Text.Json
 @using Microsoft.Extensions.Localization
 @using SpotifyPlaylistWebApp
 @await Html.PartialAsync("LanguageSwitcher")
@@ -12,8 +11,8 @@
 <!doctype html>
 <html lang="@CultureInfo.CurrentUICulture.Name">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>@L["Dashboard_Dashboard_InetConnector_Playlist_Generator_nutzt"]</title>
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -29,15 +28,6 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255,255,255,0.12);
         }
-
-        a {
-            color: #10b981;
-            text-decoration: underline;
-        }
-
-            a:hover {
-                color: #34d399;
-            }
 
         .btn {
             position: relative;
@@ -71,26 +61,19 @@
                 filter: drop-shadow(0 0 6px rgba(16,185,129,0.55));
             }
 
-            .btn[data-tip]::after {
-                content: attr(data-tip);
-                position: absolute;
-                bottom: -2.6rem;
-                left: 50%;
-                transform: translateX(-50%) translateY(6px);
-                background: rgba(0,0,0,0.8);
-                color: #fff;
-                padding: 0.4rem 0.7rem;
-                border-radius: 0.5rem;
-                font-size: 0.75rem;
-                white-space: nowrap;
-                opacity: 0;
-                transition: all 0.25s ease;
-            }
+        .status-text {
+            font-size: 0.8rem;
+            color: #9CA3AF;
+            margin-top: 0.2rem;
+        }
 
-            .btn:hover::after {
-                opacity: 1;
-                transform: translate(-50%,0);
-            }
+        .status-ready {
+            color: #10B981;
+        }
+
+        .status-wait {
+            color: #F59E0B;
+        }
 
         @@keyframes fadeInUp {
             from {
@@ -123,35 +106,21 @@
 </head>
 
 <body class="min-h-screen flex flex-col">
-<main class="flex-grow max-w-4xl mx-auto px-6 py-16">
-    <div class="glass rounded-3xl p-8 md:p-10 shadow-xl text-center">
-        <h1 class="text-3xl md:text-4xl font-bold mb-2 fade-in">Welcome, @user 👋</h1>
-        <p class="text-white/70 mb-8 fade-in delay-1">
-            @L["Dashboard_Erstelle_automatisch_deine_Spotify_Playlists_mit"]
-        </p>
+    <main class="flex-grow max-w-4xl mx-auto px-6 py-16">
+        <div class="glass rounded-3xl p-8 md:p-10 shadow-xl text-center">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 fade-in">Welcome, @user 👋</h1>
+            <p class="text-white/70 mb-8 fade-in delay-1">
+                @L["Dashboard_Erstelle_automatisch_deine_Spotify_Playlists_mit"]
+            </p>
 
-        <!-- 🔹 Source type selector -->
-        <div class="fade-in delay-1 mb-8">
-            <label for="sourceType" class="block text-sm font-semibold mb-2">
-                @L["SpotifyToPlex_SourceType"]
-            </label>
-
-            <select id="sourceType" class="text-black rounded px-3 py-2 w-64">
-                <option value="liked">@L["SpotifyToPlex_SourceLiked"]</option>
-                <option value="playlist">@L["SpotifyToPlex_SourcePlaylist"]</option>
-            </select>
-
-            <!-- Playlist selection (hidden by default) -->
-            <div id="playlistContainer" class="mt-8 text-center hidden">
+            <div id="playlistContainer" class="mt-8 text-center">
                 <label for="playlistSelect" class="block mb-2 text-lg font-semibold text-white">
                     @L["Dashboard_Source_Label"]
                 </label>
 
-                <select id="playlistSelect"
-                        name="playlistSelect"
+                <select id="playlistSelect" name="playlistSelect"
                         class="bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2 w-72 focus:ring-emerald-500 focus:border-emerald-500">
                     <option value="LikedSongs">@L["Dashboard_Source_LikedSongs"].Value</option>
-
                     @if (ViewBag.Playlists != null)
                     {
                         foreach (var item in (IEnumerable<SelectListItem>)ViewBag.Playlists)
@@ -161,88 +130,157 @@
                     }
                 </select>
 
-                <p class="text-sm text-gray-400 mt-2">
-                    @L["Dashboard_Source_Description"]
-                </p>
+                <p class="text-sm text-gray-400 mt-2">@L["Dashboard_Source_Description"]</p>
             </div>
+
+            <div class="flex flex-wrap justify-center gap-7 mt-8 fade-in delay-2">
+                <div class="flex flex-col items-center">
+                    <a id="btnAlt" href="/Home/CreateAlternativeFavorites" class="btn" data-action="alt">
+                        <span class="icon">🎶</span><span>@L["Btn_Alternative_Favorites"]</span>
+                    </a>
+                    <span class="status-text" id="status-alt">🟢 bereit</span>
+                </div>
+
+                <div class="flex flex-col items-center">
+                    <a id="btnReco" href="/Home/CreateRecommendations" class="btn" data-action="reco">
+                        <span class="icon">✨</span><span>@L["Btn_Recommendations"]</span>
+                    </a>
+                    <span class="status-text" id="status-reco">🟢 bereit</span>
+                </div>
+
+                <div class="flex flex-col items-center">
+                    <a id="btnTop" href="/Home/CreateTopList" class="btn" data-action="top">
+                        <span class="icon">📈</span><span>@L["Btn_Most_Listened"]</span>
+                    </a>
+                    <span class="status-text" id="status-top">🟢 bereit</span>
+                </div>
+
+                <div class="flex flex-col items-center">
+                    <a id="btnClone" href="/Home/CloneLikedSongs" class="btn" data-action="clone">
+                        <span class="icon">📜</span><span>@L["Btn_Liked_Clone"]</span>
+                    </a>
+                    <span class="status-text" id="status-clone">🟢 bereit</span>
+                </div>
+
+                <div class="flex flex-col items-center">
+                    <a id="btnMix" href="/Home/CreateFavMix" class="btn" data-action="mix">
+                        <span class="icon">🔀</span><span>@L["Btn_Liked_Shuffle"]</span>
+                    </a>
+                    <span class="status-text" id="status-mix">🟢 bereit</span>
+                </div>
+            </div>
+
+            <p class="mt-10 text-white/70 text-sm">
+                @L["Dashboard_Jede_Aktion_erstellt_eine_neue_Playlist_in_deine"]<br />
+                @L["Dashboard_Die_Erstellung_erfolgt_im_Hintergrund_und_dauert"]
+            </p>
         </div>
+    </main>
 
-        <!-- 🔸 Main buttons -->
-        <div class="flex flex-wrap justify-center gap-7 mt-6 fade-in delay-2">
-            <a id="btnClone" href="/Home/CloneLikedSongs" class="btn" data-action="clone" data-tip=@Html.Raw(JsonSerializer.Serialize(L["Desc_Liked_Clone"].Value))>
-                <span class="icon">📜</span><span>@L["Btn_Liked_Clone"]</span>
-            </a>
-            <a id="btnAlt" href="/Home/CreateAlternativeFavorites" class="btn" data-action="alt" data-tip=@Html.Raw(JsonSerializer.Serialize(L["Desc_Alternative_Favorites"].Value))>
-                <span class="icon">🎶</span><span>@L["Btn_Alternative_Favorites"]</span>
-            </a>
-            <a id="btnReco" href="/Home/CreateRecommendations" class="btn" data-action="reco" data-tip=@Html.Raw(JsonSerializer.Serialize(L["Desc_Recommendations"].Value))>
-                <span class="icon">✨</span><span>@L["Btn_Recommendations"]</span>
-            </a>
-            <a id="btnMix" href="/Home/CreateFavMix" class="btn" data-action="mix" data-tip=@Html.Raw(JsonSerializer.Serialize(L["Desc_Liked_Shuffle"].Value))>
-                <span class="icon">🔀</span><span>@L["Btn_Liked_Shuffle"]</span>
-            </a>
-            <a id="btnTop" href="/Home/CreateTopList" class="btn" data-action="top" data-tip=@Html.Raw(JsonSerializer.Serialize(L["Desc_Most_Listened"].Value))>
-                <span class="icon">📈</span><span>@L["Btn_Most_Listened"]</span>
-            </a>
-        </div>
-
-        <p class="mt-10 text-white/70 text-sm">
-            @L["Dashboard_Jede_Aktion_erstellt_eine_neue_Playlist_in_deine"]<br/>
-            @L["Dashboard_Die_Erstellung_erfolgt_im_Hintergrund_und_dauert"]
-        </p>
-    </div>
-</main>
-
-<!-- 🔧 Dynamic JavaScript logic -->
-<script>
+    <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const sourceType = document.getElementById("sourceType");
-            const playlistContainer = document.getElementById("playlistContainer");
             const playlistSelect = document.getElementById("playlistSelect");
             const btns = document.querySelectorAll('.btn[data-action]');
+            const DEFAULT_COOLDOWN_SEC = 300;
+            const now = () => Date.now();
+            const STORAGE_KEY = "spotify:lastPlaylist";
 
-            // Localized text sets for buttons
-            const txtLiked = {
-                clone: @Html.Raw(JsonSerializer.Serialize(L["Btn_Liked_Clone"].Value)),
-                alt: @Html.Raw(JsonSerializer.Serialize(L["Btn_Alternative_Favorites"].Value)),
-                mix: @Html.Raw(JsonSerializer.Serialize(L["Btn_Liked_Shuffle"].Value))
-            };
-            const txtPlaylist = {
-                clone: @Html.Raw(JsonSerializer.Serialize(L["Btn_Playlist_Clone"].Value)),
-                alt: @Html.Raw(JsonSerializer.Serialize(L["Btn_Alternative_Playlist"].Value)),
-                mix: @Html.Raw(JsonSerializer.Serialize(L["Btn_Playlist_Shuffle"].Value))
-            };
+            const getPlaylistKey = () => playlistSelect?.value || "none";
+            const getPlaylistName = () => playlistSelect?.options[playlistSelect.selectedIndex]?.text || "";
+            const cdKey = (action, playlistKey) => `cooldown:${action}:${encodeURIComponent(playlistKey)}`;
 
-            // Update labels + target URLs when switching between "Liked Songs" and "Playlist"
-            function updateUI() {
-                const usePlaylist = sourceType.value === "playlist";
-                playlistContainer.classList.toggle("hidden", !usePlaylist);
+            const getUntil = key => parseInt(localStorage.getItem(key) || "0", 10) || 0;
+            const setUntil = (key, ms) => localStorage.setItem(key, String(ms));
+            const clearUntil = key => localStorage.removeItem(key);
 
-                btns.forEach(btn => {
-                    const action = btn.dataset.action;
-                    const label = btn.querySelector('span:last-child');
-                    if (usePlaylist && txtPlaylist[action]) label.textContent = txtPlaylist[action];
-                    if (!usePlaylist && txtLiked[action]) label.textContent = txtLiked[action];
-                });
-
-                updateLinks();
+            function applyCooldownVisual(btn, msRemaining) {
+                const action = btn.dataset.action;
+                const status = document.getElementById(`status-${action}`);
+                if (msRemaining > 0) {
+                    const seconds = Math.ceil(msRemaining / 1000);
+                    btn.style.opacity = "0.6";
+                    btn.style.pointerEvents = "none";
+                    status.textContent = `⏳ ${seconds}s`;
+                    status.classList.add("status-wait");
+                    status.classList.remove("status-ready");
+                } else {
+                    btn.style.opacity = "";
+                    btn.style.pointerEvents = "";
+                    status.textContent = "🟢 bereit";
+                    status.classList.add("status-ready");
+                    status.classList.remove("status-wait");
+                }
             }
 
-            // Append selected playlist name to action links
             function updateLinks() {
-                const selectedName = playlistSelect.options[playlistSelect.selectedIndex]?.text || "";
+                const selectedName = getPlaylistName();
                 const encoded = encodeURIComponent(selectedName);
-
-                document.getElementById("btnAlt").href = "/Home/CreateAlternativeFavorites?playlistName=" + encoded;
-                document.getElementById("btnMix").href = "/Home/CreateFavMix?playlistName=" + encoded;
+                document.getElementById("btnAlt").href   = "/Home/CreateAlternativeFavorites?playlistName=" + encoded;
+                document.getElementById("btnMix").href   = "/Home/CreateFavMix?playlistName=" + encoded;
                 document.getElementById("btnClone").href = "/Home/CloneLikedSongs?playlistName=" + encoded;
+                document.getElementById("btnReco").href  = "/Home/CreateRecommendations?playlistName=" + encoded;
+                document.getElementById("btnTop").href   = "/Home/CreateTopList?playlistName=" + encoded;
             }
 
-            sourceType.addEventListener("change", updateUI);
-            playlistSelect.addEventListener("change", updateLinks);
+            const tickOnce = () => {
+                const pKey = getPlaylistKey();
+                const t = now();
+                btns.forEach(btn => {
+                    const key = cdKey(btn.dataset.action, pKey);
+                    const until = getUntil(key);
+                    const remain = Math.max(0, until - t);
+                    applyCooldownVisual(btn, remain);
+                    if (remain === 0 && until) clearUntil(key);
+                });
+            };
 
-            updateUI();
+            let tickTimer = null;
+            function startCooldownTicker() {
+                if (tickTimer) clearInterval(tickTimer);
+                tickOnce();
+                tickTimer = setInterval(tickOnce, 1000);
+            }
+
+            btns.forEach(btn => {
+                btn.addEventListener("click", ev => {
+                    const pKey = getPlaylistKey();
+                    const key = cdKey(btn.dataset.action, pKey);
+                    const until = getUntil(key);
+                    const t = now();
+
+                    if (until && until > t) {
+                        ev.preventDefault();
+                        btn.animate(
+                            [{transform:'translateX(0)'},{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'translateX(0)'}],
+                            {duration:250}
+                        );
+                        return;
+                    }
+
+                    setUntil(key, t + DEFAULT_COOLDOWN_SEC * 1000);
+                }, { capture: true });
+            });
+
+            function onPlaylistChanged() {
+                const selectedValue = getPlaylistKey();
+                localStorage.setItem(STORAGE_KEY, selectedValue);
+                updateLinks();
+                tickOnce();
+            }
+
+            playlistSelect.addEventListener("change", onPlaylistChanged);
+            playlistSelect.addEventListener("input", onPlaylistChanged);
+
+            const savedValue = localStorage.getItem(STORAGE_KEY);
+            if (savedValue) {
+                const option = Array.from(playlistSelect.options).find(o => o.value === savedValue);
+                if (option) playlistSelect.value = savedValue;
+            }
+
+            updateLinks();
+            startCooldownTicker();
         });
     </script>
+
 </body>
 </html>
