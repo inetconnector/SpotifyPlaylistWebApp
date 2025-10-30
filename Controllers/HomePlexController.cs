@@ -1,10 +1,11 @@
-using System.Text.Json;
-using System.Xml;
+using LukeHagar.PlexAPI.SDK;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Localization;
 using SpotifyAPI.Web;
 using SpotifyPlaylistWebApp.Services;
+using System.Text.Json;
+using System.Xml;
 
 namespace SpotifyPlaylistWebApp.Controllers;
 
@@ -387,14 +388,14 @@ public class HomePlexController : Controller
     // 🔸 AJAX: Get tracks of one Plex playlist (parsed JSON)
     // ==============================================================
     [HttpGet("GetPlexPlaylistTracks")]
-    public async Task<IActionResult> GetPlexPlaylistTracks(
+    public async Task<IActionResult> GetPlexPlaylistTracks([FromServices] PlexService plex,
         [FromServices] IStringLocalizer<SharedResource> L,
         string ratingKey)
     {
         try
         {
             var plexToken = HttpContext.Session.GetString("PlexAuthToken");
-            var plexBaseUrl = HttpContext.Session.GetString("PlexBaseUrl") ?? "http://127.0.0.1:32400";
+            var (baseUrl, defaultMachineId) = await plex.DiscoverServerAsync(plexToken);
 
             if (string.IsNullOrEmpty(plexToken))
                 return Json(new { success = false, message = L["Plex_NoToken"].Value });
@@ -405,7 +406,7 @@ public class HomePlexController : Controller
             using var client = new HttpClient();
             client.DefaultRequestHeaders.Add("X-Plex-Token", plexToken);
 
-            var url = $"{plexBaseUrl}/playlists/{ratingKey}/items";
+            var url = $"{baseUrl}/playlists/{ratingKey}/items";
             var resp = await client.GetAsync(url);
 
             if (!resp.IsSuccessStatusCode)
