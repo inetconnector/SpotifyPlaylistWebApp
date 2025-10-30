@@ -12,6 +12,32 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+	<data name="SpotifyToPlex_MissingRatingKey" xml:space="preserve">
+    <value>Falta el identificador de la lista de reproducción.</value>
+    <comment>Error cuando falta el parámetro ratingKey.</comment>
+  </data>
+	<data name="SpotifyToPlex_PlexApiError" xml:space="preserve">
+    <value>Error de la API de Plex</value>
+    <comment>Mensaje de error cuando la API de Plex devuelve un código HTTP no exitoso</comment>
+  </data> 
+	<data name="Spotify_NoToken" xml:space="preserve">
+  <value>Falta el token de Spotify.</value>
+</data>
+	<data name="SpotifyToPlex_NoMissingCacheFound" xml:space="preserve">
+  <value>No se encontró caché de faltantes.</value>
+</data>
+	<data name="SpotifyToPlex_NoMissingForPlaylist" xml:space="preserve">
+  <value>No hay pistas faltantes para esta lista.</value>
+</data>
+	<data name="Logs_None" xml:space="preserve">
+  <value>Aún no hay registro disponible.</value>
+</data>
+	<data name="SpotifyToPlex_RenameSuccess" xml:space="preserve">
+  <value>Lista de reproducción renombrada.</value>
+</data>
+	<data name="SpotifyToPlex_DeleteSuccess" xml:space="preserve">
+  <value>Lista de reproducción eliminada.</value>
+</data>
 	<data name="SpotifyToPlex_LiveExportAll" xml:space="preserve">
   <value>Exportar todas las listas (en vivo)</value>
 </data>

@@ -1,4 +1,4 @@
-# 🎧 Playlist Web App for Spotify® + Plex Integration — README (v3.5)
+# 🎧 Playlist Web App for Spotify® + Plex Integration — README (v3.4)
 
 ## 🌐 Live Demo
 👉 **https://playlists.inetconnector.com**
@@ -16,7 +16,7 @@
 ## 🧩 Overview
 
 This **ASP.NET Core 8 MVC web application** connects to the **Spotify Web API** to automatically create, clone, and organize playlists based on your listening history, liked songs, and personalized recommendations.  
-It also integrates optional **Plex® export functionality**, allowing you to sync selected or all playlists directly to a Plex Media Server library.
+It also integrates optional **Plex® export functionality**, allowing you to sync selected playlists directly to a Plex Media Server library.
 
 All authentication is handled through **OAuth 2.0 PKCE**, ensuring full security without storing secrets server-side.
 
@@ -31,8 +31,7 @@ All authentication is handled through **OAuth 2.0 PKCE**, ensuring full security
 | ✨ | **Recommendations** | Builds a discovery playlist from Spotify’s recommendation engine. |
 | 🔀 | **Shuffle Liked Songs** | Creates a randomized “Liked Mix”. |
 | 📈 | **Most-Listened Songs** | Lists your most-played tracks (long-term). |
-| 🎬 | **Export to Plex (Live)** | Syncs generated playlists to a Plex library using the Plex API (PIN-authenticated). |
-| 🌐 | **Export All to Plex (Live)** | Exports **all** your Spotify playlists to Plex with batch processing and live progress. |
+| 🎬 | **Export to Plex** | (New) Syncs generated playlists to a Plex library using the Plex API (PIN-authenticated). |
 
 All labels, buttons, and tooltips are fully localized (🇬🇧 English, 🇩🇪 German, 🇪🇸 Spanish).
 
@@ -49,12 +48,12 @@ All labels, buttons, and tooltips are fully localized (🇬🇧 English, 🇩�
 | **Auth Flow** | OAuth 2.0 PKCE |
 | **Localization** | `.resx` via `IStringLocalizer` |
 | **Storage** | In-memory token/session cache |
-| **Logging** | Console + internal middleware |
+| **Logging** | Console + internal error handling middleware |
 | **Deployment** | Linux/Windows (Kestrel, Nginx, IIS) |
 
 ---
 
-## 🗂️ File Structure (Actual v3.5)
+## 🗂️ File Structure (Actual v3.4)
 
 ```
 Controllers/ErrorController.cs
@@ -78,10 +77,11 @@ Views/Shared/Error.cshtml
 Views/Shared/LanguageSwitcher.cshtml
 Views/Shared/Layout.cshtml
 Views/ViewImports.cshtml
-wwwroot/images/plex-spotify.svg
-wwwroot/js/plex-login.js
+wwwroot/QR-Code.png
 wwwroot/css/site.css
 wwwroot/favicon.ico
+wwwroot/images/plex-spotify.svg
+wwwroot/js/plex-login.js
 wwwroot/robots.txt
 wwwroot/sitemap.xml
 ```
@@ -95,8 +95,7 @@ wwwroot/sitemap.xml
 3. User triggers playlist creation or export.  
 4. The app calls Spotify Web API asynchronously.  
 5. Playlist is created in the user’s Spotify library.  
-6. (Optional) Playlist(s) are exported to Plex via Plex API using a temporary PIN-based token.  
-7. Progress and status are streamed via Server-Sent Events (SSE).
+6. (Optional) Playlist is exported to Plex via Plex API using a temporary PIN-based token.
 
 ---
 
@@ -138,12 +137,6 @@ You must be registered as a Spotify tester for your Client ID.
 | German | `Resources/SharedResource.de.resx` |
 | Spanish | `Resources/SharedResource.es.resx` |
 
-New localization keys for ExportAllLive:
-- `SpotifyToPlex_LiveExportAll`
-- `SpotifyToPlex_AllPlaylistsExported`
-- `SpotifyToPlex_PlaylistProgress`
-- `SpotifyToPlex_AllDone`
-
 ---
 
 ## 🎵 Playlist Logic Overview
@@ -153,31 +146,30 @@ New localization keys for ExportAllLive:
 | `GeneratePlaylistAsync()` | Handles playlist creation from liked or top tracks. |
 | `GenerateAlternativeFavoritesAsync()` | Finds similar songs and filters duplicates. |
 | `GenerateRecommendationsAsync()` | Uses Spotify’s seed-based recommendation system. |
-| `ExportOneLive()` | Exports one Spotify playlist to Plex with live SSE progress. |
-| `ExportAllLive()` | Exports all Spotify playlists sequentially with live progress and batching. |
+| `ExportToPlexAsync()` | Authenticates via Plex PIN and exports the playlist JSON. |
 
 ---
 
 ## 🧩 Additional Features
 
 - Automatic **market detection** from UI culture  
-- **Batch uploads to Plex** (up to 50 tracks/request)  
-- **Live progress streaming** via Server-Sent Events (SSE)  
+- **Cooldown protection** (4 min per user)  
 - **Plex export cache** to avoid duplicates  
 - **Localized language switcher** (`LanguageController`)  
-- **Responsive TailwindCSS layout**  
-- **No persistent user data** — fully GDPR compliant  
+- **Responsive layout** via Tailwind CSS  
+- **Strong error handling** with Spotify API response parsing  
+- **GDPR-friendly**: No persistent user data stored  
 
 ---
 
-## 🧾 Recent Updates (v3.5 – Oct 2025)
+## 🧾 Recent Updates (v3.4 – Oct 2025)
 
-- Added **ExportAllLive**: multi-playlist live export with SSE feedback  
-- Added **Batch export** (50-track chunk uploads to Plex)  
-- Optimized **AddTracksToPlaylistAsync** for high-speed transfers  
-- Added new `.resx` localization keys for live multi-export  
-- Cleaned up old `ExportOne` and `ExportAll` legacy endpoints  
-- Improved overall performance and error resilience  
+- Added **Spanish localization (`SharedResource.es.resx`)**  
+- Added **Plex export service (`PlexService`)** with PIN-auth flow  
+- Added **`HomePlexController`** and views for Plex synchronization  
+- Improved **language switcher component** (flag icons + active culture)  
+- Updated **dashboard layout** and icons  
+- Expanded **README** with full project file tree and correct tech stack  
 
 ---
 

@@ -75,7 +75,6 @@ public class HomePlexController : Controller
         }
     }
 
-
     // ==============================================================
     // 🔸 Polling endpoint for Plex login confirmation
     // ==============================================================
@@ -115,7 +114,8 @@ public class HomePlexController : Controller
             HttpContext.Session.Remove("PlexBaseUrl");
             HttpContext.Session.Remove("PlexMachineId");
 
-            TempData["Info"] = _localizer["Plex_Removed"].Value;
+            // vorhandener Key im RESX
+            TempData["Info"] = _localizer["PlexActions_Info_Disconnected"].Value;
         }
         catch (Exception ex)
         {
@@ -125,14 +125,16 @@ public class HomePlexController : Controller
 
         return RedirectToAction("Index", "Home");
     }
-     
 
+    // ============================================================
+    // 🔸 ExportOneLive — single playlist via SSE
+    // ============================================================
     [HttpGet("ExportOneLive")]
     public async Task ExportOneLive(
-    [FromServices] PlexService plex,
-    [FromServices] IStringLocalizer<SharedResource> L,
-    string playlistId,
-    string playlistName)
+        [FromServices] PlexService plex,
+        [FromServices] IStringLocalizer<SharedResource> L,
+        string playlistId,
+        string playlistName)
     {
         var exportId = Guid.NewGuid().ToString();
         Response.ContentType = "text/event-stream";
@@ -206,9 +208,9 @@ public class HomePlexController : Controller
             }
 
             // ============================================================
-            // 🔸 NEW: Batch-wise export (up to 50 tracks per request)
+            // 🔸 Batch-wise export (keep 1 to be safe with Plex)
             // ============================================================
-            const int batchSize = 50;
+            const int batchSize = 1;
             var matchedKeys = new List<string>();
 
             foreach (var (title, artist) in tracks)
@@ -235,7 +237,6 @@ public class HomePlexController : Controller
                     await plex.SendSseAsync(exportId, $"❌ {L["SpotifyToPlex_MissingTrack"]}: {artist} — {title}");
                 }
 
-                // ✅ When we collected enough → send batch to Plex
                 if (matchedKeys.Count >= batchSize)
                 {
                     await plex.AddTracksToPlaylistAsync(
@@ -285,7 +286,6 @@ public class HomePlexController : Controller
         }
     }
 
-
     // ============================================================
     // 🔸 Download missing tracks for last or specific playlist
     // ============================================================
@@ -308,14 +308,14 @@ public class HomePlexController : Controller
             var cache = PlexService.GetMissingCacheSnapshot();
 
             if (cache.Count == 0)
-                return Content("No missing cache found.", "text/plain");
+                return Content(_localizer["SpotifyToPlex_NoMissingCacheFound"].Value, "text/plain");
 
             // Wenn kein Playlist-Name angegeben → letzte exportierte Playlist nehmen
             if (string.IsNullOrWhiteSpace(playlistName))
                 playlistName = cache.Last().Key;
 
             if (!cache.TryGetValue(playlistName, out var missing) || missing.Items.Count == 0)
-                return Content("No missing tracks for this playlist.", "text/plain");
+                return Content(_localizer["SpotifyToPlex_NoMissingForPlaylist"].Value, "text/plain");
 
             // CSV generieren
             var csv = PlexService.GenerateMissingCsv(missing.Items);
@@ -331,7 +331,6 @@ public class HomePlexController : Controller
         }
     }
 
-
     // ==============================================================
     // 🔸 AJAX: Get all Plex playlists (Title + RatingKey)
     // ==============================================================
@@ -342,7 +341,7 @@ public class HomePlexController : Controller
         {
             var plexToken = HttpContext.Session.GetString("PlexAuthToken");
             if (string.IsNullOrEmpty(plexToken))
-                return Json(new { success = false, message = "No Plex token." });
+                return Json(new { success = false, message = _localizer["Plex_NoToken"].Value });
 
             var (baseUrl, machineId) = await plex.DiscoverServerAsync(plexToken);
             plex.LoadMissingCacheForServer(machineId);
@@ -360,7 +359,9 @@ public class HomePlexController : Controller
         }
     }
 
-
+    // ==============================================================
+    // 🔸 Raw playlists XML (debug)
+    // ==============================================================
     [HttpGet("GetPlexPlaylistsRaw")]
     public async Task<IActionResult> GetPlexPlaylistsRaw([FromServices] PlexService plex)
     {
@@ -368,13 +369,11 @@ public class HomePlexController : Controller
         {
             var plexToken = HttpContext.Session.GetString("PlexAuthToken");
             if (string.IsNullOrEmpty(plexToken))
-                return Content("No Plex token available.");
+                return Content(_localizer["Plex_NoToken"].Value);
 
             var (baseUrl, machineId) = await plex.DiscoverServerAsync(plexToken);
             plex.LoadMissingCacheForServer(machineId);
             var xml = await plex.GetRawPlaylistsXmlAsync(baseUrl, plexToken);
-
-            //return  Content($"{baseUrl}/playlists/all?X-Plex-Token={plexToken}", "application/xml");
 
             return Content(xml, "application/xml");
         }
@@ -384,46 +383,101 @@ public class HomePlexController : Controller
         }
     }
 
-
     // ==============================================================
-    // 🔸 AJAX: Get tracks of one Plex playlist
+    // 🔸 AJAX: Get tracks of one Plex playlist (parsed JSON)
     // ==============================================================
     [HttpGet("GetPlexPlaylistTracks")]
-    public async Task<IActionResult> GetPlexPlaylistTracks([FromServices] PlexService plex, string ratingKey)
+    public async Task<IActionResult> GetPlexPlaylistTracks(
+        [FromServices] IStringLocalizer<SharedResource> L,
+        string ratingKey)
     {
         try
         {
             var plexToken = HttpContext.Session.GetString("PlexAuthToken");
+            var plexBaseUrl = HttpContext.Session.GetString("PlexBaseUrl") ?? "http://127.0.0.1:32400";
+
             if (string.IsNullOrEmpty(plexToken))
-                return Json(new { success = false, message = "No Plex token." });
+                return Json(new { success = false, message = L["Plex_NoToken"].Value });
 
-            var (baseUrl, machineId) = await plex.DiscoverServerAsync(plexToken);
-            plex.LoadMissingCacheForServer(machineId);
-            var xml = await plex.GetPlaylistTracksXmlAsync(baseUrl, plexToken, ratingKey);
+            if (string.IsNullOrEmpty(ratingKey))
+                return Json(new { success = false, message = L["SpotifyToPlex_MissingRatingKey"].Value });
 
-            return Json(new { success = true, tracks = xml });
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.Add("X-Plex-Token", plexToken);
+
+            var url = $"{plexBaseUrl}/playlists/{ratingKey}/items";
+            var resp = await client.GetAsync(url);
+
+            if (!resp.IsSuccessStatusCode)
+                return Json(new
+                {
+                    success = false,
+                    message = $"{L["SpotifyToPlex_PlexApiError"].Value} {resp.StatusCode}"
+                });
+
+            var xml = await resp.Content.ReadAsStringAsync();
+            var doc = new XmlDocument();
+            doc.LoadXml(xml);
+
+            var tracks = new List<object>();
+            foreach (XmlNode node in doc.SelectNodes("//Track"))
+            {
+                var title = node.Attributes["title"]?.Value ?? "";
+                var artist = node.Attributes["grandparentTitle"]?.Value ?? "";
+                var album = node.Attributes["parentTitle"]?.Value ?? "";
+                tracks.Add(new { title, artist, album });
+            }
+
+            return Json(new { success = true, tracks });
         }
         catch (Exception ex)
         {
             Console.WriteLine("[GetPlexPlaylistTracks] " + ex);
-            return Json(new { success = false, message = ex.Message });
+            return Json(new
+            {
+                success = false,
+                message = $"{L["SpotifyToPlex_LoadError"].Value}: {ex.Message}"
+            });
         }
     }
 
-    [HttpDelete("DeletePlexPlaylist")]
-    public async Task<IActionResult> DeletePlexPlaylist([FromServices] PlexService plex, string ratingKey)
+
+    // ==============================================================
+    // 🔸 Delete Plex playlist
+    // ==============================================================
+    [HttpPost("DeletePlexPlaylist")]
+    public async Task<IActionResult> DeletePlexPlaylist(
+        [FromServices] PlexService plex,
+        [FromBody] JsonElement payload)
     {
         try
-        {
-            var plexToken = HttpContext.Session.GetString("PlexAuthToken");
-            if (string.IsNullOrEmpty(plexToken))
-                return Json(new { success = false, message = "No Plex token." });
+        { 
+            var token = HttpContext.Session.GetString("PlexAuthToken");
+            if (string.IsNullOrEmpty(token))
+                return Json(new { success = false, message = _localizer["Plex_NoToken"].Value });
+             
+            if (!payload.TryGetProperty("key", out var keyProp))
+                return Json(new { success = false, message = _localizer["Job_Error_Preparation"].Value });
 
-            var (baseUrl, machineId) = await plex.DiscoverServerAsync(plexToken);
+            var ratingKey = keyProp.GetString();
+            if (string.IsNullOrWhiteSpace(ratingKey))
+                return Json(new { success = false, message = _localizer["Job_Error_Preparation"].Value });
+             
+            var (baseUrl, machineId) = await plex.DiscoverServerAsync(token);
             plex.LoadMissingCacheForServer(machineId);
-            await plex.DeletePlaylistAsync(baseUrl, plexToken, ratingKey);
+             
+            await plex.DeletePlaylistAsync(baseUrl, token, ratingKey);
 
-            return Json(new { success = true, message = "Playlist deleted." });
+            return Json(new { success = true, message = _localizer["SpotifyToPlex_DeleteSuccess"].Value });
+        }
+        catch (HttpRequestException httpEx)
+        {
+            Console.WriteLine("[DeletePlexPlaylist:HTTP] " + httpEx);
+            return Json(new
+            {
+                success = false,
+                message = $"{_localizer["Plex_DisconnectError"].Value} (HTTP)"
+            });
         }
         catch (Exception ex)
         {
@@ -431,7 +485,6 @@ public class HomePlexController : Controller
             return Json(new { success = false, message = ex.Message });
         }
     }
-
 
     // ==============================================================
     // 🔸 Result page after single export
@@ -476,7 +529,8 @@ public class HomePlexController : Controller
             var totalPlaylists = playlists.Count;
             int processedPlaylists = 0;
 
-            await plex.SendSseAsync(exportId, $"🎧 {L["SpotifyToPlex_Starting"]}: {totalPlaylists} playlists");
+            // kein Sprachwort "playlists" anhängen -> rein numerisch + Start-Text
+            await plex.SendSseAsync(exportId, $"🎧 {L["SpotifyToPlex_Starting"]}: {totalPlaylists}");
 
             foreach (var item in playlists)
             {
@@ -523,7 +577,7 @@ public class HomePlexController : Controller
                     }
                 }
 
-                const int batchSize = 50;
+                const int batchSize = 1;
                 var matchedKeys = new List<string>();
                 int added = 0, failed = 0, missing = 0, total = tracks.Count;
 
@@ -643,17 +697,20 @@ public class HomePlexController : Controller
         return RedirectToAction("SpotifyToPlex");
     }
 
-
+    // ==============================================================
+    // 🔸 Rename Plex playlist
+    // ==============================================================
     [HttpPost("RenamePlexPlaylist")]
-    public async Task<IActionResult> RenamePlexPlaylist([FromServices] PlexService plex, [FromBody] JsonElement payload)
+    public async Task<IActionResult> RenamePlexPlaylist(
+        [FromServices] PlexService plex,
+        [FromBody] JsonElement payload)
     {
         var token = HttpContext.Session.GetString("PlexAuthToken");
         var baseUrl = HttpContext.Session.GetString("PlexBaseUrl");
 
         if (string.IsNullOrEmpty(token))
-            return Json(new { success = false, message = "No Plex token in session." });
+            return Json(new { success = false, message = _localizer["Plex_NoToken"].Value });
 
-        // 🔧 Auto-discover if missing
         if (string.IsNullOrEmpty(baseUrl))
         {
             var (b, m) = await plex.DiscoverServerAsync(token);
@@ -662,11 +719,14 @@ public class HomePlexController : Controller
             HttpContext.Session.SetString("PlexMachineId", m);
         }
 
-        var ratingKey = payload.GetProperty("ratingKey").GetString();
-        var newName = payload.GetProperty("newName").GetString();
+        if (!payload.TryGetProperty("ratingKey", out var rk) ||
+            !payload.TryGetProperty("newName", out var nn))
+            return Json(new { success = false, message = _localizer["Job_Error_Preparation"].Value });
 
+        var ratingKey = rk.GetString();
+        var newName = nn.GetString();
         if (string.IsNullOrWhiteSpace(ratingKey) || string.IsNullOrWhiteSpace(newName))
-            return Json(new { success = false, message = "Invalid parameters." });
+            return Json(new { success = false, message = _localizer["Job_Error_Preparation"].Value });
 
         var url = $"{baseUrl}/playlists/{ratingKey}?title={Uri.EscapeDataString(newName)}";
         using var req = new HttpRequestMessage(HttpMethod.Put, url);
@@ -675,95 +735,16 @@ public class HomePlexController : Controller
 
         using var http = new HttpClient();
         var resp = await http.SendAsync(req);
+
         if (resp.IsSuccessStatusCode)
-            return Json(new { success = true, message = "Playlist renamed successfully." });
+            return Json(new { success = true, message = _localizer["SpotifyToPlex_RenameSuccess"].Value });
 
-        return Json(new { success = false, message = $"HTTP {resp.StatusCode}" });
+        return Json(new
+        {
+            success = false,
+            message = $"HTTP {(int)resp.StatusCode} – {resp.ReasonPhrase}"
+        });
     }
-
-
-    // ==============================================================
-    // 🔸 AJAX: show playlist content (title + artist)
-    // ==============================================================
-    [HttpGet("GetPlaylistTracks")]
-    public async Task<IActionResult> GetPlaylistTracks(string playlistId)
-    {
-        try
-        {
-            var spotifyToken = HttpContext.Session.GetString(SessionSpotifyTokenKey);
-            if (string.IsNullOrEmpty(spotifyToken))
-                return Json(new { success = false, message = "Spotify token missing." });
-
-            var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault(spotifyToken));
-            var tracks = await spotify.Playlists.GetItems(playlistId);
-
-            var list = tracks.Items
-                .OfType<PlaylistTrack<IPlayableItem>>()
-                .Select(t => new
-                {
-                    title = (t.Track as FullTrack)?.Name ?? "",
-                    artist = string.Join(", ",
-                        (t.Track as FullTrack)?.Artists.Select(a => a.Name) ?? new List<string>())
-                })
-                .ToList();
-
-            return Json(new { success = true, tracks = list });
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("[GetPlaylistTracks] " + ex);
-            return Json(new { success = false, message = ex.Message });
-        }
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> GetPlexPlaylistTracks(string ratingKey)
-    {
-        try
-        {
-            var plexToken = HttpContext.Session.GetString("PlexAuthToken");
-            var plexBaseUrl = HttpContext.Session.GetString("PlexBaseUrl") ?? "http://127.0.0.1:32400";
-
-            if (string.IsNullOrEmpty(plexToken))
-                return Json(new { success = false, message = "No Plex token in session." });
-
-            if (string.IsNullOrEmpty(ratingKey))
-                return Json(new { success = false, message = "Missing playlist ratingKey." });
-
-            using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("X-Plex-Token", plexToken);
-
-            var url = $"{plexBaseUrl}/playlists/{ratingKey}/items";
-            var resp = await client.GetAsync(url);
-
-            if (!resp.IsSuccessStatusCode)
-                return Json(new
-                {
-                    success = false,
-                    message = $"Plex API error {resp.StatusCode} at {url}"
-                });
-
-            var xml = await resp.Content.ReadAsStringAsync();
-            var doc = new XmlDocument();
-            doc.LoadXml(xml);
-
-            var tracks = new List<object>();
-            foreach (XmlNode node in doc.SelectNodes("//Track"))
-            {
-                var title = node.Attributes["title"]?.Value ?? "";
-                var artist = node.Attributes["grandparentTitle"]?.Value ?? "";
-                var album = node.Attributes["parentTitle"]?.Value ?? "";
-                tracks.Add(new { title, artist, album });
-            }
-
-            return Json(new { success = true, tracks });
-        }
-        catch (Exception ex)
-        {
-            return Json(new { success = false, message = ex.Message });
-        }
-    }
-
 
     // ============================================================
     // 🔸 Simple text log endpoint for Live Export (last-run info)
@@ -782,11 +763,9 @@ public class HomePlexController : Controller
             }
         }
 
-        return Content("No log available yet.", "text/plain; charset=utf-8");
-    } // ============================================================
+        return Content(_localizer["Logs_None"].Value, "text/plain; charset=utf-8");
+    }
 
-    // 🔸 Get cache state for frontend (playlist count + timestamp)
-    // ============================================================
     // ============================================================
     // 🔸 Get cache state for frontend (playlist count + timestamp)
     // ============================================================
