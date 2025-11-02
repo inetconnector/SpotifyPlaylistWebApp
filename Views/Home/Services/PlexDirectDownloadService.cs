@@ -77,14 +77,14 @@ namespace SpotifyPlaylistWebApp.Services
         {
             var parts = new List<string>();
 
-            if (trackNumber is { } tn && tn > 0)
-                parts.Add(tn.ToString("D2"));
-
             if (!string.IsNullOrWhiteSpace(artist))
                 parts.Add(artist!.Trim());
 
             if (!string.IsNullOrWhiteSpace(album))
                 parts.Add(album!.Trim());
+
+            if (trackNumber is { } tn && tn > 0)
+                parts.Add(tn.ToString("D2"));
 
             if (!string.IsNullOrWhiteSpace(title))
                 parts.Add(title.Trim());
