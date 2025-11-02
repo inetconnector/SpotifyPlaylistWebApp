@@ -106,6 +106,11 @@ window.startPlexDirectZip = async function ({
         // Create ZIP
         const zip = new JSZip();
 
+        const optionIndex = ddl.selectedIndex >= 0 ? ddl.selectedIndex : 0;
+        const selectedOption = ddl.options[optionIndex];
+        const playlistNameRaw = selectedOption ? selectedOption.textContent || "" : "";
+        const playlistNameSanitized = sanitizeFileName((playlistNameRaw || "playlist").trim()) || "playlist";
+
         let index = 0;
         for (const item of items) {
             index++;
@@ -127,7 +132,7 @@ window.startPlexDirectZip = async function ({
 
         const a = document.createElement("a");
         a.href = url;
-        a.download = "playlist.zip";
+        a.download = `${playlistNameSanitized}.zip`;
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -148,4 +153,14 @@ function updateStatus(elem, msg, isError = false) {
     if (!elem) return;
     elem.style.color = isError ? "#ff7070" : "#ffffff";
     elem.textContent = msg;
+}
+
+function sanitizeFileName(name) {
+    if (!name) return "";
+    return name
+        .replace(/[\\/:*?"<>|]/g, "_")
+        .replace(/\s+/g, " ")
+        .trim()
+        .replace(/^\.+$/, "")
+        .substring(0, 120);
 }
