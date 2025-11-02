@@ -1,10 +1,17 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 
 namespace SpotifyPlaylistWebApp.Services
 {
     public sealed record PlexDirectItem(
-        string Title, string? Artist, string? Album,
-        string FileName, string PlexUrl, long? SizeBytes
+        string Title,
+        string? Artist,
+        string? Album,
+        int? TrackNumber,
+        string FileName,
+        string PlexUrl,
+        long? SizeBytes
     );
 
     /// <summary>
@@ -41,6 +48,7 @@ namespace SpotifyPlaylistWebApp.Services
                 string title  = t.TryGetProperty("title", out var tt) ? tt.GetString() ?? "" : "";
                 string? artist= t.TryGetProperty("grandparentTitle", out var ar) ? ar.GetString() : null;
                 string? album = t.TryGetProperty("parentTitle", out var al) ? al.GetString() : null;
+                int? trackNumber = t.TryGetProperty("index", out var idx) && idx.TryGetInt32(out var trackIdx) ? trackIdx : (int?)null;
 
                 string? file = null; string? partId = null; long? size = null;
                 try
@@ -56,13 +64,33 @@ namespace SpotifyPlaylistWebApp.Services
                     continue; // cannot build safe direct download without partId
 
                 var ext = SafeExt(file) ?? ".bin";
-                var baseName = string.IsNullOrWhiteSpace(artist) ? title : $"{artist} - {title}";
+                var baseName = BuildBaseFileName(title, artist, album, trackNumber);
                 var fileName = Sanitize(string.IsNullOrWhiteSpace(baseName) ? "track" : baseName) + ext;
 
                 var plexUrl = $"{baseUrl.TrimEnd('/')}/library/parts/{partId}/file{ext}?download=1&X-Plex-Token={plexToken}";
-                list.Add(new PlexDirectItem(title, artist, album, fileName, plexUrl, size));
+                list.Add(new PlexDirectItem(title, artist, album, trackNumber, fileName, plexUrl, size));
             }
             return list;
+        }
+
+        private static string BuildBaseFileName(string title, string? artist, string? album, int? trackNumber)
+        {
+            var parts = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(artist))
+                parts.Add(artist!.Trim());
+
+            if (!string.IsNullOrWhiteSpace(album))
+                parts.Add(album!.Trim());
+
+            if (trackNumber is { } tn && tn > 0)
+                parts.Add(tn.ToString("D2"));
+
+            if (!string.IsNullOrWhiteSpace(title))
+                parts.Add(title.Trim());
+
+            var baseName = string.Join(" - ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
+            return baseName;
         }
 
         private static string Sanitize(string name)

@@ -52,6 +52,7 @@ builder.Services.AddHostedService<MissingCacheCleanupService>();
 
 // Register PlexService with localization and HttpClient support
 builder.Services.AddTransient<PlexService>();
+builder.Services.AddTransient<PlexDirectDownloadService>();
 
 // =====================================================
 // 🔹 Localization Setup
