@@ -81,7 +81,6 @@ window.startPlexDirectZip = async function ({
     selectId = "playlistSelect",
     statusId = "statusArea"
 } = {}) {
-
     const ddl = document.getElementById(selectId);
     const status = document.getElementById(statusId);
     if (!ddl) return;
@@ -89,62 +88,25 @@ window.startPlexDirectZip = async function ({
     const playlistKey = ddl.value;
     if (!playlistKey) return updateStatus(status, plexStrings.statusSelectPlaylist || "⚠️ Please choose a playlist.", true);
 
-    updateStatus(status, plexStrings.statusLoadingTrackUrls || "⏳ Loading track URLs…");
+    const optionIndex = ddl.selectedIndex >= 0 ? ddl.selectedIndex : 0;
+    const selectedOption = ddl.options[optionIndex];
+    const playlistNameRaw = selectedOption ? selectedOption.textContent || "" : "";
+    const playlistNameSanitized = sanitizeFileName((playlistNameRaw || "playlist").trim()) || "playlist";
 
-    try {
-        // Load URLs
-        const res = await fetch(`/PlexDirect/Urls?playlistKey=${encodeURIComponent(playlistKey)}`);
-        if (!res.ok) return updateStatus(status, plexStrings.statusLoadUrlsError || "❌ Failed to load URLs.", true);
+    updateStatus(status, plexStrings.statusCreatingZip || "📦 Creating ZIP…");
 
-        const data = await res.json();
-        const items = data.items;
-        if (!items || !items.length) return updateStatus(status, plexStrings.statusNoItems || "⚠️ No tracks found.", true);
+    // ein Request → Browser lädt direkt die ZIP-Datei
+    const url = `/PlexDirect/Zip?playlistKey=${encodeURIComponent(playlistKey)}&playlistName=${encodeURIComponent(playlistNameSanitized)}`;
 
-        const loadingFilesTemplate = plexStrings.statusLoadingFiles || "📥 Downloading {0} files…";
-        updateStatus(status, loadingFilesTemplate.replace("{0}", items.length));
+    // Navigieren startet den Download (Content-Disposition: attachment)
+    window.location.href = url;
 
-        // Create ZIP
-        const zip = new JSZip();
-
-        const optionIndex = ddl.selectedIndex >= 0 ? ddl.selectedIndex : 0;
-        const selectedOption = ddl.options[optionIndex];
-        const playlistNameRaw = selectedOption ? selectedOption.textContent || "" : "";
-        const playlistNameSanitized = sanitizeFileName((playlistNameRaw || "playlist").trim()) || "playlist";
-
-        let index = 0;
-        for (const item of items) {
-            index++;
-            const progressTemplate = plexStrings.statusLoadingFileProgress || "📥 Downloading {0}/{1}: {2}";
-            updateStatus(status, progressTemplate
-                .replace("{0}", index)
-                .replace("{1}", items.length)
-                .replace("{2}", item.filename));
-
-            const fileRes = await fetch(item.url);
-            const blob = await fileRes.blob();
-            zip.file(item.filename, blob);
-        }
-
-        updateStatus(status, plexStrings.statusCreatingZip || "📦 Creating ZIP…");
-
-        const zipBlob = await zip.generateAsync({ type: "blob" });
-        const url = URL.createObjectURL(zipBlob);
-
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${playlistNameSanitized}.zip`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-
-        updateStatus(status, plexStrings.statusDownloadComplete || "✅ ZIP downloaded!");
-
-    } catch (err) {
-        console.error("ZIP failed:", err);
-        updateStatus(status, plexStrings.statusDownloadFailed || "❌ Download failed.", true);
-    }
+    // optional: nach ein paar Sekunden neutralen Status setzen
+    setTimeout(() => {
+        updateStatus(status, plexStrings.statusDownloadStarted || "✅ Download started…");
+    }, 1500);
 };
+
 
 
 // Helper
