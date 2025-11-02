@@ -83,7 +83,7 @@ namespace SpotifyPlaylistWebApp.Controllers
                 ViewBag.Playlists = playlists;
 
                 // Optional: localized page title
-                ViewData["Title"] = "Spotify → Plex";
+                ViewData["Title"] = _localizer["SpotifyToPlex_Title"].Value;
 
                 return View("PlexActions");
             }

@@ -6,7 +6,11 @@
 @inject IJsonHelper Json
 @{
     Layout = null;
-    var user = ViewBag?.User as string ?? "Spotify User";
+    var user = ViewBag?.User as string;
+    if (string.IsNullOrWhiteSpace(user))
+    {
+        user = L["Dashboard_DefaultUserName"];
+    }
 }
 <!doctype html>
 <html lang="@CultureInfo.CurrentUICulture.Name">
@@ -108,7 +112,7 @@
 <body class="min-h-screen flex flex-col">
     <main class="flex-grow max-w-4xl mx-auto px-6 py-16">
         <div class="glass rounded-3xl p-8 md:p-10 shadow-xl text-center">
-            <h1 class="text-3xl md:text-4xl font-bold mb-2 fade-in">Welcome, @user 👋</h1>
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 fade-in">@string.Format(L["Dashboard_WelcomeUser"], user)</h1>
             <p class="text-white/70 mb-8 fade-in delay-1">
                 @L["Dashboard_Erstelle_automatisch_deine_Spotify_Playlists_mit"]
             </p>
@@ -138,35 +142,45 @@
                     <a id="btnAlt" href="/Home/CreateAlternativeFavorites" class="btn" data-action="alt">
                         <span class="icon">🎶</span><span>@L["Btn_Alternative_Favorites"]</span>
                     </a>
-                    <span class="status-text" id="status-alt">🟢 bereit</span>
+                    <span class="status-text" id="status-alt"
+                          data-ready-text="@L["Dashboard_Status_Ready"]"
+                          data-countdown-template="@L["Dashboard_Status_CountdownTemplate"]">@L["Dashboard_Status_Ready"]</span>
                 </div>
 
                 <div class="flex flex-col items-center">
                     <a id="btnReco" href="/Home/CreateRecommendations" class="btn" data-action="reco">
                         <span class="icon">✨</span><span>@L["Btn_Recommendations"]</span>
                     </a>
-                    <span class="status-text" id="status-reco">🟢 bereit</span>
+                    <span class="status-text" id="status-reco"
+                          data-ready-text="@L["Dashboard_Status_Ready"]"
+                          data-countdown-template="@L["Dashboard_Status_CountdownTemplate"]">@L["Dashboard_Status_Ready"]</span>
                 </div>
 
                 <div class="flex flex-col items-center">
                     <a id="btnTop" href="/Home/CreateTopList" class="btn" data-action="top">
                         <span class="icon">📈</span><span>@L["Btn_Most_Listened"]</span>
                     </a>
-                    <span class="status-text" id="status-top">🟢 bereit</span>
+                    <span class="status-text" id="status-top"
+                          data-ready-text="@L["Dashboard_Status_Ready"]"
+                          data-countdown-template="@L["Dashboard_Status_CountdownTemplate"]">@L["Dashboard_Status_Ready"]</span>
                 </div>
 
                 <div class="flex flex-col items-center">
                     <a id="btnClone" href="/Home/CloneLikedSongs" class="btn" data-action="clone">
                         <span class="icon">📜</span><span>@L["Btn_Liked_Clone"]</span>
                     </a>
-                    <span class="status-text" id="status-clone">🟢 bereit</span>
+                    <span class="status-text" id="status-clone"
+                          data-ready-text="@L["Dashboard_Status_Ready"]"
+                          data-countdown-template="@L["Dashboard_Status_CountdownTemplate"]">@L["Dashboard_Status_Ready"]</span>
                 </div>
 
                 <div class="flex flex-col items-center">
                     <a id="btnMix" href="/Home/CreateFavMix" class="btn" data-action="mix">
                         <span class="icon">🔀</span><span>@L["Btn_Liked_Shuffle"]</span>
                     </a>
-                    <span class="status-text" id="status-mix">🟢 bereit</span>
+                    <span class="status-text" id="status-mix"
+                          data-ready-text="@L["Dashboard_Status_Ready"]"
+                          data-countdown-template="@L["Dashboard_Status_CountdownTemplate"]">@L["Dashboard_Status_Ready"]</span>
                 </div>
             </div>
 
@@ -196,17 +210,19 @@
             function applyCooldownVisual(btn, msRemaining) {
                 const action = btn.dataset.action;
                 const status = document.getElementById(`status-${action}`);
+                const readyText = status?.dataset?.readyText || "";
+                const countdownTemplate = status?.dataset?.countdownTemplate || "⏳ {0}s";
                 if (msRemaining > 0) {
                     const seconds = Math.ceil(msRemaining / 1000);
                     btn.style.opacity = "0.6";
                     btn.style.pointerEvents = "none";
-                    status.textContent = `⏳ ${seconds}s`;
+                    status.textContent = countdownTemplate.replace("{0}", seconds);
                     status.classList.add("status-wait");
                     status.classList.remove("status-ready");
                 } else {
                     btn.style.opacity = "";
                     btn.style.pointerEvents = "";
-                    status.textContent = "🟢 bereit";
+                    status.textContent = readyText || "";
                     status.classList.add("status-ready");
                     status.classList.remove("status-wait");
                 }

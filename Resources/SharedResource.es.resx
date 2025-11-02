@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -60,7 +60,7 @@
 </data>
 
 	<data name="Job_Success_Started" xml:space="preserve">
-  <value>✅ {0} iniciado.<br/>Revisa Spotify® en 1–2 minutos.</value>
+  <value>✅ {0} iniciado.<br />Revisa Spotify® en 1–2 minutos.</value>
 </data>
 
 	<data name="SpotifyToPlex_DeleteConfirm" xml:space="preserve">
@@ -523,9 +523,9 @@
   <data name="Datenschutz_www_paypal_com_privacy" xml:space="preserve">
     <value>www.paypal.com/privacy</value>
   </data>
-  <!-- ===================== -->
-  <!--  ⚠️ Error messages ES -->
-  <!-- ===================== -->
+  
+  
+  
   <data name="Error_Details_anzeigen" xml:space="preserve">
     <value>Mostrar detalles</value>
   </data>
@@ -541,9 +541,9 @@
   <data name="Error_Zur_ck_zum_Dashboard" xml:space="preserve">
     <value>⬅️ Volver al panel</value>
   </data>
-  <!-- ===================== -->
-  <!--  🧾 Impressum / Legal -->
-  <!-- ===================== -->
+  
+  
+  
   <data name="Impressum_97209_Veitsh_chheim" xml:space="preserve">
     <value>97209 Veitshöchheim</value>
   </data>
@@ -604,9 +604,9 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
   <data name="Impressum_Zur_Datenschutzerkl_rung" xml:space="preserve">
     <value>Ir a la política de privacidad</value>
   </data>
-  <!-- ===================== -->
-  <!--  🏠 Index / Home Page -->
-  <!-- ===================== -->
+  
+  
+  
   <data name="Index_Datenschutz" xml:space="preserve">
     <value>Privacidad</value>
   </data>
@@ -682,9 +682,9 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
   <data name="Index_oder" xml:space="preserve">
     <value>o</value>
   </data>
-  <!-- ===================== -->
-  <!--  Misc Buttons / UI -->
-  <!-- ===================== -->
+  
+  
+  
   <data name="Cancel" xml:space="preserve">
     <value>Cancelar</value>
   </data>
@@ -721,11 +721,11 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
   <data name="Welcome" xml:space="preserve">
     <value>Bienvenido</value>
   </data>
-  <!-- ===================== -->
-  <!--  Spotify → Plex (ES) -->
-  <!-- ===================== -->
+  
+  
+  
   <data name="SpotifyToPlex_Title" xml:space="preserve">
-    <value>Spotify a Plex</value>
+    <value>Spotify → Plex</value>
   </data>
   <data name="SpotifyToPlex_Heading" xml:space="preserve">
     <value>Conecta tu cuenta Plex</value>
@@ -811,7 +811,7 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
   <data name="SpotifyToPlex_LiveExport" xml:space="preserve">
     <value>Exportación en vivo</value>
   </data>
-  <!-- 🎧 Playlist Generator / Buttons -->
+  
   <data name="Btn_Liked_Clone" xml:space="preserve">
     <value>Clonar canciones favoritas</value>
   </data>
@@ -848,7 +848,7 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
   <data name="Playlist_LikedSongs" xml:space="preserve">
     <value>Canciones favoritas</value>
   </data>
-  <!-- 🔗 Spotify → Plex -->
+  
   <data name="SpotifyToPlex_ExportAll_Summary" xml:space="preserve">
     <value>Listas de reproducción:</value>
   </data>
@@ -867,7 +867,7 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
   <data name="SpotifyToPlex_Loading" xml:space="preserve">
     <value>Cargando…</value>
   </data>
-  <!-- 🌐 Meta / OpenGraph / SEO -->
+  
   <data name="Meta_Description" xml:space="preserve">
     <value>Crea automáticamente listas de reproducción para Spotify a partir de tus canciones favoritas o las más escuchadas. Gratis, seguro y basado en la API web de Spotify. Desarrollado por InetConnector.</value>
   </data>
@@ -892,7 +892,7 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
   <data name="Schema_Description" xml:space="preserve">
     <value>Crea automáticamente listas de Spotify a partir de tus canciones favoritas o más escuchadas usando la API web de Spotify.</value>
   </data>
-  <!-- 🏠 Página principal -->
+  
   <data name="Index_PageTitle" xml:space="preserve">
     <value>Página de inicio</value>
   </data>
@@ -935,7 +935,7 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
   <data name="Dashboard_Source_LikedSongs" xml:space="preserve">
   <value>Canciones favoritas</value> 
 </data>
-	<!-- 📥 Plex Direct Download – missing keys (ES) -->
+	
 	<data name="DirectDownload_PageTitle" xml:space="preserve">
     <value>Descarga directa de Plex</value>
   </data>
@@ -976,7 +976,7 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
     <value>Cancelar</value>
   </data>
 
-	<!-- Tabs -->
+	
 	<data name="DirectDownload_Tab_Select" xml:space="preserve">
     <value>Selección</value>
   </data>
@@ -987,7 +987,7 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
     <value>Completado</value>
   </data>
 
-	<!-- Progreso & Estado -->
+	
 	<data name="DirectDownload_Waiting" xml:space="preserve">
     <value>Esperando descarga…</value>
   </data>
@@ -1032,7 +1032,7 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
     <value>❌ Error en la descarga.</value>
   </data>
 
-        <!-- Errores -->
+        
         <data name="DirectDownload_Error_PlaylistLoad" xml:space="preserve">
     <value>Error al cargar las listas.</value>
   </data>
@@ -1042,7 +1042,7 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
   <data name="Index_Plex_Direct_Download_Button" xml:space="preserve">
     <value>Descarga directa de Plex</value>
   </data>
-  <!-- 📥 Plex Direct Download – claves faltantes -->
+  
   <data name="SpotifyToPlex_DownloadZip">
 	  <value>Descargar como ZIP</value>
   </data>
@@ -1053,4 +1053,40 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
 	  <value>Cancelar</value>
   </data>
 
+  <data name="Layout_TitleSuffix" xml:space="preserve">
+    <value>Generador de listas de reproducción para Spotify</value>
+  </data>
+  <data name="SpotifyToPlex_ExportTitle" xml:space="preserve">
+    <value>Exportación de Spotify → Plex</value>
+  </data>
+  <data name="SpotifyToPlex_LogoAlt" xml:space="preserve">
+    <value>Spotify a Plex</value>
+  </data>
+  <data name="Dashboard_WelcomeUser" xml:space="preserve">
+    <value>Hola, {0} 👋</value>
+  </data>
+  <data name="Dashboard_DefaultUserName" xml:space="preserve">
+    <value>Usuario de Spotify</value>
+  </data>
+  <data name="Dashboard_Status_Ready" xml:space="preserve">
+    <value>🟢 listo</value>
+  </data>
+  <data name="Dashboard_Status_CountdownTemplate" xml:space="preserve">
+    <value>⏳ {0}s</value>
+  </data>
+  <data name="Datenschutz_PageTitle" xml:space="preserve">
+    <value>Política de privacidad</value>
+  </data>
+  <data name="Datenschutz_MetaDescription" xml:space="preserve">
+    <value>Política de privacidad del InetConnector Playlist Generator™. Descubre cómo se procesan tus datos de Spotify de forma segura, temporal y conforme al RGPD.</value>
+  </data>
+  <data name="Datenschutz_MetaKeywords" xml:space="preserve">
+    <value>privacidad, RGPD, Spotify, generador de listas, InetConnector, datos personales, política de privacidad de Spotify, herramientas de música</value>
+  </data>
+  <data name="Impressum_PageTitle" xml:space="preserve">
+    <value>Aviso legal</value>
+  </data>
+  <data name="Impressum_MetaDescription" xml:space="preserve">
+    <value>Aviso legal del InetConnector Playlist Generator™. Información legal según §5 TMG y §18 párr. 2 MStV.</value>
+  </data>
 </root>

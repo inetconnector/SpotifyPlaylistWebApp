@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using SpotifyPlaylistWebApp.Services;
 using System.IO.Compression;
 
@@ -183,10 +184,14 @@ namespace SpotifyPlaylistWebApp.Controllers
         [HttpGet("DirectDownload")]
         public IActionResult DirectDownload(
             [FromQuery] string playlistKey = "",
-            [FromQuery] string playlistName = "")
+            [FromQuery] string playlistName = "",
+            [FromServices] IStringLocalizer<SharedResource> localizer = null)
         {
-            ViewData["Title"] = "Plex Direct Download";
-             
+            if (localizer != null)
+            {
+                ViewData["Title"] = localizer["DirectDownload_PageTitle"].Value;
+            }
+
             ViewBag.PlaylistKey = playlistKey ?? "";
             ViewBag.PlaylistName = playlistName ?? "";
 

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -69,7 +69,7 @@
 </data>
 
 	<data name="Job_Success_Started" xml:space="preserve">
-  <value>✅ {0} started.<br/>Please check Spotify® in 1–2 minutes.</value>
+  <value>✅ {0} started.<br />Please check Spotify® in 1–2 minutes.</value>
 </data>
 
 	<data name="SpotifyToPlex_MissingCacheLoaded" xml:space="preserve">
@@ -769,7 +769,7 @@ Third-party contributions are marked as such. Duplication, processing, distribut
     <value>Liked Songs</value>
   </data>
   <data name="SpotifyToPlex_Title">
-    <value>Spotify to Plex</value>
+    <value>Spotify → Plex</value>
   </data>
   <data name="SpotifyToPlex_Heading">
     <value>Connect your Plex account</value>
@@ -858,7 +858,7 @@ Third-party contributions are marked as such. Duplication, processing, distribut
   <data name="SpotifyToPlex_SyncAll" xml:space="preserve">
     <value>Sync all playlists</value>
   </data>
-  <!-- 🌐 SEO / Open Graph / Schema -->
+  
   <data name="Meta_Description" xml:space="preserve">
     <value>Automatically create Spotify playlists from your favorite or most-played tracks. Free, secure, and powered by the Spotify Web API. Developed by InetConnector.</value>
   </data>
@@ -883,7 +883,7 @@ Third-party contributions are marked as such. Duplication, processing, distribut
   <data name="Schema_Description" xml:space="preserve">
     <value>Automatically create Spotify playlists from your favorite songs or top tracks using the Spotify Web API.</value>
   </data>
-  <!-- 🌐 Titel + Footer -->
+  
   <data name="Index_PageTitle" xml:space="preserve">
     <value>Home</value>
   </data>
@@ -920,7 +920,7 @@ Third-party contributions are marked as such. Duplication, processing, distribut
   <data name="Dashboard_Source_LikedSongs" xml:space="preserve">
   <value>Liked Songs</value> 
 </data>
-	<!-- 📥 Plex Direct Download – missing keys (EN) -->
+	
 	<data name="DirectDownload_PageTitle" xml:space="preserve">
     <value>Plex Direct Download</value>
   </data>
@@ -961,7 +961,7 @@ Third-party contributions are marked as such. Duplication, processing, distribut
     <value>Cancel</value>
   </data>
 
-	<!-- Tabs -->
+	
 	<data name="DirectDownload_Tab_Select" xml:space="preserve">
     <value>Select</value>
   </data>
@@ -972,7 +972,7 @@ Third-party contributions are marked as such. Duplication, processing, distribut
     <value>Done</value>
   </data>
 
-	<!-- Progress & Status -->
+	
 	<data name="DirectDownload_Waiting" xml:space="preserve">
     <value>Waiting for download…</value>
   </data>
@@ -1017,7 +1017,7 @@ Third-party contributions are marked as such. Duplication, processing, distribut
     <value>❌ Download failed.</value>
   </data>
 
-        <!-- Errors -->
+        
         <data name="DirectDownload_Error_PlaylistLoad" xml:space="preserve">
     <value>Error loading playlists.</value>
   </data>
@@ -1027,7 +1027,7 @@ Third-party contributions are marked as such. Duplication, processing, distribut
   <data name="Index_Plex_Direct_Download_Button" xml:space="preserve">
     <value>Plex Direct Download</value>
   </data>
-  <!-- 📥 Plex Direct Download – missing keys -->
+  
   <data name="SpotifyToPlex_DownloadZip">
 	  <value>Download as ZIP</value>
   </data>
@@ -1038,4 +1038,40 @@ Third-party contributions are marked as such. Duplication, processing, distribut
 	  <value>Cancel</value>
   </data>
 
+  <data name="Layout_TitleSuffix" xml:space="preserve">
+    <value>Playlist Generator for Spotify</value>
+  </data>
+  <data name="SpotifyToPlex_ExportTitle" xml:space="preserve">
+    <value>Spotify → Plex Export</value>
+  </data>
+  <data name="SpotifyToPlex_LogoAlt" xml:space="preserve">
+    <value>Spotify to Plex</value>
+  </data>
+  <data name="Dashboard_WelcomeUser" xml:space="preserve">
+    <value>Welcome, {0} 👋</value>
+  </data>
+  <data name="Dashboard_DefaultUserName" xml:space="preserve">
+    <value>Spotify User</value>
+  </data>
+  <data name="Dashboard_Status_Ready" xml:space="preserve">
+    <value>🟢 ready</value>
+  </data>
+  <data name="Dashboard_Status_CountdownTemplate" xml:space="preserve">
+    <value>⏳ {0}s</value>
+  </data>
+  <data name="Datenschutz_PageTitle" xml:space="preserve">
+    <value>Privacy Policy</value>
+  </data>
+  <data name="Datenschutz_MetaDescription" xml:space="preserve">
+    <value>Privacy policy of the InetConnector Playlist Generator™. Learn how your Spotify data is processed securely, temporarily, and in compliance with the GDPR.</value>
+  </data>
+  <data name="Datenschutz_MetaKeywords" xml:space="preserve">
+    <value>privacy, GDPR, Spotify, playlist generator, InetConnector, personal data, Spotify app privacy policy, music tools privacy</value>
+  </data>
+  <data name="Impressum_PageTitle" xml:space="preserve">
+    <value>Legal Notice</value>
+  </data>
+  <data name="Impressum_MetaDescription" xml:space="preserve">
+    <value>Legal notice of the InetConnector Playlist Generator™. Legal information according to §5 TMG and §18 para. 2 MStV.</value>
+  </data>
 </root>
