@@ -152,14 +152,22 @@
                         <label for="playlistSelect" class="block text-sm text-white/80 mb-2">
                             @L["DirectDownload_SelectPlaylist"]
                         </label>
-                        <div class="relative">
-                            <select id="playlistSelect"
-                                    class="w-full appearance-none rounded-xl border border-white/15 text-white/90 px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-amber-400 transition">
-                                <option>@L["DirectDownload_LoadPlaylists"]…</option>
-                            </select>
-                            <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
+                        <div class="flex gap-3">
+                            <div class="relative flex-1">
+                                <select id="playlistSelect"
+                                        class="w-full appearance-none rounded-xl border border-white/15 text-white/90 px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-amber-400 transition">
+                                    <option>@L["DirectDownload_LoadPlaylists"]…</option>
+                                </select>
+                                <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                            <button type="button"
+                                    id="btnShowPlexPlaylist"
+                                    class="shrink-0 px-4 py-3 rounded-xl bg-amber-500/90 hover:bg-amber-400 transition text-black font-semibold shadow-lg"
+                                    title="@L["SpotifyToPlex_ShowPlaylist"]">
+                                ?
+                            </button>
                         </div>
                         <p id="playlistMeta" class="text-xs text-white/60 mt-2 hidden"></p>
                     </div>
@@ -185,6 +193,15 @@
         </div>
     </main>
 
+    <div id="playlistModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+        <div class="glass rounded-2xl max-w-lg w-full shadow-2xl relative p-6 md:p-7 border border-white/15">
+            <button type="button" id="closeModal" class="absolute right-3 top-3 text-white/60 hover:text-white text-2xl leading-none">&times;</button>
+            <h3 id="playlistModalTitle" class="text-xl font-semibold mb-1">@L["SpotifyToPlex_PlaylistContent"]</h3>
+            <p class="text-sm text-white/60 mb-4">@L["DirectDownload_SelectPlaylist_Help"]</p>
+            <div id="playlistTracks" class="max-h-80 overflow-y-auto space-y-2 text-white/80 text-sm"></div>
+        </div>
+    </div>
+
     <footer class="max-w-5xl mx-auto px-6 mt-10 pb-10 text-sm text-white/70">
         <div class="glass rounded-2xl p-5 flex flex-col md:flex-row justify-between items-center gap-3">
             <div class="flex flex-col md:flex-row items-center gap-3">
@@ -207,12 +224,122 @@
     <script src="/js/plex-direct-flow.js"></script>
     <script>
         (function initDirectDownloadPage() {
+            const modalStrings = {
+                loading: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_Loading"].Value)),
+                noTracks: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_NoTracksFound"].Value)),
+                loadError: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_LoadError"].Value)),
+                selectPlaylist: @Html.Raw(JsonSerializer.Serialize(L["DirectDownload_Status_SelectPlaylist"].Value)),
+                modalTitle: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_PlaylistContent"].Value))
+            };
+
+            const htmlMap = {
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            };
+
+            const escapeHtml = (value) => {
+                if (value === null || value === undefined) return "";
+                return String(value).replace(/[&<>"']/g, ch => htmlMap[ch] ?? ch);
+            };
+
             const init = () => {
                 // Playlists automatisch laden
                 if (window.loadPlexPlaylists) {
                     window.loadPlexPlaylists({
                         selectId: "playlistSelect",
                         metaId: "playlistMeta"
+                    });
+                }
+
+                const modal = document.getElementById("playlistModal");
+                const tracksContainer = document.getElementById("playlistTracks");
+                const modalTitle = document.getElementById("playlistModalTitle");
+                const closeModalButton = document.getElementById("closeModal");
+                const statusArea = document.getElementById("statusArea");
+
+                const hideModal = () => {
+                    if (modal) {
+                        modal.classList.add("hidden");
+                    }
+                };
+
+                closeModalButton?.addEventListener("click", hideModal);
+                modal?.addEventListener("click", ev => {
+                    if (ev.target === modal) {
+                        hideModal();
+                    }
+                });
+                document.addEventListener("keydown", ev => {
+                    if (ev.key === "Escape") {
+                        hideModal();
+                    }
+                });
+
+                const showPlaylistButton = document.getElementById("btnShowPlexPlaylist");
+                if (showPlaylistButton) {
+                    showPlaylistButton.addEventListener("click", async () => {
+                        const ddl = document.getElementById("playlistSelect");
+                        const playlistKey = ddl?.value;
+
+                        if (!ddl || !playlistKey) {
+                            if (statusArea) {
+                                statusArea.style.color = "#ff7070";
+                                statusArea.textContent = modalStrings.selectPlaylist;
+                            }
+                            return;
+                        }
+
+                        const selectedOption = ddl.options[ddl.selectedIndex];
+                        const playlistName = (selectedOption?.textContent || "")
+                            .replace(/\s*\([^)]*\)\s*$/g, "")
+                            .trim();
+
+                        if (modalTitle) {
+                            modalTitle.textContent = playlistName || modalStrings.modalTitle;
+                        }
+
+                        if (tracksContainer) {
+                            tracksContainer.innerHTML = `<div class="text-center text-white/60">${modalStrings.loading}</div>`;
+                        }
+
+                        modal?.classList.remove("hidden");
+
+                        try {
+                            const res = await fetch(`/HomePlex/GetPlexPlaylistTracks?ratingKey=${encodeURIComponent(playlistKey)}`);
+                            const data = await res.json();
+
+                            if (!tracksContainer) {
+                                return;
+                            }
+
+                            if (data.success) {
+                                const items = Array.isArray(data.tracks) ? data.tracks : [];
+                                if (items.length) {
+                                    tracksContainer.innerHTML = items.map(t => {
+                                        const title = escapeHtml(t.title || "");
+                                        const artist = escapeHtml(t.artist || "");
+                                        return `
+                                            <div class="bg-white/5 border border-white/10 rounded-lg px-4 py-2">
+                                                <div class="font-semibold text-white/90">${title || "—"}</div>
+                                                ${artist ? `<div class="text-white/60 text-xs mt-1">${artist}</div>` : ""}
+                                            </div>`;
+                                    }).join("");
+                                } else {
+                                    tracksContainer.innerHTML = `<div class="text-center text-white/60">${modalStrings.noTracks}</div>`;
+                                }
+                            } else {
+                                const msg = escapeHtml(data.message || modalStrings.loadError);
+                                tracksContainer.innerHTML = `<div class="text-center text-rose-300">${msg}</div>`;
+                            }
+                        } catch (err) {
+                            if (tracksContainer) {
+                                tracksContainer.innerHTML = `<div class="text-center text-rose-300">${modalStrings.loadError}</div>`;
+                            }
+                            console.error(err);
+                        }
                     });
                 }
 
