@@ -951,13 +951,16 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
 	<data name="DirectDownload_SelectPlaylist_Help" xml:space="preserve">
     <value>Selecciona una lista de reproducción de Plex para la descarga directa.</value>
   </data>
-	<data name="DirectDownload_LoadPlaylists" xml:space="preserve">
+        <data name="DirectDownload_LoadPlaylists" xml:space="preserve">
     <value>Cargar listas</value>
   </data>
-	<data name="DirectDownload_AvailablePlaylists" xml:space="preserve">
+        <data name="DirectDownload_LoadPlaylists_Error" xml:space="preserve">
+    <value>❌ Error al cargar</value>
+  </data>
+        <data name="DirectDownload_AvailablePlaylists" xml:space="preserve">
     <value>Listas de Plex disponibles</value>
   </data>
-	<data name="DirectDownload_NoPlaylists" xml:space="preserve">
+        <data name="DirectDownload_NoPlaylists" xml:space="preserve">
     <value>No se encontraron listas de Plex.</value>
   </data>
 	<data name="DirectDownload_Download_Help" xml:space="preserve">
@@ -991,15 +994,46 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
 	<data name="DirectDownload_InProgress" xml:space="preserve">
     <value>Descarga en progreso…</value>
   </data>
-	<data name="DirectDownload_Done" xml:space="preserve">
+        <data name="DirectDownload_Done" xml:space="preserve">
     <value>Completado. {0} archivos.</value>
   </data>
-	<data name="DirectDownload_FinishedWithErrors" xml:space="preserve">
+        <data name="DirectDownload_FinishedWithErrors" xml:space="preserve">
     <value>Completado con errores ({0}).</value>
   </data>
 
-	<!-- Errores -->
-	<data name="DirectDownload_Error_PlaylistLoad" xml:space="preserve">
+        <data name="DirectDownload_Meta_PlaylistsFound" xml:space="preserve">
+    <value>{0} listas encontradas</value>
+  </data>
+        <data name="DirectDownload_Status_SelectPlaylist" xml:space="preserve">
+    <value>⚠️ Selecciona una lista de reproducción.</value>
+  </data>
+        <data name="DirectDownload_Status_LoadingTrackUrls" xml:space="preserve">
+    <value>⏳ Cargando URL de pistas…</value>
+  </data>
+        <data name="DirectDownload_Status_LoadUrlsError" xml:space="preserve">
+    <value>❌ Error al cargar las URL.</value>
+  </data>
+        <data name="DirectDownload_Status_NoItems" xml:space="preserve">
+    <value>⚠️ No se encontraron pistas.</value>
+  </data>
+        <data name="DirectDownload_Status_LoadingFiles" xml:space="preserve">
+    <value>📥 Descargando {0} archivos…</value>
+  </data>
+        <data name="DirectDownload_Status_LoadingFileProgress" xml:space="preserve">
+    <value>📥 Descargando {0}/{1}: {2}</value>
+  </data>
+        <data name="DirectDownload_Status_CreatingZip" xml:space="preserve">
+    <value>📦 Creando ZIP…</value>
+  </data>
+        <data name="DirectDownload_Status_DownloadComplete" xml:space="preserve">
+    <value>✅ ¡ZIP descargado!</value>
+  </data>
+        <data name="DirectDownload_Status_DownloadFailed" xml:space="preserve">
+    <value>❌ Error en la descarga.</value>
+  </data>
+
+        <!-- Errores -->
+        <data name="DirectDownload_Error_PlaylistLoad" xml:space="preserve">
     <value>Error al cargar las listas.</value>
   </data>
 	<data name="DirectDownload_Error_DownloadFailed" xml:space="preserve">

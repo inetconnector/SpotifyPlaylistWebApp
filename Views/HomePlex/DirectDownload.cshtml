@@ -1,14 +1,31 @@
+@using System.Collections.Generic
 @using System.Globalization
 @using Microsoft.Extensions.Localization
 @using SpotifyPlaylistWebApp
+@using System.Text.Json
 @await Html.PartialAsync("LanguageSwitcher")
 @inject IStringLocalizer<SharedResource> L
 
-@{
+@{ 
     Layout = "Layout";
     ViewData["Title"] = L["DirectDownload_PageTitle"];
     var lang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
     var isGerman = lang == "de";
+    var plexDirectStrings = new Dictionary<string, string>
+    {
+        ["loadPlaylistsOption"] = $"{L["DirectDownload_LoadPlaylists"]}…",
+        ["loadPlaylistsError"] = L["DirectDownload_LoadPlaylists_Error"],
+        ["metaPlaylistsFound"] = L["DirectDownload_Meta_PlaylistsFound"],
+        ["statusSelectPlaylist"] = L["DirectDownload_Status_SelectPlaylist"],
+        ["statusLoadingTrackUrls"] = L["DirectDownload_Status_LoadingTrackUrls"],
+        ["statusLoadUrlsError"] = L["DirectDownload_Status_LoadUrlsError"],
+        ["statusNoItems"] = L["DirectDownload_Status_NoItems"],
+        ["statusLoadingFiles"] = L["DirectDownload_Status_LoadingFiles"],
+        ["statusLoadingFileProgress"] = L["DirectDownload_Status_LoadingFileProgress"],
+        ["statusCreatingZip"] = L["DirectDownload_Status_CreatingZip"],
+        ["statusDownloadComplete"] = L["DirectDownload_Status_DownloadComplete"],
+        ["statusDownloadFailed"] = L["DirectDownload_Status_DownloadFailed"]
+    };
 }
 
 <!doctype html>
@@ -150,7 +167,7 @@
                     <!-- ACTION BUTTONS -->
                     <div class="flex flex-col sm:flex-row gap-3 mt-6">
                         <a href="/Home/Index" class="btn-outline flex-1">⬅️ @L["Button_BackToHome"]</a>
-                        <button id="btnStartDownload" class="btn flex-1">⬇️ @L["DirectDownload_Start"]</button>
+                        <button id="btnStartDownload" type="button" class="btn flex-1">⬇️ @L["DirectDownload_Start"]</button>
                     </div>
 
                     <div id="statusArea" class="rounded-xl mt-5 bg-black/30 border border-white/10 p-4 min-h-[64px] text-sm text-white/80"></div>
@@ -184,28 +201,40 @@
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        window.PlexDirectStrings = @Html.Raw(JsonSerializer.Serialize(plexDirectStrings));
+    </script>
     <script src="/js/plex-direct-flow.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
+        (function initDirectDownloadPage() {
+            const init = () => {
+                // Playlists automatisch laden
+                if (window.loadPlexPlaylists) {
+                    window.loadPlexPlaylists({
+                        selectId: "playlistSelect",
+                        metaId: "playlistMeta"
+                    });
+                }
 
-            // Playlists automatisch laden
-            if (window.loadPlexPlaylists) {
-                window.loadPlexPlaylists({
-                    selectId: "playlistSelect",
-                    metaId: "playlistMeta"
-                });
+                // Download starten → ZIP erzeugen & herunterladen
+                const btnStart = document.getElementById("btnStartDownload");
+                if (btnStart && window.startPlexDirectZip) {
+                    btnStart.addEventListener("click", (ev) => {
+                        ev.preventDefault();
+                        window.startPlexDirectZip({
+                            selectId: "playlistSelect",
+                            statusId: "statusArea"
+                        });
+                    });
+                }
+            };
+
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", init, { once: true });
+            } else {
+                init();
             }
-
-            // Download starten → ZIP erzeugen & herunterladen
-            const btnStart = document.getElementById("btnStartDownload");
-            if (btnStart && window.startPlexDirectZip) {
-                btnStart.addEventListener("click", () => window.startPlexDirectZip({
-                    selectId: "playlistSelect",
-                    statusId: "statusArea"
-                }));
-            }
-        });
-
+        })();
     </script>
 
 </body>
