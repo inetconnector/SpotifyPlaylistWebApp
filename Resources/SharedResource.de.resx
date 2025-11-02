@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -73,7 +73,7 @@
 </data>
 
 	<data name="Job_Success_Started" xml:space="preserve">
-  <value>✅ {0} gestartet.<br/>Bitte in 1–2 Minuten in Spotify® prüfen.</value>
+  <value>✅ {0} gestartet.<br />Bitte in 1–2 Minuten in Spotify® prüfen.</value>
 </data>
 	
 	<data name="SpotifyToPlex_MissingCacheLoaded" xml:space="preserve">
@@ -787,7 +787,7 @@
     <value>Lieblingssongs</value>
   </data>
   <data name="SpotifyToPlex_Title">
-    <value>Spotify zu Plex</value>
+    <value>Spotify → Plex</value>
   </data>
   <data name="SpotifyToPlex_Heading">
     <value>Verbinde dein Plex-Konto</value>
@@ -876,7 +876,7 @@
   <data name="SpotifyToPlex_SyncAll" xml:space="preserve">
     <value>Alle Playlists synchronisieren</value>
   </data>
-  <!-- 🌐 Neue SEO / Open Graph / Schema Keys -->
+  
   <data name="Meta_Description" xml:space="preserve">
     <value>Erstelle automatisch Playlisten für Spotify aus deinen Lieblingssongs oder meistgehörten Tracks. Kostenlos, sicher und direkt über die Spotify Web API. Entwickelt von InetConnector.</value>
   </data>
@@ -901,7 +901,7 @@
   <data name="Schema_Description" xml:space="preserve">
     <value>Erstelle Spotify-Playlists automatisch aus deinen Lieblingssongs oder Top-Tracks mit der Spotify Web API.</value>
   </data>
-  <!-- 🌐 Titel + Footer -->
+  
   <data name="Index_PageTitle" xml:space="preserve">
     <value>Startseite</value>
   </data>
@@ -937,7 +937,7 @@
   <data name="Dashboard_Source_LikedSongs" xml:space="preserve">
   <value>Lieblingssongs</value> 
 </data>
-	<!-- 📥 Plex Direct Download – fehlende Keys -->
+	
 	<data name="DirectDownload_PageTitle" xml:space="preserve">
     <value>Plex Direkt-Download</value>
   </data>
@@ -978,7 +978,7 @@
     <value>Abbrechen</value>
   </data>
 
-	<!-- Tabs -->
+	
 	<data name="DirectDownload_Tab_Select" xml:space="preserve">
     <value>Auswahl</value>
   </data>
@@ -989,7 +989,7 @@
     <value>Fertig</value>
   </data>
 
-        <!-- Fortschritt & Status -->
+        
         <data name="DirectDownload_Waiting" xml:space="preserve">
     <value>Warte auf Download …</value>
   </data>
@@ -1034,7 +1034,7 @@
     <value>❌ Download fehlgeschlagen.</value>
   </data>
 
-        <!-- Fehler -->
+        
         <data name="DirectDownload_Error_PlaylistLoad" xml:space="preserve">
     <value>Fehler beim Laden der Playlists.</value>
   </data>
@@ -1044,7 +1044,7 @@
   <data name="Index_Plex_Direct_Download_Button" xml:space="preserve">
     <value>Plex Direkt-Download</value>
   </data>
-  <!-- 📥 Plex Direct Download – fehlende Keys -->
+  
   <data name="SpotifyToPlex_DownloadZip">
 	  <value>Als ZIP herunterladen</value>
   </data>
@@ -1055,4 +1055,40 @@
 	  <value>Abbrechen</value>
   </data>
 
+  <data name="Layout_TitleSuffix" xml:space="preserve">
+    <value>Playlist Generator für Spotify</value>
+  </data>
+  <data name="SpotifyToPlex_ExportTitle" xml:space="preserve">
+    <value>Spotify → Plex Export</value>
+  </data>
+  <data name="SpotifyToPlex_LogoAlt" xml:space="preserve">
+    <value>Spotify nach Plex</value>
+  </data>
+  <data name="Dashboard_WelcomeUser" xml:space="preserve">
+    <value>Willkommen, {0} 👋</value>
+  </data>
+  <data name="Dashboard_DefaultUserName" xml:space="preserve">
+    <value>Spotify-Nutzer</value>
+  </data>
+  <data name="Dashboard_Status_Ready" xml:space="preserve">
+    <value>🟢 bereit</value>
+  </data>
+  <data name="Dashboard_Status_CountdownTemplate" xml:space="preserve">
+    <value>⏳ {0}s</value>
+  </data>
+  <data name="Datenschutz_PageTitle" xml:space="preserve">
+    <value>Datenschutzerklärung</value>
+  </data>
+  <data name="Datenschutz_MetaDescription" xml:space="preserve">
+    <value>Datenschutzerklärung des InetConnector Playlist Generator™. Erfahre, wie deine Spotify-Daten sicher, temporär und DSGVO-konform verarbeitet werden.</value>
+  </data>
+  <data name="Datenschutz_MetaKeywords" xml:space="preserve">
+    <value>Datenschutz, DSGVO, Spotify, Playlist Generator, InetConnector, personenbezogene Daten, Datenschutzrichtlinie Spotify App, Datenschutz Musik Tools</value>
+  </data>
+  <data name="Impressum_PageTitle" xml:space="preserve">
+    <value>Impressum</value>
+  </data>
+  <data name="Impressum_MetaDescription" xml:space="preserve">
+    <value>Impressum des InetConnector Playlist Generator™. Rechtliche Angaben nach §5 TMG und §18 Abs. 2 MStV.</value>
+  </data>
 </root>

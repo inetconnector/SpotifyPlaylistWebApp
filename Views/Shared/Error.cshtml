@@ -1,4 +1,5 @@
 @inject IStringLocalizer<SharedResource> L
+@using System.Globalization
 @using Microsoft.Extensions.Localization
 @using SpotifyPlaylistWebApp
 @model SpotifyPlaylistWebApp.Controllers.ErrorViewModel
@@ -7,7 +8,7 @@
 }
 
 <!doctype html>
-<html lang="de">
+<html lang="@CultureInfo.CurrentUICulture.Name">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>

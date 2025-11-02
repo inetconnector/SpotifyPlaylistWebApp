@@ -5,7 +5,7 @@
 @inject IStringLocalizer<SharedResource> L
 @{
     Layout = "Layout";
-    ViewData["Title"] = "Spotify → Plex Export";
+    ViewData["Title"] = L["SpotifyToPlex_ExportTitle"];
 
     var data = TempData["ExportOneResult"]?.ToString();
     string exportedName = "", addedCount = "", missingCount = "";
@@ -43,12 +43,12 @@
 <div class="max-w-xl mx-auto mt-16 p-8 bg-white/5 rounded-3xl shadow-xl backdrop-blur-sm text-center">
 
     <div class="flex justify-center mb-4">
-        <img src="/images/plex-spotify.svg" alt="Spotify→Plex"
+        <img src="/images/plex-spotify.svg" alt="@L["SpotifyToPlex_LogoAlt"]"
              class="h-20 w-auto mx-auto drop-shadow-[0_0_8px_rgba(255,160,0,0.4)]"
              style="max-height:80px;"/>
     </div>
 
-    <h1 class="text-3xl font-bold mb-3">Spotify → Plex</h1>
+    <h1 class="text-3xl font-bold mb-3">@L["SpotifyToPlex_Title"]</h1>
     <p class="text-gray-300 mb-8">@L["Plex_ExportSummary"]</p>
 
     @if (hasData)

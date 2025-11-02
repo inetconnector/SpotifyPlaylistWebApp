@@ -1,19 +1,20 @@
+@using System.Globalization
 @using Microsoft.Extensions.Localization
 @using SpotifyPlaylistWebApp
 @await Html.PartialAsync("LanguageSwitcher")
 @inject IStringLocalizer<SharedResource> L
 @{
     Layout = "Layout";
-    ViewData["Title"] = "Impressum";
+    ViewData["Title"] = L["Impressum_PageTitle"];
 }
 <!doctype html>
-<html lang="de">
+<html lang="@CultureInfo.CurrentUICulture.Name">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <title>@L["Impressum_Impressum_InetConnector_Playlist_Generator"]</title>
 
-    <meta name="description" content="Impressum des InetConnector Playlist Generator™. Rechtliche Angaben nach §5 TMG und §18 Abs. 2 MStV."/>
+    <meta name="description" content="@L["Impressum_MetaDescription"]"/>
     <meta name="robots" content="index, follow"/>
     <link rel="canonical" href="https://playlists.inetconnector.com/Home/Impressum"/>
 
@@ -94,7 +95,7 @@
 
 <footer class="max-w-5xl mx-auto px-6 mt-10 pb-10 text-sm text-white/70">
     <div class="glass rounded-2xl p-5 flex flex-col md:flex-row justify-between items-center gap-3">
-        <div>© @DateTime.Now.Year InetConnector – Alle Rechte vorbehalten</div>
+        <div>© @DateTime.Now.Year InetConnector – @L["Index_All_Rights_Reserved"]</div>
         <a href="/Home/Datenschutz" class="hover:text-white underline">@L["Impressum_Datenschutzerkl_rung"]</a>
     </div>
 </footer>

@@ -1,20 +1,21 @@
+@using System.Globalization
 @using Microsoft.Extensions.Localization
 @using SpotifyPlaylistWebApp
 @await Html.PartialAsync("LanguageSwitcher")
 @inject IStringLocalizer<SharedResource> L
 @{
     Layout = "Layout";
-    ViewData["Title"] = "Datenschutzerklärung";
+    ViewData["Title"] = L["Datenschutz_PageTitle"];
 }
 <!doctype html>
-<html lang="de">
+<html lang="@CultureInfo.CurrentUICulture.Name">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <title>@L["Datenschutz_Datenschutzerkl_rung_InetConnector_Playlist_Gene"]</title>
 
-    <meta name="description" content="Datenschutzerklärung des InetConnector Playlist Generator™. Erfahre, wie deine Spotify-Daten sicher, temporär und DSGVO-konform verarbeitet werden."/>
-    <meta name="keywords" content="Datenschutz, DSGVO, Spotify, Playlist Generator, InetConnector, personenbezogene Daten, Datenschutzrichtlinie Spotify App, Datenschutz Musik Tools"/>
+    <meta name="description" content="@L["Datenschutz_MetaDescription"]"/>
+    <meta name="keywords" content="@L["Datenschutz_MetaKeywords"]"/>
     <meta name="robots" content="index, follow"/>
     <link rel="canonical" href="https://playlists.inetconnector.com/Home/Datenschutz"/>
 
@@ -25,9 +26,9 @@
         {
           "@@context": "https://schema.org",
           "@@type": "WebApplication",
-          "name": "InetConnector Playlist Generator für Spotify®",
+          "name": "@L["Schema_Name"]",
           "url": "https://playlists.inetconnector.com/",
-          "description": "Erstelle automatisch Playlisten für Spotify aus deinen Lieblingssongs – sicher, DSGVO-konform und kostenlos.",
+          "description": "@L["Schema_Description"]",
           "applicationCategory": "MusicApplication",
           "operatingSystem": "Web",
           "creator": {
@@ -179,7 +180,7 @@
 
 <footer class="max-w-5xl mx-auto px-6 mt-10 pb-10 text-sm text-white/70">
     <div class="glass rounded-2xl p-5 flex flex-col md:flex-row justify-between items-center gap-3">
-        <div>© @DateTime.Now.Year InetConnector – Alle Rechte vorbehalten</div>
+        <div>© @DateTime.Now.Year InetConnector – @L["Index_All_Rights_Reserved"]</div>
         <a href="/Home/Impressum" class="hover:text-white underline">@L["Datenschutz_Impressum"]</a>
     </div>
 </footer>
