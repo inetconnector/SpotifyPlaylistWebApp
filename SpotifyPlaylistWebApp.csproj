@@ -11,7 +11,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Services\ImportPlaylistFromJsonAsync.cs" />
+	  <Compile Remove="Views\Home\Services\ImportPlaylistFromJsonAsync.cs" />
 	</ItemGroup>
 
 	<ItemGroup>

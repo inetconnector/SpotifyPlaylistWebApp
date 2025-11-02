@@ -1,0 +1,212 @@
+@using System.Globalization
+@using Microsoft.Extensions.Localization
+@using SpotifyPlaylistWebApp
+@await Html.PartialAsync("LanguageSwitcher")
+@inject IStringLocalizer<SharedResource> L
+
+@{
+    Layout = "Layout";
+    ViewData["Title"] = L["DirectDownload_PageTitle"];
+    var lang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+    var isGerman = lang == "de";
+}
+
+<!doctype html>
+<html lang="@CultureInfo.CurrentUICulture.Name">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>@L["DirectDownload_PageTitle"] – @L["Index_InetConnector"]</title>
+
+    <meta name="description" content="@L["Meta_Description"]" />
+    <meta name="keywords" content="@L["Meta_Keywords"]" />
+    <meta name="author" content="InetConnector" />
+    <meta name="robots" content="index, follow" />
+
+    <meta property="og:locale" content="@(isGerman ? "de_DE" : "en_US")" />
+    <meta property="og:title" content="@L["DirectDownload_PageTitle"]" />
+    <meta property="og:description" content="@L["OG_Description"]" />
+    <meta property="og:image" content="https://playlists.inetconnector.com/preview.jpg" />
+    <meta property="og:url" content="@(isGerman ? "https://playlists.inetconnector.com/de" : "https://playlists.inetconnector.com/en")" />
+    <meta property="og:type" content="website" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@L["DirectDownload_PageTitle"]" />
+    <meta name="twitter:description" content="@L["Twitter_Description"]" />
+    <meta name="twitter:image" content="https://playlists.inetconnector.com/preview.jpg" />
+
+    <link rel="canonical" href="@(isGerman ? "https://playlists.inetconnector.com/de" : "https://playlists.inetconnector.com/en")" />
+    <link rel="alternate" href="https://playlists.inetconnector.com/de" hreflang="de" />
+    <link rel="alternate" href="https://playlists.inetconnector.com/en" hreflang="en" />
+    <link rel="alternate" href="https://playlists.inetconnector.com/es" hreflang="es" />
+
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="sitemap" type="application/xml" title="@L["Attr_Index_Sitemap"]" href="/sitemap.xml" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            background: radial-gradient(1000px 600px at 20% 10%, rgba(16,185,129,.25), transparent 60%), radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,.25), transparent 60%), #0b0f17;
+            color: white;
+            font-family: system-ui, sans-serif;
+        }
+
+        .glass {
+            background: rgba(255,255,255,.08);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,.12);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: .9rem 1.6rem;
+            border-radius: 1rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+            background: linear-gradient(90deg,#FFC727,#FFAA00,#F09500);
+            transition: all .25s ease;
+            box-shadow: 0 0 10px rgba(0,0,0,.25);
+        }
+
+            .btn:hover {
+                filter: brightness(1.1);
+                transform: translateY(-2px);
+            }
+
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: .85rem 1.4rem;
+            border-radius: 1rem;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,.15);
+            color: #e5e7eb;
+            background: rgba(255,255,255,.06);
+        }
+
+            .btn-outline:hover {
+                background: rgba(255,255,255,.1);
+            }
+
+        select {
+            background-color: rgba(255,255,255,.06);
+        }
+
+            select option {
+                color: #111 !important;
+                background-color: #fff !important;
+            }
+    </style>
+</head>
+
+<body style="padding-top:54px" class="min-h-screen flex flex-col font-sans antialiased">
+
+    <main class="flex-grow max-w-3xl mx-auto px-6 py-16">
+        <div class="glass rounded-3xl p-8 md:p-10 shadow-xl text-center leading-relaxed">
+
+            <div class="flex justify-center mb-6">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-500 grid place-items-center shadow-lg text-2xl">⬇️</div>
+            </div>
+
+            <h1 class="text-3xl md:text-4xl font-bold mb-4">@L["DirectDownload_Title"]</h1>
+            <p class="text-white/80 mb-6">@L["DirectDownload_Subtitle"]</p>
+
+            <section class="text-white/70 text-sm max-w-lg mx-auto">
+                <h2 class="text-xl font-semibold mb-2">@L["DirectDownload_AvailablePlaylists"]</h2>
+                <ul class="list-disc text-left text-white/80 mt-6 space-y-2 mx-auto max-w-md pl-16">
+                    <li>@L["DirectDownload_SelectPlaylist_Help"]</li>
+                    <li>@L["DirectDownload_ParallelDownloads"]</li>
+                </ul>
+            </section>
+
+            <section class="mt-10 text-left">
+                <div class="glass rounded-2xl p-6 md:p-8 shadow-inner">
+
+                    <h3 class="text-2xl font-semibold mb-1">@L["DirectDownload_SelectPlaylist"]</h3>
+                    <p class="text-white/70 mb-5">@L["DirectDownload_Download_Help"]</p>
+
+                    <div class="mb-6">
+                        <label for="playlistSelect" class="block text-sm text-white/80 mb-2">
+                            @L["DirectDownload_SelectPlaylist"]
+                        </label>
+                        <div class="relative">
+                            <select id="playlistSelect"
+                                    class="w-full appearance-none rounded-xl border border-white/15 text-white/90 px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-amber-400 transition">
+                                <option>@L["DirectDownload_LoadPlaylists"]…</option>
+                            </select>
+                            <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                        <p id="playlistMeta" class="text-xs text-white/60 mt-2 hidden"></p>
+                    </div>
+
+                    <!-- ACTION BUTTONS -->
+                    <div class="flex flex-col sm:flex-row gap-3 mt-6">
+                        <a href="/Home/Index" class="btn-outline flex-1">⬅️ @L["Button_BackToHome"]</a>
+                        <button id="btnStartDownload" class="btn flex-1">⬇️ @L["DirectDownload_Start"]</button>
+                    </div>
+
+                    <div id="statusArea" class="rounded-xl mt-5 bg-black/30 border border-white/10 p-4 min-h-[64px] text-sm text-white/80"></div>
+                </div>
+            </section>
+
+            <div class="mt-12 glass rounded-2xl p-6 md:p-8 shadow-inner text-center">
+                <h2 class="text-2xl font-semibold mb-3">@L["Index_Unterst_tze_das_Projekt"]</h2>
+                <p class="text-white/80 mb-4">@L["Index_Gef_llt_dir_dieses_Tool_Unterst_tze_die_Weiteren"]</p>
+                <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G" target="_blank" rel="noopener" class="btn mb-6">
+                    @L["Index_Jetzt_ber_PayPal_spenden"]
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="max-w-5xl mx-auto px-6 mt-10 pb-10 text-sm text-white/70">
+        <div class="glass rounded-2xl p-5 flex flex-col md:flex-row justify-between items-center gap-3">
+            <div class="flex flex-col md:flex-row items-center gap-3">
+                <span>© @DateTime.Now.Year InetConnector – @L["Index_All_Rights_Reserved"]</span>
+                <a href="/Home/Impressum" class="hover:text-white underline">@L["Index_Impressum"]</a>
+                <a href="/Home/Datenschutz" class="hover:text-white underline">@L["Index_Datenschutz"]</a>
+            </div>
+            <div class="flex items-center gap-3 mt-4 md:mt-0">
+                <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G" target="_blank" rel="noopener" class="hover:text-white underline">
+                    @L["Index_Spenden"]
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="/js/plex-direct-flow.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+            // Playlists automatisch laden
+            if (window.loadPlexPlaylists) {
+                window.loadPlexPlaylists({
+                    selectId: "playlistSelect",
+                    metaId: "playlistMeta"
+                });
+            }
+
+            // Download starten → ZIP erzeugen & herunterladen
+            const btnStart = document.getElementById("btnStartDownload");
+            if (btnStart && window.startPlexDirectZip) {
+                btnStart.addEventListener("click", () => window.startPlexDirectZip({
+                    selectId: "playlistSelect",
+                    statusId: "statusArea"
+                }));
+            }
+        });
+
+    </script>
+
+</body>
+</html>

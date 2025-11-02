@@ -920,4 +920,88 @@ Third-party contributions are marked as such. Duplication, processing, distribut
   <data name="Dashboard_Source_LikedSongs" xml:space="preserve">
   <value>Liked Songs</value> 
 </data>
+	<!-- 📥 Plex Direct Download – missing keys (EN) -->
+	<data name="DirectDownload_PageTitle" xml:space="preserve">
+    <value>Plex Direct Download</value>
+  </data>
+	<data name="DirectDownload_Title" xml:space="preserve">
+    <value>Direct Download</value>
+  </data>
+	<data name="DirectDownload_Subtitle" xml:space="preserve">
+    <value>Download your Plex playlist tracks directly as files – without detours.</value>
+  </data>
+	<data name="DirectDownload_SelectPlaylist" xml:space="preserve">
+    <value>Select playlist</value>
+  </data>
+	<data name="DirectDownload_SelectPlaylist_Help" xml:space="preserve">
+    <value>Select a Plex playlist for direct download.</value>
+  </data>
+	<data name="DirectDownload_LoadPlaylists" xml:space="preserve">
+    <value>Load playlists</value>
+  </data>
+	<data name="DirectDownload_AvailablePlaylists" xml:space="preserve">
+    <value>Available Plex playlists</value>
+  </data>
+	<data name="DirectDownload_NoPlaylists" xml:space="preserve">
+    <value>No Plex playlists found.</value>
+  </data>
+	<data name="DirectDownload_Download_Help" xml:space="preserve">
+    <value>Here you can download the selected playlist.</value>
+  </data>
+	<data name="DirectDownload_ParallelDownloads" xml:space="preserve">
+    <value>Parallel downloads:</value>
+  </data>
+	<data name="DirectDownload_Start" xml:space="preserve">
+    <value>Start download</value>
+  </data>
+	<data name="DirectDownload_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+
+	<!-- Tabs -->
+	<data name="DirectDownload_Tab_Select" xml:space="preserve">
+    <value>Select</value>
+  </data>
+	<data name="DirectDownload_Tab_Downloading" xml:space="preserve">
+    <value>Downloading…</value>
+  </data>
+	<data name="DirectDownload_Tab_Done" xml:space="preserve">
+    <value>Done</value>
+  </data>
+
+	<!-- Progress & Status -->
+	<data name="DirectDownload_Waiting" xml:space="preserve">
+    <value>Waiting for download…</value>
+  </data>
+	<data name="DirectDownload_InProgress" xml:space="preserve">
+    <value>Download in progress…</value>
+  </data>
+	<data name="DirectDownload_Done" xml:space="preserve">
+    <value>Done. {0} files.</value>
+  </data>
+	<data name="DirectDownload_FinishedWithErrors" xml:space="preserve">
+    <value>Finished with errors ({0}).</value>
+  </data>
+
+	<!-- Errors -->
+	<data name="DirectDownload_Error_PlaylistLoad" xml:space="preserve">
+    <value>Error loading playlists.</value>
+  </data>
+	<data name="DirectDownload_Error_DownloadFailed" xml:space="preserve">
+    <value>Download failed.</value>
+  </data>
+  <data name="Index_Plex_Direct_Download_Button" xml:space="preserve">
+    <value>Plex Direct Download</value>
+  </data>
+  <!-- 📥 Plex Direct Download – missing keys -->
+  <data name="SpotifyToPlex_DownloadZip">
+	  <value>Download as ZIP</value>
+  </data>
+  <data name="Common_Back">
+	  <value>Back</value>
+  </data>
+  <data name="Common_Cancel">
+	  <value>Cancel</value>
+  </data>
+
 </root>

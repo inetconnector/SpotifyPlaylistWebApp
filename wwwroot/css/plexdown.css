@@ -1,0 +1,6 @@
+:root { color-scheme: dark; }
+#fileList li { display:flex; gap:.75rem; align-items:center; padding:.5rem 0; }
+.file-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+.file-size { font-size:.8rem; opacity:.7; width:6rem; text-align:right; }
+.file-progress { width:35%; height:8px; background:#252939; border-radius:6px; overflow:hidden; }
+.file-progress > div { height:100%; width:0%; background:#f2c94c; transition:width .2s ease; }

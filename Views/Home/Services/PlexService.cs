@@ -722,12 +722,12 @@ public class PlexService
     // ============================================================
     // 🔸 Generate CSV of missing tracks (sortiert: Artist → Album → Title)
     // ============================================================
-    public static byte[] GenerateMissingCsv(List<string> missing)
+    public static byte[] GenerateMissingCsv(List<string> missing, string playlistName)
     {
         using var ms = new MemoryStream();
         using var writer = new StreamWriter(ms, Encoding.UTF8);
 
-        writer.WriteLine("Artist;Album;Title");
+        writer.WriteLine("Playlist;Artist;Album;Title");
 
         foreach (var entry in missing
                      .Select(m =>
