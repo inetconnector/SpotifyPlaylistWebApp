@@ -52,6 +52,7 @@ namespace SpotifyPlaylistWebApp.Controllers
                     title = x.Title,
                     artist = x.Artist,
                     album = x.Album,
+                    trackNumber = x.TrackNumber,
                     filename = x.FileName,
                     url = x.PlexUrl,
                     sizeBytes = x.SizeBytes
