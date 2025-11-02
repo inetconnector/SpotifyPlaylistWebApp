@@ -9,14 +9,35 @@ namespace SpotifyPlaylistWebApp.Controllers
         [HttpGet("Urls")]
         public async Task<IActionResult> Urls(
             [FromServices] PlexDirectDownloadService direct,
+            [FromServices] PlexService plex,
             [FromQuery] string playlistKey,
             CancellationToken ct)
         {
             var token = HttpContext.Session.GetString("PlexAuthToken");
             var baseUrl = HttpContext.Session.GetString("PlexBaseUrl");
 
-            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(baseUrl))
+            if (string.IsNullOrEmpty(token))
                 return Unauthorized(new { message = "Not logged in to Plex." });
+
+            if (string.IsNullOrEmpty(baseUrl))
+            {
+                try
+                {
+                    var (discoveredBaseUrl, machineId) = await plex.DiscoverServerAsync(token);
+                    if (string.IsNullOrWhiteSpace(discoveredBaseUrl))
+                        return StatusCode(502, new { message = "Could not determine Plex base URL." });
+
+                    baseUrl = discoveredBaseUrl;
+                    HttpContext.Session.SetString("PlexBaseUrl", baseUrl);
+
+                    if (!string.IsNullOrWhiteSpace(machineId))
+                        HttpContext.Session.SetString("PlexMachineId", machineId);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, new { message = $"Failed to discover Plex server: {ex.Message}" });
+                }
+            }
 
             if (string.IsNullOrWhiteSpace(playlistKey))
                 return BadRequest(new { message = "playlistKey required" });
