@@ -2,6 +2,8 @@
 // PLEX DIRECT DOWNLOAD – Client-Side ZIP Creation
 // -------------------------------------------------------------
 
+const plexStrings = window.PlexDirectStrings || {};
+
 // Starts Plex Direct Download Flow (login if needed)
 window.startPlexDirectDownloadFlow = window.startPlexDirectDownloadFlow || (async function () {
     try {
@@ -41,7 +43,7 @@ window.loadPlexPlaylists = async function ({ selectId = "playlistSelect", metaId
 
     if (!ddl) return console.error("playlistSelect not found");
 
-    ddl.innerHTML = `<option>Lade Playlists…</option>`;
+    ddl.innerHTML = `<option>${plexStrings.loadPlaylistsOption || "Load playlists…"}</option>`;
 
     try {
         const res = await fetch("/HomePlex/GetPlexPlaylists");
@@ -61,12 +63,13 @@ window.loadPlexPlaylists = async function ({ selectId = "playlistSelect", metaId
         });
 
         if (meta) {
-            meta.textContent = `${data.playlists.length} Playlists gefunden`;
+            const metaTemplate = plexStrings.metaPlaylistsFound || "{0} playlists found";
+            meta.textContent = metaTemplate.replace("{0}", data.playlists.length);
             meta.classList.remove("hidden");
         }
 
     } catch (err) {
-        ddl.innerHTML = `<option>❌ Fehler beim Laden</option>`;
+        ddl.innerHTML = `<option>${plexStrings.loadPlaylistsError || "❌ Failed to load"}</option>`;
         console.error(err);
     }
 };
@@ -84,20 +87,21 @@ window.startPlexDirectZip = async function ({
     if (!ddl) return;
 
     const playlistKey = ddl.value;
-    if (!playlistKey) return updateStatus(status, "⚠️ Bitte eine Playlist auswählen.", true);
+    if (!playlistKey) return updateStatus(status, plexStrings.statusSelectPlaylist || "⚠️ Please choose a playlist.", true);
 
-    updateStatus(status, "⏳ Lade Track-URLs…");
+    updateStatus(status, plexStrings.statusLoadingTrackUrls || "⏳ Loading track URLs…");
 
     try {
         // Load URLs
         const res = await fetch(`/PlexDirect/Urls?playlistKey=${encodeURIComponent(playlistKey)}`);
-        if (!res.ok) return updateStatus(status, "❌ Fehler beim Laden der URLs.", true);
+        if (!res.ok) return updateStatus(status, plexStrings.statusLoadUrlsError || "❌ Failed to load URLs.", true);
 
         const data = await res.json();
         const items = data.items;
-        if (!items || !items.length) return updateStatus(status, "⚠️ Keine Titel gefunden.", true);
+        if (!items || !items.length) return updateStatus(status, plexStrings.statusNoItems || "⚠️ No tracks found.", true);
 
-        updateStatus(status, `📥 Lade ${items.length} Dateien…`);
+        const loadingFilesTemplate = plexStrings.statusLoadingFiles || "📥 Downloading {0} files…";
+        updateStatus(status, loadingFilesTemplate.replace("{0}", items.length));
 
         // Create ZIP
         const zip = new JSZip();
@@ -105,14 +109,18 @@ window.startPlexDirectZip = async function ({
         let index = 0;
         for (const item of items) {
             index++;
-            updateStatus(status, `📥 Lade ${index}/${items.length}: ${item.filename}`);
+            const progressTemplate = plexStrings.statusLoadingFileProgress || "📥 Downloading {0}/{1}: {2}";
+            updateStatus(status, progressTemplate
+                .replace("{0}", index)
+                .replace("{1}", items.length)
+                .replace("{2}", item.filename));
 
             const fileRes = await fetch(item.url);
             const blob = await fileRes.blob();
             zip.file(item.filename, blob);
         }
 
-        updateStatus(status, "📦 Erstelle ZIP…");
+        updateStatus(status, plexStrings.statusCreatingZip || "📦 Creating ZIP…");
 
         const zipBlob = await zip.generateAsync({ type: "blob" });
         const url = URL.createObjectURL(zipBlob);
@@ -125,11 +133,11 @@ window.startPlexDirectZip = async function ({
         a.remove();
         URL.revokeObjectURL(url);
 
-        updateStatus(status, "✅ ZIP wurde heruntergeladen!");
+        updateStatus(status, plexStrings.statusDownloadComplete || "✅ ZIP downloaded!");
 
     } catch (err) {
         console.error("ZIP failed:", err);
-        updateStatus(status, "❌ Download fehlgeschlagen.", true);
+        updateStatus(status, plexStrings.statusDownloadFailed || "❌ Download failed.", true);
     }
 };
 
