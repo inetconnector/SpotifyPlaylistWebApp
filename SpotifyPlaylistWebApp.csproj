@@ -29,9 +29,18 @@
 		<Content Update="wwwroot\images\plex-spotify.svg">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\js\plex-login.js">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
+                <Content Update="wwwroot\js\plex-login.js">
+                        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+                </Content>
+                <Content Update="wwwroot\js\plex-direct-flow.js">
+                        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+                </Content>
+                <Content Update="wwwroot\js\plexDirectDownloader.js">
+                        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+                </Content>
+                <Content Update="wwwroot\js\simpleZipWriter.js">
+                        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+                </Content>
 		<Content Update="wwwroot\QR-Code.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
