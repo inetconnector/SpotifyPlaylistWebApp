@@ -1035,7 +1035,17 @@ Third-party contributions are marked as such. Duplication, processing, distribut
 	  <value>Back</value>
   </data>
   <data name="Common_Cancel">
-	  <value>Cancel</value>
+          <value>Cancel</value>
+  </data>
+
+  <data name="Common_BackToDashboard" xml:space="preserve">
+    <value>⬅️ Back to dashboard</value>
+  </data>
+  <data name="Common_LoginFirst" xml:space="preserve">
+    <value>⚠️ Please log in first.</value>
+  </data>
+  <data name="Error_ActionStartFailed" xml:space="preserve">
+    <value>Error starting {0}: {1}</value>
   </data>
 
   <data name="Layout_TitleSuffix" xml:space="preserve">
@@ -1054,7 +1064,7 @@ Third-party contributions are marked as such. Duplication, processing, distribut
     <value>Spotify User</value>
   </data>
   <data name="Dashboard_Status_Ready" xml:space="preserve">
-    <value>🟢 ready</value>
+    <value>🟢 Ready</value>
   </data>
   <data name="Dashboard_Status_CountdownTemplate" xml:space="preserve">
     <value>⏳ {0}s</value>

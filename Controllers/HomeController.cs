@@ -229,28 +229,32 @@ public class HomeController : Controller
     public IActionResult CreateTopMix()
     {
         var selectedPlaylistName = HttpContext.Request.Query["playlistName"].FirstOrDefault();
-        return StartPlaylistJob(GetToken(), "Top-Mix", "[TopMix]", false, true, selectedPlaylistName);
+        var actionName = _localizer["Dashboard_Top_Mix"].Value;
+        return StartPlaylistJob(GetToken(), actionName, "[TopMix]", false, true, selectedPlaylistName);
     }
 
     [HttpGet]
     public IActionResult CreateTopList()
     {
         var selectedPlaylistName = HttpContext.Request.Query["playlistName"].FirstOrDefault();
-        return StartPlaylistJob(GetToken(), "Top-Liste", "[TopList]", false, false, selectedPlaylistName);
+        var actionName = _localizer["Dashboard_Top_Liste"].Value;
+        return StartPlaylistJob(GetToken(), actionName, "[TopList]", false, false, selectedPlaylistName);
     }
 
     [HttpGet]
     public IActionResult CreateFavMix()
     {
         var selectedPlaylistName = HttpContext.Request.Query["playlistName"].FirstOrDefault();
-        return StartPlaylistJob(GetToken(), "Favoriten-Mix", "[FavMix]", true, true, selectedPlaylistName);
+        var actionName = _localizer["Dashboard_Favoriten_Mix"].Value;
+        return StartPlaylistJob(GetToken(), actionName, "[FavMix]", true, true, selectedPlaylistName);
     }
 
     [HttpGet]
     public IActionResult CreateFavList()
     {
         var selectedPlaylistName = HttpContext.Request.Query["playlistName"].FirstOrDefault();
-        return StartPlaylistJob(GetToken(), "Favoriten-Liste", "[FavList]", true, false, selectedPlaylistName);
+        var actionName = _localizer["Dashboard_Favoriten_Liste"].Value;
+        return StartPlaylistJob(GetToken(), actionName, "[FavList]", true, false, selectedPlaylistName);
     }
 
     [HttpGet]
@@ -274,7 +278,7 @@ public class HomeController : Controller
     bool shuffled, string? basePlaylistName = null)
     {
         if (string.IsNullOrWhiteSpace(token))
-            return Warn("⚠️ Bitte zuerst einloggen.");
+            return Warn(_localizer["Common_LoginFirst"].Value);
 
         try
         {
@@ -299,7 +303,7 @@ public class HomeController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "{Action} konnte nicht gestartet werden.", namePrefix);
-            return Error($"Fehler beim Starten von {namePrefix}: {ex.Message}");
+            return Error(string.Format(_localizer["Error_ActionStartFailed"].Value, namePrefix, ex.Message));
         }
     }
 
@@ -307,7 +311,7 @@ public class HomeController : Controller
     private IActionResult StartAlternativeFavoritesJob(string token)
     {
         if (string.IsNullOrWhiteSpace(token))
-            return Warn("⚠️ Bitte zuerst einloggen.");
+            return Warn(_localizer["Common_LoginFirst"].Value);
 
         try
         {
@@ -332,14 +336,18 @@ public class HomeController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Alternative Favorites konnten nicht gestartet werden.");
-            return Error($"Fehler beim Starten von '{_localizer["Playlist_AlternativeFavorites"]}': {ex.Message}");
+            return Error(string.Format(_localizer["Error_ActionStartFailed"].Value,
+                _localizer["Playlist_AlternativeFavorites"].Value,
+                ex.Message));
         }
     } 
     private IActionResult StartLikedCloneJob()
     {
         var token = GetToken();
         if (string.IsNullOrWhiteSpace(token))
-            return Warn("⚠️ Bitte zuerst einloggen.");
+            return Warn(_localizer["Common_LoginFirst"].Value);
+
+        var likedSongsLabel = _localizer["Playlist_LikedSongs"].Value;
 
         try
         {
@@ -360,11 +368,11 @@ public class HomeController : Controller
                 }
 
                 var today = DateTime.UtcNow.ToString("yyyy-MM-dd");
-                var playlistName = $"Lieblingssongs {today}";
+                var playlistName = $"{likedSongsLabel} {today}";
                 var newPl = await spotify.Playlists.Create(me.Id, new PlaylistCreateRequest(playlistName)
                 {
                     Public = false,
-                    Description = _localizer["Playlist_CopyOfLikedSongs"]  
+                    Description = _localizer["Playlist_CopyOfLikedSongs"]
                 });
 
                 for (var i = 0; i < tracks.Count; i += 100)
@@ -381,13 +389,15 @@ public class HomeController : Controller
                         .UserProfile.Current();
                     return $"{me.Id}_[LikedClone]_{selectedPlaylistName}";
                 },
-                "Lieblingssongs",
+                likedSongsLabel,
                 "[LikedClone]");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Action} konnte nicht gestartet werden.", "Lieblingssongs");
-            return Error($"Fehler beim Starten von Lieblingssongs: {ex.Message}");
+            _logger.LogError(ex, "{Action} konnte nicht gestartet werden.", likedSongsLabel);
+            return Error(string.Format(_localizer["Error_ActionStartFailed"].Value,
+                likedSongsLabel,
+                ex.Message));
         }
     }
 
@@ -396,7 +406,7 @@ public class HomeController : Controller
     {
         var token = GetToken();
         if (string.IsNullOrWhiteSpace(token))
-            return Warn("⚠️ Bitte zuerst einloggen.");
+            return Warn(_localizer["Common_LoginFirst"].Value);
 
         try
         {
@@ -421,7 +431,9 @@ public class HomeController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Empfehlungen konnten nicht gestartet werden.");
-            return Error($"Fehler beim Starten von '{_localizer["Playlist_Recommendations"]}': {ex.Message}");
+            return Error(string.Format(_localizer["Error_ActionStartFailed"].Value,
+                _localizer["Playlist_Recommendations"].Value,
+                ex.Message));
         }
     }
 
@@ -940,9 +952,13 @@ public class HomeController : Controller
 
     private ContentResult HtmlResult(string message, string color)
     {
+        var culture = CultureInfo.CurrentUICulture;
+        var lang = culture.Name;
+        var backToDashboard = _localizer["Common_BackToDashboard"].Value;
+
         var html = $@"
 <!doctype html>
-<html lang='de'>
+<html lang='{lang}'>
 <head>
 <meta charset='utf-8'/>
 <meta name='viewport' content='width=device-width, initial-scale=1'/>
@@ -956,7 +972,7 @@ body {{background:#0b0f17;color:white;font-family:system-ui,sans-serif;}}
 <body class='min-h-screen flex items-center justify-center'>
 <div class='glass p-8 rounded-3xl shadow-xl text-center max-w-lg'>
 <h1 class='text-2xl font-bold mb-4' style='color:{color};'>{message}</h1>
-<a href='/Home/Dashboard' class='px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white no-underline'>Zurück zum Dashboard</a>
+<a href='/Home/Dashboard' class='px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white no-underline'>{backToDashboard}</a>
 </div>
 </body>
 </html>";
