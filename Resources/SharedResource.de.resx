@@ -1052,7 +1052,17 @@
 	  <value>Zurück</value>
   </data>
   <data name="Common_Cancel">
-	  <value>Abbrechen</value>
+          <value>Abbrechen</value>
+  </data>
+
+  <data name="Common_BackToDashboard" xml:space="preserve">
+    <value>⬅️ Zurück zum Dashboard</value>
+  </data>
+  <data name="Common_LoginFirst" xml:space="preserve">
+    <value>⚠️ Bitte zuerst einloggen.</value>
+  </data>
+  <data name="Error_ActionStartFailed" xml:space="preserve">
+    <value>Fehler beim Starten von {0}: {1}</value>
   </data>
 
   <data name="Layout_TitleSuffix" xml:space="preserve">

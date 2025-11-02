@@ -1050,7 +1050,17 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
 	  <value>Volver</value>
   </data>
   <data name="Common_Cancel">
-	  <value>Cancelar</value>
+          <value>Cancelar</value>
+  </data>
+
+  <data name="Common_BackToDashboard" xml:space="preserve">
+    <value>⬅️ Volver al panel</value>
+  </data>
+  <data name="Common_LoginFirst" xml:space="preserve">
+    <value>⚠️ Inicia sesión primero.</value>
+  </data>
+  <data name="Error_ActionStartFailed" xml:space="preserve">
+    <value>Error al iniciar {0}: {1}</value>
   </data>
 
   <data name="Layout_TitleSuffix" xml:space="preserve">
