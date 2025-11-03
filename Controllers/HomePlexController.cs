@@ -164,17 +164,19 @@ namespace SpotifyPlaylistWebApp.Controllers
             PlexService.RegisterSseStream(exportId, writer);
 
             var plexToken = HttpContext.Session.GetString("PlexAuthToken");
+            var spotifyToken = HttpContext.Session.GetString("SpotifyAccessToken");
+
+            if (string.IsNullOrWhiteSpace(plexToken) || string.IsNullOrWhiteSpace(spotifyToken))
+            {
+                await plex.SendSseAsync(exportId, $"❌ {L["SpotifyToPlex_TokenExpired"]}");
+                return;
+            }
+
             var (baseUrl, defaultMachineId) = await plex.DiscoverServerAsync(plexToken);
             var missingList = new List<(string Artist, string Title, string? Album)>();
 
             try
             {
-                var spotifyToken = HttpContext.Session.GetString("SpotifyAccessToken");
-                if (spotifyToken == null || plexToken == null)
-                {
-                    await plex.SendSseAsync(exportId, $"❌ {L["SpotifyToPlex_TokenExpired"]}");
-                    return;
-                }
 
                 var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault(spotifyToken));
                 var tracks = await plex.GetSpotifyPlaylistTracksAsync(spotify, playlistId);
