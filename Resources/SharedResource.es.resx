@@ -867,6 +867,36 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
   <data name="SpotifyToPlex_Loading" xml:space="preserve">
     <value>Cargando…</value>
   </data>
+  <data name="Terms_PageTitle" xml:space="preserve">
+    <value>Términos y condiciones</value>
+  </data>
+  <data name="Terms_Title" xml:space="preserve">
+    <value>Términos y condiciones de la función de descarga de Plex</value>
+  </data>
+  <data name="Terms_MetaDescription" xml:space="preserve">
+    <value>Términos y condiciones para el uso de la función de descarga de Plex del generador de listas de reproducción de InetConnector.</value>
+  </data>
+  <data name="Terms_Paragraph1" xml:space="preserve">
+    <value>(1) El proveedor únicamente pone a disposición una función técnica mediante la cual los usuarios pueden descargar, convertir o almacenar localmente contenidos de su propio servidor multimedia Plex (“Función de Descarga de Plex”). No se realiza ninguna revisión o control del contenido transmitido, almacenado o descargado por los usuarios.</value>
+  </data>
+  <data name="Terms_Paragraph2" xml:space="preserve">
+    <value>(2) El usuario es el único responsable de garantizar que dispone de todos los derechos de uso y explotación necesarios para descargar, copiar, almacenar, convertir o procesar los contenidos correspondientes a través de la Función de Descarga de Plex.</value>
+  </data>
+  <data name="Terms_Paragraph3" xml:space="preserve">
+    <value>(3) Se prohíbe expresamente al usuario descargar, reproducir, poner a disposición del público o distribuir contenidos protegidos por derechos de autor a través de la Función de Descarga de Plex, salvo que disponga de los derechos necesarios para ello. Esto incluye, en particular, pero no de forma exhaustiva, contenidos musicales, cinematográficos, de series, imágenes, textos y otros contenidos multimedia sujetos a protección por derechos de autor.</value>
+  </data>
+  <data name="Terms_Paragraph4" xml:space="preserve">
+    <value>(4) El usuario mantendrá indemne al proveedor frente a todas las reclamaciones de terceros que resulten del uso ilícito de la Función de Descarga de Plex por parte del usuario. Esto incluye, en particular, reclamaciones derivadas de infracciones de derechos de autor, derechos conexos, marcas, derechos de la personalidad u otros derechos protegidos. El usuario se compromete a reembolsar al proveedor todos los costes derivados de ello (incluidos los costes razonables de acciones legales y defensa).</value>
+  </data>
+  <data name="Terms_Paragraph5" xml:space="preserve">
+    <value>(5) El proveedor se reserva el derecho, en caso de sospecha de un uso ilícito de la Función de Descarga de Plex o de una infracción de estas disposiciones, de restringir, bloquear total o parcialmente el acceso del usuario o tomar otras medidas adecuadas.</value>
+  </data>
+  <data name="Terms_Paragraph6" xml:space="preserve">
+    <value>(6) Los derechos y obligaciones legales de las partes no se verán afectados.</value>
+  </data>
+  <data name="Terms_Paragraph7" xml:space="preserve">
+    <value>(7) Queda prohibido el uso de la Función de Descarga de Plex con el fin de eludir medidas técnicas de protección (en particular, DRM o medidas anticopia). El usuario debe asegurarse de no infringir ninguna prohibición legal, en especial las previstas en los artículos 95a y siguientes de la Ley de Propiedad Intelectual alemana (UrhG).</value>
+  </data>
   
   <data name="Meta_Description" xml:space="preserve">
     <value>Crea automáticamente listas de reproducción para Spotify a partir de tus canciones favoritas o las más escuchadas. Gratis, seguro y basado en la API web de Spotify. Desarrollado por InetConnector.</value>
@@ -898,6 +928,15 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
   </data>
   <data name="Index_All_Rights_Reserved" xml:space="preserve">
     <value>Todos los derechos reservados</value>
+  </data>
+  <data name="Footer_Impressum" xml:space="preserve">
+    <value>Aviso legal</value>
+  </data>
+  <data name="Footer_Privacy" xml:space="preserve">
+    <value>Política de privacidad</value>
+  </data>
+  <data name="Footer_Terms" xml:space="preserve">
+    <value>Términos y condiciones</value>
   </data>
   <data name="SpotifyToPlex_RenamePlaylist" xml:space="preserve">
     <value>Renombrar lista de reproducción de Plex</value>

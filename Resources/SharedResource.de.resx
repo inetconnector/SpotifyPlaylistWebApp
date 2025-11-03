@@ -908,6 +908,15 @@
   <data name="Index_All_Rights_Reserved" xml:space="preserve">
     <value>Alle Rechte vorbehalten</value>
   </data>
+  <data name="Footer_Impressum" xml:space="preserve">
+    <value>Impressum</value>
+  </data>
+  <data name="Footer_Privacy" xml:space="preserve">
+    <value>Datenschutz</value>
+  </data>
+  <data name="Footer_Terms" xml:space="preserve">
+    <value>AGB</value>
+  </data>
   <data name="SpotifyToPlex_NoTracksFound" xml:space="preserve">
   <value>Keine Titel gefunden.</value>
 </data>
@@ -920,6 +929,36 @@
   <data name="SpotifyToPlex_Loading" xml:space="preserve">
   <value>Lade …</value>
 </data>
+  <data name="Terms_PageTitle" xml:space="preserve">
+    <value>Allgemeine Geschäftsbedingungen</value>
+  </data>
+  <data name="Terms_Title" xml:space="preserve">
+    <value>Allgemeine Geschäftsbedingungen für die Plex-Download-Funktion</value>
+  </data>
+  <data name="Terms_MetaDescription" xml:space="preserve">
+    <value>Allgemeine Geschäftsbedingungen für die Nutzung der Plex-Download-Funktion des InetConnector Playlist Generators.</value>
+  </data>
+  <data name="Terms_Paragraph1" xml:space="preserve">
+    <value>(1) Der Anbieter stellt ausschließlich eine technische Funktion zur Verfügung, über die Nutzer Inhalte ihres eigenen Plex-Medienservers herunterladen, konvertieren oder lokal speichern können („Plex-Download-Funktion“). Eine inhaltliche Überprüfung oder Kontrolle der durch Nutzer übertragenen, gespeicherten oder heruntergeladenen Mediendateien findet nicht statt.</value>
+  </data>
+  <data name="Terms_Paragraph2" xml:space="preserve">
+    <value>(2) Der Nutzer ist allein dafür verantwortlich sicherzustellen, dass er über sämtliche notwendigen Nutzungs- und Verwertungsrechte verfügt, um die betreffenden Inhalte über die Plex-Download-Funktion herunterzuladen, zu kopieren, zu speichern, zu konvertieren oder weiterzuverarbeiten.</value>
+  </data>
+  <data name="Terms_Paragraph3" xml:space="preserve">
+    <value>(3) Es ist dem Nutzer ausdrücklich untersagt, über die Plex-Download-Funktion urheberrechtlich geschützte Inhalte herunterzuladen, zu vervielfältigen, öffentlich zugänglich zu machen oder zu verbreiten, sofern er hierfür nicht die erforderlichen Rechte besitzt. Dies umfasst insbesondere, aber nicht abschließend, Musik-, Film-, Serien-, Bild-, Text- und sonstige Medieninhalte, die dem Schutz des Urheberrechts unterliegen.</value>
+  </data>
+  <data name="Terms_Paragraph4" xml:space="preserve">
+    <value>(4) Der Nutzer stellt den Anbieter von sämtlichen Ansprüchen Dritter frei, die aus einer rechtswidrigen Nutzung der Plex-Download-Funktion durch den Nutzer resultieren. Dies umfasst insbesondere Ansprüche wegen Verletzung von Urheber-, Leistungsschutz-, Marken-, Persönlichkeits- oder sonstigen Schutzrechten. Der Nutzer verpflichtet sich, dem Anbieter alle daraus entstehenden Kosten (einschließlich angemessener Rechtsverfolgungs- und Verteidigungskosten) zu erstatten.</value>
+  </data>
+  <data name="Terms_Paragraph5" xml:space="preserve">
+    <value>(5) Der Anbieter behält sich vor, bei Verdacht einer rechtswidrigen Nutzung der Plex-Download-Funktion oder eines Verstoßes gegen diese Bestimmungen den Zugang des Nutzers ganz oder teilweise einzuschränken, zu sperren oder weitere geeignete Maßnahmen zu treffen.</value>
+  </data>
+  <data name="Terms_Paragraph6" xml:space="preserve">
+    <value>(6) Gesetzliche Rechte und Pflichten der Parteien bleiben unberührt.</value>
+  </data>
+  <data name="Terms_Paragraph7" xml:space="preserve">
+    <value>(7) Die Nutzung der Plex-Download-Funktion zur Umgehung technischer Schutzmaßnahmen (insb. DRM oder Kopierschutz) ist untersagt. Der Nutzer hat sicherzustellen, dass keine gesetzlichen Verbote, insbesondere nach §§ 95a ff. UrhG, verletzt werden.</value>
+  </data>
   <data name="SpotifyToPlex_LiveExport" xml:space="preserve">
     <value>Live Export</value>
   </data>

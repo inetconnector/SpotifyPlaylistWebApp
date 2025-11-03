@@ -890,6 +890,15 @@ Third-party contributions are marked as such. Duplication, processing, distribut
   <data name="Index_All_Rights_Reserved" xml:space="preserve">
     <value>All rights reserved</value>
   </data>
+  <data name="Footer_Impressum" xml:space="preserve">
+    <value>Imprint</value>
+  </data>
+  <data name="Footer_Privacy" xml:space="preserve">
+    <value>Privacy policy</value>
+  </data>
+  <data name="Footer_Terms" xml:space="preserve">
+    <value>Terms of Service</value>
+  </data>
   <data name="SpotifyToPlex_NoTracksFound" xml:space="preserve">
   <value>No tracks found.</value>
 </data>
@@ -902,6 +911,36 @@ Third-party contributions are marked as such. Duplication, processing, distribut
   <data name="SpotifyToPlex_Loading" xml:space="preserve">
   <value>Loading ...</value>
 </data>
+  <data name="Terms_PageTitle" xml:space="preserve">
+    <value>Terms of Service</value>
+  </data>
+  <data name="Terms_Title" xml:space="preserve">
+    <value>Terms of Service for the Plex Download Function</value>
+  </data>
+  <data name="Terms_MetaDescription" xml:space="preserve">
+    <value>Terms of Service for using the Plex Download Function of the InetConnector Playlist Generator.</value>
+  </data>
+  <data name="Terms_Paragraph1" xml:space="preserve">
+    <value>(1) The Provider solely offers a technical feature enabling users to download, convert or locally store content from their own Plex Media Server (“Plex Download Function”). The Provider does not monitor, review or control any media files transmitted, stored or downloaded by users.</value>
+  </data>
+  <data name="Terms_Paragraph2" xml:space="preserve">
+    <value>(2) The user is solely responsible for ensuring that they hold all necessary usage and exploitation rights to download, copy, store, convert or otherwise process the respective content via the Plex Download Function.</value>
+  </data>
+  <data name="Terms_Paragraph3" xml:space="preserve">
+    <value>(3) Users are strictly prohibited from downloading, reproducing, making available to the public or distributing any content via the Plex Download Function that is protected by copyright or other intellectual property rights unless they lawfully hold the necessary rights to do so. This includes, without limitation, music, films, series, images, texts and any other media content subject to intellectual property protection.</value>
+  </data>
+  <data name="Terms_Paragraph4" xml:space="preserve">
+    <value>(4) The user shall indemnify and hold the Provider harmless from any and all third-party claims arising from the user’s unlawful use of the Plex Download Function. This includes, in particular, claims relating to the infringement of copyrights, neighbouring rights, trademarks, personality rights or any other protected rights. The user agrees to reimburse the Provider for all costs (including reasonable legal and defence expenses) resulting from such unlawful use.</value>
+  </data>
+  <data name="Terms_Paragraph5" xml:space="preserve">
+    <value>(5) The Provider reserves the right to restrict or suspend the user’s access to the Plex Download Function, in whole or in part, or to take further appropriate measures in the event of suspected unlawful use or breach of these provisions.</value>
+  </data>
+  <data name="Terms_Paragraph6" xml:space="preserve">
+    <value>(6) Statutory rights and obligations of the parties remain unaffected.</value>
+  </data>
+  <data name="Terms_Paragraph7" xml:space="preserve">
+    <value>(7) The use of the Plex Download Function to circumvent technical protection measures (including DRM or copy protection) is strictly prohibited. The user must ensure that no applicable laws are violated, including but not limited to anti-circumvention laws.</value>
+  </data>
   <data name="Playlist_Inhalt" xml:space="preserve">
     <value>Playlist content</value>
   </data>

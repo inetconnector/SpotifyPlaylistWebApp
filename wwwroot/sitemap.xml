@@ -14,7 +14,10 @@
 	<url>
 		<loc>https://playlists.inetconnector.com/Home/Impressum</loc>
 	</url>
-	<url>
-		<loc>https://playlists.inetconnector.com/Home/Datenschutz</loc>
-	</url>
+        <url>
+                <loc>https://playlists.inetconnector.com/Home/Datenschutz</loc>
+        </url>
+        <url>
+                <loc>https://playlists.inetconnector.com/Home/Terms</loc>
+        </url>
 </urlset>

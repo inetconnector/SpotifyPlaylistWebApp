@@ -67,6 +67,11 @@ public class HomeController : Controller
         return View();
     }
 
+    public IActionResult Terms()
+    {
+        return View();
+    }
+
     public IActionResult Login()
     {
         // Generate PKCE codes and store verifier in session
