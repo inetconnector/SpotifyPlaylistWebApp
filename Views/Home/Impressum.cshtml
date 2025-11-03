@@ -93,11 +93,6 @@
     </div>
 </main>
 
-<footer class="max-w-5xl mx-auto px-6 mt-10 pb-10 text-sm text-white/70">
-    <div class="glass rounded-2xl p-5 flex flex-col md:flex-row justify-between items-center gap-3">
-        <div>© @DateTime.Now.Year InetConnector – @L["Index_All_Rights_Reserved"]</div>
-        <a href="/Home/Datenschutz" class="hover:text-white underline">@L["Impressum_Datenschutzerkl_rung"]</a>
-    </div>
-</footer>
+@await Html.PartialAsync("Footer")
 </body>
 </html>

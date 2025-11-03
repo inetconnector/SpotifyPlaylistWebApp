@@ -184,22 +184,7 @@
         </div>
     </main>
 
-    <footer class="max-w-5xl mx-auto px-6 mt-10 pb-10 text-sm text-white/70">
-        <div class="glass rounded-2xl p-5 flex flex-col md:flex-row justify-between items-center gap-3">
-            <div class="flex flex-col md:flex-row items-center gap-3">
-                <span>© @DateTime.Now.Year InetConnector – @L["Index_All_Rights_Reserved"]</span>
-                <a href="/Home/Impressum" class="hover:text-white underline">@L["Index_Impressum"]</a>
-                <a href="/Home/Datenschutz" class="hover:text-white underline">@L["Index_Datenschutz"]</a>
-            </div>
-
-            <div class="flex items-center gap-3 mt-4 md:mt-0">
-                <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
-                   target="_blank" rel="noopener" class="hover:text-white underline">
-                    @L["Index_Spenden"]
-                </a>
-            </div>
-        </div>
-    </footer>
+    @await Html.PartialAsync("Footer")
 
     <script src="/js/plex-login.js"></script>
     <script src="/js/plex-direct-flow.js"></script>
