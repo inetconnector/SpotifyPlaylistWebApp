@@ -407,7 +407,8 @@ public class HomeController : Controller
     }
 
 
-    private IActionResult CreateRecommendations()
+    [HttpGet]
+    public IActionResult CreateRecommendations()
     {
         var token = GetToken();
         if (string.IsNullOrWhiteSpace(token))
