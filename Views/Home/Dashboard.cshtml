@@ -230,12 +230,22 @@
 
             function updateLinks() {
                 const selectedName = getPlaylistName();
-                const encoded = encodeURIComponent(selectedName);
-                document.getElementById("btnAlt").href   = "/Home/CreateAlternativeFavorites?playlistName=" + encoded;
-                document.getElementById("btnMix").href   = "/Home/CreateFavMix?playlistName=" + encoded;
-                document.getElementById("btnClone").href = "/Home/CloneLikedSongs?playlistName=" + encoded;
-                document.getElementById("btnReco").href  = "/Home/CreateRecommendations?playlistName=" + encoded;
-                document.getElementById("btnTop").href   = "/Home/CreateTopList?playlistName=" + encoded;
+                const selectedValue = getPlaylistKey();
+                const buildHref = (basePath) => {
+                    const params = new URLSearchParams();
+                    if (selectedValue && selectedValue !== "LikedSongs") {
+                        params.set("playlistName", selectedName);
+                    }
+
+                    const query = params.toString();
+                    return query ? `${basePath}?${query}` : basePath;
+                };
+
+                document.getElementById("btnAlt").href = buildHref("/Home/CreateAlternativeFavorites");
+                document.getElementById("btnMix").href = buildHref("/Home/CreateFavMix");
+                document.getElementById("btnClone").href = buildHref("/Home/CloneLikedSongs");
+                document.getElementById("btnReco").href = buildHref("/Home/CreateRecommendations");
+                document.getElementById("btnTop").href = buildHref("/Home/CreateTopList");
             }
 
             const tickOnce = () => {
