@@ -185,7 +185,7 @@ namespace SpotifyPlaylistWebApp.Controllers
         public IActionResult DirectDownload(
             [FromQuery] string playlistKey = "",
             [FromQuery] string playlistName = "",
-            [FromServices] IStringLocalizer<SharedResource> localizer = null)
+            [FromServices] IStringLocalizer<SharedResource>? localizer = null)
         {
             if (localizer != null)
             {
