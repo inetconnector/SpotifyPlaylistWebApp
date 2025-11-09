@@ -10,18 +10,27 @@
     <title>@ViewData["Title"] - @L["Layout_TitleSuffix"]</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <style>
-        body { background: radial-gradient(circle at top left, #0f2027, #203a43, #2c5364); color: #fff; font-family: system-ui, sans-serif; margin: 0; }
-        main { max-width: 1000px; margin: 0 auto; padding: 80px 20px 40px; }
-        header { position: fixed; top: 10px; right: 20px; z-index: 100; }
+        body {
+            background: radial-gradient(circle at top left, #0f2027, #203a43, #2c5364);
+            color: #fff;
+            font-family: system-ui, sans-serif;
+            margin: 0;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 80px 20px 40px;
+        }
     </style>
 </head>
 <body>
-<header>
-    <partial name="LanguageSwitcher"/>
-</header>
+<partial name="GlobalHeader" />
 <main role="main" class="pb-3">
     @RenderBody()
 </main>
+
+<partial name="Footer" />
 
 <div id="toast-root" style="position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:9999;"></div>
 <script>

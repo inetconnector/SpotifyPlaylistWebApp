@@ -1,7 +1,6 @@
 @using System.Globalization
 @using Microsoft.Extensions.Localization
 @using SpotifyPlaylistWebApp
-@await Html.PartialAsync("LanguageSwitcher")
 @inject IStringLocalizer<SharedResource> L
 @{
     Layout = "Layout";
@@ -183,8 +182,6 @@
             </div>
         </div>
     </main>
-
-    @await Html.PartialAsync("Footer")
 
     <script src="/js/plex-login.js"></script>
     <script src="/js/plex-direct-flow.js"></script>

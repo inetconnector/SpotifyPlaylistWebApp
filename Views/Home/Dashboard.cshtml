@@ -1,7 +1,6 @@
 @using System.Globalization
 @using Microsoft.Extensions.Localization
 @using SpotifyPlaylistWebApp
-@await Html.PartialAsync("LanguageSwitcher")
 @inject IStringLocalizer<SharedResource> L
 @inject IJsonHelper Json
 @{
@@ -110,6 +109,7 @@
 </head>
 
 <body class="min-h-screen flex flex-col">
+    @await Html.PartialAsync("GlobalHeader")
     <main class="flex-grow max-w-4xl mx-auto px-6 py-16">
         <div class="glass rounded-3xl p-8 md:p-10 shadow-xl text-center">
             <h1 class="text-3xl md:text-4xl font-bold mb-2 fade-in">@string.Format(L["Dashboard_WelcomeUser"], user)</h1>
@@ -307,6 +307,8 @@
             startCooldownTicker();
         });
     </script>
+
+    @await Html.PartialAsync("Footer")
 
 </body>
 </html>

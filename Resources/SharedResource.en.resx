@@ -1090,6 +1090,12 @@ Third-party contributions are marked as such. Duplication, processing, distribut
   <data name="Layout_TitleSuffix" xml:space="preserve">
     <value>Playlist Generator for Spotify</value>
   </data>
+  <data name="Layout_BackToHome" xml:space="preserve">
+    <value>Back to start page</value>
+  </data>
+  <data name="Layout_Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
   <data name="SpotifyToPlex_ExportTitle" xml:space="preserve">
     <value>Spotify → Plex Export</value>
   </data>
