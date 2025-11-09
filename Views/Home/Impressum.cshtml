@@ -1,7 +1,6 @@
 @using System.Globalization
 @using Microsoft.Extensions.Localization
 @using SpotifyPlaylistWebApp
-@await Html.PartialAsync("LanguageSwitcher")
 @inject IStringLocalizer<SharedResource> L
 @{
     Layout = "Layout";
@@ -100,6 +99,5 @@
     </div>
 </main>
 
-@await Html.PartialAsync("Footer")
 </body>
 </html>

@@ -3,10 +3,9 @@
 @using Microsoft.Extensions.Localization
 @using SpotifyPlaylistWebApp
 @using System.Text.Json
-@await Html.PartialAsync("LanguageSwitcher")
 @inject IStringLocalizer<SharedResource> L
 
-@{ 
+@{
     Layout = "Layout";
     ViewData["Title"] = L["DirectDownload_PageTitle"];
     var lang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
@@ -201,8 +200,6 @@
             <div id="playlistTracks" class="max-h-80 overflow-y-auto space-y-2 text-white/80 text-sm"></div>
         </div>
     </div>
-
-    @await Html.PartialAsync("Footer")
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
