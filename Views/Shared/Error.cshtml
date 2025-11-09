@@ -19,11 +19,23 @@
             background: radial-gradient(800px 600px at 20% 10%, rgba(16,185,129,0.25), transparent 60%), radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,0.25), transparent 60%), #0b0f17;
             color: white;
             font-family: system-ui, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 120px 0 80px;
+            box-sizing: border-box;
+        }
+
+        .error-wrapper {
+            flex: 1;
+            width: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            padding: 0 20px;
+            box-sizing: border-box;
         }
 
         .glass {
@@ -66,8 +78,9 @@
     </style>
 </head>
 <body>
-@await Html.PartialAsync("LanguageSwitcher")
-<div class="glass">
+    @await Html.PartialAsync("GlobalHeader")
+    <main class="error-wrapper">
+        <div class="glass">
     <h1>@L["Error_Ein_Fehler_ist_aufgetreten"]</h1>
     <p class="mb-4">
         @L["Error_Pfad"] <strong>@Model.Path</strong>
@@ -86,5 +99,9 @@
         @L["Error_Zur_ck_zum_Dashboard"]
     </a>
 </div>
+    </main>
+
+    @await Html.PartialAsync("Footer")
+
 </body>
 </html>

@@ -1105,6 +1105,12 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
   <data name="Layout_TitleSuffix" xml:space="preserve">
     <value>Generador de listas de reproducción para Spotify</value>
   </data>
+  <data name="Layout_BackToHome" xml:space="preserve">
+    <value>Volver a la página de inicio</value>
+  </data>
+  <data name="Layout_Home" xml:space="preserve">
+    <value>Inicio</value>
+  </data>
   <data name="SpotifyToPlex_ExportTitle" xml:space="preserve">
     <value>Exportación de Spotify → Plex</value>
   </data>
