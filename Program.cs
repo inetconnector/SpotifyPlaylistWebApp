@@ -108,7 +108,7 @@ app.MapControllerRoute(
 
 PlexService.CleanupOldMissingCache(); // at Startup
 
-Task.Run(async () =>
+_ = Task.Run(async () =>
 {
     while (true)
     {

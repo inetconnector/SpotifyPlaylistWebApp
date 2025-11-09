@@ -1,27 +1,28 @@
 @using System.Globalization
 @using Microsoft.Extensions.Localization
 @using SpotifyPlaylistWebApp
-@await Html.PartialAsync("LanguageSwitcher")
 @inject IStringLocalizer<SharedResource> L
 @{
-    Layout = "Layout";
     ViewData["Title"] = L["Impressum_PageTitle"];
+    ViewData["BrowserTitle"] = L["Impressum_Impressum_InetConnector_Playlist_Generator"];
+    ViewData["BodyClass"] = "min-h-screen font-sans antialiased";
+    ViewData["BodyStyle"] = "padding-top: 64px";
+    ViewData["MainClass"] = "flex-grow max-w-3xl mx-auto px-6 py-16";
+    ViewData["UseDefaultMainLayout"] = false;
 }
-<!doctype html>
-<html lang="@CultureInfo.CurrentUICulture.Name">
-<head>
+
+@section HeadContent {
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>@L["Impressum_Impressum_InetConnector_Playlist_Generator"]</title>
-
     <meta name="description" content="@L["Impressum_MetaDescription"]"/>
     <meta name="robots" content="index, follow"/>
     <link rel="canonical" href="https://playlists.inetconnector.com/Home/Impressum"/>
-
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            background: radial-gradient(1000px 600px at 20% 10%, rgba(16,185,129,0.25), transparent 60%), radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,0.25), transparent 60%), #0b0f17;
+            background: radial-gradient(1000px 600px at 20% 10%, rgba(16,185,129,0.25), transparent 60%),
+                        radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,0.25), transparent 60%),
+                        #0b0f17;
             color: white;
             font-family: system-ui, sans-serif;
         }
@@ -37,13 +38,12 @@
             text-decoration: underline;
         }
 
-            a:hover {
-                color: #34d399;
-            }
+        a:hover {
+            color: #34d399;
+        }
     </style>
-</head>
+}
 
-<body class="min-h-screen font-sans antialiased">
 <header class="max-w-5xl mx-auto px-6 pt-10">
     <div class="flex items-center gap-3">
         <div>
@@ -51,55 +51,49 @@
         </div>
     </div>
 </header>
-<main class="flex-grow max-w-3xl mx-auto px-6 py-16">
-    <div class="glass rounded-3xl p-8 md:p-10 shadow-xl leading-relaxed">
-        <h1 class="text-3xl font-bold mb-6">@L["Impressum_Impressum"]</h1>
+<div class="glass rounded-3xl p-8 md:p-10 shadow-xl leading-relaxed">
+    <h1 class="text-3xl font-bold mb-6">@L["Impressum_Impressum"]</h1>
 
-        <p>
-            <strong>@L["Impressum_Angaben_gem_5_TMG_18_Abs_2_MStV"]</strong>
-        </p>
-        <p class="mt-2">
-            @L["Impressum_InetConnector_com"]<br/>
-            @L["Impressum_Daniel_Frede"]<br/>
-            @L["Impressum_Bismarckstrasse_6e"]<br/>
-            @L["Impressum_97209_Veitsh_chheim"]<br/>
-            @L["Impressum_Deutschland"]<br/>
-            @L["Impressum_E_Mail_kontakt_at_inetconnector_com"]
-        </p>
+    <p>
+        <strong>@L["Impressum_Angaben_gem_5_TMG_18_Abs_2_MStV"]</strong>
+    </p>
+    <p class="mt-2">
+        @L["Impressum_InetConnector_com"]<br/>
+        @L["Impressum_Daniel_Frede"]<br/>
+        @L["Impressum_Bismarckstrasse_6e"]<br/>
+        @L["Impressum_97209_Veitsh_chheim"]<br/>
+        @L["Impressum_Deutschland"]<br/>
+        @L["Impressum_E_Mail_kontakt_at_inetconnector_com"]
+    </p>
 
-        <h2 class="text-2xl font-semibold mt-8 mb-3">@L["Impressum_Verantwortlich_f_r_den_Inhalt"]</h2>
-        <p>@L["Impressum_Daniel_Frede_Veitsh_chheim_bei_W_rzburg"]</p>
+    <h2 class="text-2xl font-semibold mt-8 mb-3">@L["Impressum_Verantwortlich_f_r_den_Inhalt"]</h2>
+    <p>@L["Impressum_Daniel_Frede_Veitsh_chheim_bei_W_rzburg"]</p>
 
-        <h2 class="text-2xl font-semibold mt-8 mb-3">@L["Impressum_Haftung_f_r_Inhalte"]</h2>
-        <p>
-            @L["Impressum_Die_Inhalte_unserer_Seiten_wurden_mit_gr_ter_Sor"]
-        </p>
+    <h2 class="text-2xl font-semibold mt-8 mb-3">@L["Impressum_Haftung_f_r_Inhalte"]</h2>
+    <p>
+        @L["Impressum_Die_Inhalte_unserer_Seiten_wurden_mit_gr_ter_Sor"]
+    </p>
 
-        <h2 class="text-2xl font-semibold mt-8 mb-3">@L["Impressum_Haftung_f_r_Links"]</h2>
-        <p>
-            @L["Impressum_Unser_Angebot_enth_lt_Links_zu_externen_Websites"]
-        </p>
+    <h2 class="text-2xl font-semibold mt-8 mb-3">@L["Impressum_Haftung_f_r_Links"]</h2>
+    <p>
+        @L["Impressum_Unser_Angebot_enth_lt_Links_zu_externen_Websites"]
+    </p>
 
-        <h2 class="text-2xl font-semibold mt-8 mb-3">@L["Impressum_Urheberrecht"]</h2>
-        <p>
-            @L["Impressum_Die_durch_die_Seitenbetreiber_erstellten_Inhalte"]
-        </p>
+    <h2 class="text-2xl font-semibold mt-8 mb-3">@L["Impressum_Urheberrecht"]</h2>
+    <p>
+        @L["Impressum_Die_durch_die_Seitenbetreiber_erstellten_Inhalte"]
+    </p>
 
-        <hr class="my-8 border-white/20"/>
+    <hr class="my-8 border-white/20"/>
 
-        <div class="text-sm text-white/70">
-            <a href="/Home/Datenschutz" class="underline hover:text-white">@L["Impressum_Zur_Datenschutzerkl_rung"]</a>
-        </div>
-
-        <div class="mt-12 text-center">
-            <a href="/Home/Index"
-               class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-lg transition-all duration-200">
-                ⬅️ @L["Button_BackToHome"]
-            </a>
-        </div>
+    <div class="text-sm text-white/70">
+        <a href="/Home/Datenschutz" class="underline hover:text-white">@L["Impressum_Zur_Datenschutzerkl_rung"]</a>
     </div>
-</main>
 
-@await Html.PartialAsync("Footer")
-</body>
-</html>
+    <div class="mt-12 text-center">
+        <a href="/Home/Index"
+           class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-lg transition-all duration-200">
+            ⬅️ @L["Button_BackToHome"]
+        </a>
+    </div>
+</div>

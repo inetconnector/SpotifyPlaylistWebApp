@@ -1107,6 +1107,12 @@
   <data name="Layout_TitleSuffix" xml:space="preserve">
     <value>Playlist Generator für Spotify</value>
   </data>
+  <data name="Layout_BackToHome" xml:space="preserve">
+    <value>Zur Startseite</value>
+  </data>
+  <data name="Layout_Home" xml:space="preserve">
+    <value>Startseite</value>
+  </data>
   <data name="SpotifyToPlex_ExportTitle" xml:space="preserve">
     <value>Spotify → Plex Export</value>
   </data>

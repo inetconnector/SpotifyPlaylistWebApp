@@ -158,7 +158,7 @@ namespace SpotifyPlaylistWebApp.Controllers
         {
             var exportId = Guid.NewGuid().ToString();
             Response.ContentType = "text/event-stream";
-            Response.Headers.Add("Cache-Control", "no-cache");
+            Response.Headers["Cache-Control"] = "no-cache";
 
             await using var writer = new StreamWriter(Response.Body);
             PlexService.RegisterSseStream(exportId, writer);
@@ -527,7 +527,7 @@ namespace SpotifyPlaylistWebApp.Controllers
         {
             var exportId = Guid.NewGuid().ToString();
             Response.ContentType = "text/event-stream";
-            Response.Headers.Add("Cache-Control", "no-cache");
+            Response.Headers["Cache-Control"] = "no-cache";
 
             await using var writer = new StreamWriter(Response.Body);
             PlexService.RegisterSseStream(exportId, writer);
