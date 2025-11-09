@@ -1,0 +1,39 @@
+@using SpotifyPlaylistWebApp
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResource> L
+
+<header class="global-header">
+    <a asp-controller="Home" asp-action="Index" class="lc-btn home-link" title="@L["Layout_BackToHome"]">
+        <span class="flag" aria-hidden="true">🏠</span>
+        <span class="label">@L["Layout_Home"]</span>
+    </a>
+    <partial name="LanguageSwitcher" />
+</header>
+
+<style>
+.global-header {
+    position: fixed;
+    top: 10px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.global-header > * {
+    pointer-events: auto;
+}
+
+.home-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+}
+
+.home-link .label {
+    font-size: .9rem;
+}
+</style>

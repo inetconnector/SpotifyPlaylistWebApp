@@ -1,14 +1,17 @@
 @using System.Collections.Generic
 @using System.Globalization
+@using System.Text.Json
 @using Microsoft.Extensions.Localization
 @using SpotifyPlaylistWebApp
-@using System.Text.Json
-@await Html.PartialAsync("LanguageSwitcher")
 @inject IStringLocalizer<SharedResource> L
 
-@{ 
-    Layout = "Layout";
+@{
     ViewData["Title"] = L["DirectDownload_PageTitle"];
+    ViewData["BrowserTitle"] = L["DirectDownload_PageTitle"];
+    ViewData["BodyClass"] = "min-h-screen font-sans antialiased";
+    ViewData["BodyStyle"] = "padding-top: 64px";
+    ViewData["MainClass"] = "flex flex-col gap-10";
+    ViewData["UseDefaultMainLayout"] = false;
     var lang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
     var isGerman = lang == "de";
     var plexDirectStrings = new Dictionary<string, string>
@@ -28,14 +31,9 @@
     };
 }
 
-<!doctype html>
-<html lang="@CultureInfo.CurrentUICulture.Name">
-<head>
+@section HeadContent {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <title>@L["DirectDownload_PageTitle"] – @L["Index_InetConnector"]</title>
-
     <meta name="description" content="@L["Meta_Description"]" />
     <meta name="keywords" content="@L["Meta_Keywords"]" />
     <meta name="author" content="InetConnector" />
@@ -60,12 +58,12 @@
 
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
     <link rel="sitemap" type="application/xml" title="@L["Attr_Index_Sitemap"]" href="/sitemap.xml" />
-
     <script src="https://cdn.tailwindcss.com"></script>
-
     <style>
         body {
-            background: radial-gradient(1000px 600px at 20% 10%, rgba(16,185,129,.25), transparent 60%), radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,.25), transparent 60%), #0b0f17;
+            background: radial-gradient(1000px 600px at 20% 10%, rgba(16,185,129,.25), transparent 60%),
+                        radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,.25), transparent 60%),
+                        #0b0f17;
             color: white;
             font-family: system-ui, sans-serif;
         }
@@ -80,130 +78,79 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: .9rem 1.6rem;
-            border-radius: 1rem;
-            font-size: 1.125rem;
+            gap: 0.6rem;
+            padding: 0.85rem 1.4rem;
+            border-radius: 0.9rem;
             font-weight: 600;
-            color: #111827;
-            background: linear-gradient(90deg,#FFC727,#FFAA00,#F09500);
-            transition: all .25s ease;
-            box-shadow: 0 0 10px rgba(0,0,0,.25);
+            color: white;
+            text-decoration: none;
+            background: linear-gradient(145deg, rgba(16,185,129,0.28), rgba(99,102,241,0.22));
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 18px 30px rgba(15,118,110,0.35);
+            transition: all 0.2s ease;
         }
 
-            .btn:hover {
-                filter: brightness(1.1);
-                transform: translateY(-2px);
-            }
-
-        .btn-outline {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: .85rem 1.4rem;
-            border-radius: 1rem;
-            font-weight: 600;
-            border: 1px solid rgba(255,255,255,.15);
-            color: #e5e7eb;
-            background: rgba(255,255,255,.06);
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 24px 36px rgba(5,150,105,0.35);
         }
-
-            .btn-outline:hover {
-                background: rgba(255,255,255,.1);
-            }
-
-        select {
-            background-color: rgba(255,255,255,.06);
-        }
-
-            select option {
-                color: #111 !important;
-                background-color: #fff !important;
-            }
     </style>
-</head>
+}
 
-<body style="padding-top:54px" class="min-h-screen flex flex-col font-sans antialiased">
+<header class="max-w-5xl mx-auto px-6">
+    <h1 class="text-3xl md:text-4xl font-bold mb-3">@L["DirectDownload_PageTitle"]</h1>
+    <p class="text-white/70">@L["DirectDownload_Intro"]</p>
+</header>
 
-    <main class="flex-grow max-w-3xl mx-auto px-6 py-16">
-        <div class="glass rounded-3xl p-8 md:p-10 shadow-xl text-center leading-relaxed">
-
-            <div class="flex justify-center mb-6">
-                <div class="w-14 h-14 rounded-2xl bg-emerald-500 grid place-items-center shadow-lg text-2xl">⬇️</div>
+<div class="glass max-w-5xl mx-auto px-6 py-8 md:py-10 rounded-3xl shadow-xl">
+    <div class="grid gap-10 md:grid-cols-2">
+        <section class="space-y-4">
+            <div>
+                <label for="playlistSelect" class="block text-sm font-semibold uppercase tracking-wide text-white/70">
+                    @L["DirectDownload_SelectPlaylist"]
+                </label>
+                <select id="playlistSelect" class="mt-2 w-full rounded-xl bg-white/5 border border-white/15 px-4 py-3 text-white focus:ring-emerald-500 focus:border-emerald-500">
+                    <option value="">@L["DirectDownload_LoadPlaylists"]…</option>
+                </select>
+                <div id="playlistMeta" class="mt-3 text-xs text-white/60"></div>
             </div>
 
-            <h1 class="text-3xl md:text-4xl font-bold mb-4">@L["DirectDownload_Title"]</h1>
-            <p class="text-white/80 mb-6">@L["DirectDownload_Subtitle"]</p>
+            <button id="btnShowPlexPlaylist" type="button" class="btn w-full justify-center">
+                👀 @L["DirectDownload_ShowPlaylist"]
+            </button>
 
-            <section class="text-white/70 text-sm max-w-lg mx-auto">
-                <h2 class="text-xl font-semibold mb-2">@L["DirectDownload_AvailablePlaylists"]</h2>
-                <ul class="list-disc text-left text-white/80 mt-6 space-y-2 mx-auto max-w-md pl-16">
-                    <li>@L["DirectDownload_SelectPlaylist_Help"]</li>
-                    <li>@L["DirectDownload_ParallelDownloads"]</li>
-                </ul>
-            </section>
+            <p class="text-sm text-white/60">@L["DirectDownload_Description"]</p>
+        </section>
 
-            <section class="mt-10 text-left">
-                <div class="glass rounded-2xl p-6 md:p-8 shadow-inner">
+        <section class="space-y-4">
+            <h2 class="text-xl font-semibold">@L["DirectDownload_ExportTitle"]</h2>
+            <p class="text-sm text-white/70">@L["DirectDownload_ExportDescription"]</p>
 
-                    <h3 class="text-2xl font-semibold mb-1">@L["DirectDownload_SelectPlaylist"]</h3>
-                    <p class="text-white/70 mb-5">@L["DirectDownload_Download_Help"]</p>
+            <button id="btnStartDownload" class="btn w-full justify-center">
+                ⬇️ @L["DirectDownload_Start"]
+            </button>
 
-                    <div class="mb-6">
-                        <label for="playlistSelect" class="block text-sm text-white/80 mb-2">
-                            @L["DirectDownload_SelectPlaylist"]
-                        </label>
-                        <div class="flex gap-3">
-                            <div class="relative flex-1">
-                                <select id="playlistSelect"
-                                        class="w-full appearance-none rounded-xl border border-white/15 text-white/90 px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-amber-400 transition">
-                                    <option>@L["DirectDownload_LoadPlaylists"]…</option>
-                                </select>
-                                <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </div>
-                            <button type="button"
-                                    id="btnShowPlexPlaylist"
-                                    class="shrink-0 px-4 py-3 rounded-xl bg-amber-500/90 hover:bg-amber-400 transition text-black font-semibold shadow-lg"
-                                    title="@L["SpotifyToPlex_ShowPlaylist"]">
-                                ?
-                            </button>
-                        </div>
-                        <p id="playlistMeta" class="text-xs text-white/60 mt-2 hidden"></p>
-                    </div>
+            <div id="statusArea" class="min-h-[3rem] rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80"></div>
 
-                    <!-- ACTION BUTTONS -->
-                    <div class="flex flex-col sm:flex-row gap-3 mt-6">
-                        <a href="/Home/Index" class="btn-outline flex-1">⬅️ @L["Button_BackToHome"]</a>
-                        <button id="btnStartDownload" type="button" class="btn flex-1">⬇️ @L["DirectDownload_Start"]</button>
-                    </div>
-
-                    <div id="statusArea" class="rounded-xl mt-5 bg-black/30 border border-white/10 p-4 min-h-[64px] text-sm text-white/80"></div>
-                </div>
-            </section>
-
-            <div class="mt-12 glass rounded-2xl p-6 md:p-8 shadow-inner text-center">
-                <h2 class="text-2xl font-semibold mb-3">@L["Index_Unterst_tze_das_Projekt"]</h2>
-                <p class="text-white/80 mb-4">@L["Index_Gef_llt_dir_dieses_Tool_Unterst_tze_die_Weiteren"]</p>
-                <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G" target="_blank" rel="noopener" class="btn mb-6">
-                    @L["Index_Jetzt_ber_PayPal_spenden"]
-                </a>
+            <div class="text-xs text-white/60 space-y-1">
+                <p>@L["DirectDownload_StatusHint"]</p>
+                <p>@L["DirectDownload_StatusHintFiles"]</p>
             </div>
-
-        </div>
-    </main>
-
-    <div id="playlistModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-        <div class="glass rounded-2xl max-w-lg w-full shadow-2xl relative p-6 md:p-7 border border-white/15">
-            <button type="button" id="closeModal" class="absolute right-3 top-3 text-white/60 hover:text-white text-2xl leading-none">&times;</button>
-            <h3 id="playlistModalTitle" class="text-xl font-semibold mb-1">@L["SpotifyToPlex_PlaylistContent"]</h3>
-            <p class="text-sm text-white/60 mb-4">@L["DirectDownload_SelectPlaylist_Help"]</p>
-            <div id="playlistTracks" class="max-h-80 overflow-y-auto space-y-2 text-white/80 text-sm"></div>
-        </div>
+        </section>
     </div>
+</div>
 
-    @await Html.PartialAsync("Footer")
+<div id="playlistModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 flex items-center justify-center px-4">
+    <div class="glass max-w-2xl w-full rounded-3xl p-6 relative">
+        <div class="flex items-start justify-between mb-4">
+            <h3 id="playlistModalTitle" class="text-xl font-semibold text-white"></h3>
+            <button id="closeModal" class="text-white/60 hover:text-white">✖</button>
+        </div>
+        <div id="playlistTracks" class="max-h-80 overflow-y-auto space-y-2 text-white/80 text-sm"></div>
+    </div>
+</div>
 
+@section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
         window.PlexDirectStrings = @Html.Raw(JsonSerializer.Serialize(plexDirectStrings));
@@ -233,7 +180,6 @@
             };
 
             const init = () => {
-                // Playlists automatisch laden
                 if (window.loadPlexPlaylists) {
                     window.loadPlexPlaylists({
                         selectId: "playlistSelect",
@@ -330,7 +276,6 @@
                     });
                 }
 
-                // Download starten → ZIP erzeugen & herunterladen
                 const btnStart = document.getElementById("btnStartDownload");
                 if (btnStart && window.startPlexDirectZip) {
                     btnStart.addEventListener("click", (ev) => {
@@ -350,6 +295,4 @@
             }
         })();
     </script>
-
-</body>
-</html>
+}

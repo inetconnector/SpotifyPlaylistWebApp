@@ -1,22 +1,20 @@
 @using System.Globalization
 @using Microsoft.Extensions.Localization
 @using SpotifyPlaylistWebApp
-@await Html.PartialAsync("LanguageSwitcher")
 @inject IStringLocalizer<SharedResource> L
 @{
     Layout = "Layout";
     ViewData["Title"] = L["Index_PageTitle"];
+    ViewData["BrowserTitle"] = L["Index_Spotify_Playlist_Generator_by_InetConnector_Lieb"];
     var lang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
     var isGerman = lang == "de";
+    ViewData["BodyClass"] = "min-h-screen flex flex-col font-sans antialiased";
+    ViewData["BodyStyle"] = "padding-top: 54px";
+    ViewData["MainClass"] = "flex-grow max-w-3xl mx-auto px-6 py-16";
+    ViewData["UseDefaultMainLayout"] = false;
 }
-<!doctype html>
-<html lang="@CultureInfo.CurrentUICulture.Name">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>@L["Index_Spotify_Playlist_Generator_by_InetConnector_Lieb"]</title>
-
+@section HeadContent {
     <meta name="description" content="@L["Meta_Description"]" />
     <meta name="keywords" content="@L["Meta_Keywords"]" />
     <meta name="author" content="InetConnector" />
@@ -40,7 +38,6 @@
     <link rel="alternate" href="https://playlists.inetconnector.com/es" hreflang="es" />
 
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-
     <link rel="sitemap" type="application/xml" title="@L["Attr_Index_Sitemap"]" href="/sitemap.xml" />
 
     <script type="application/ld+json">
@@ -69,7 +66,8 @@
 
     <style>
         body {
-            background: radial-gradient(1000px 600px at 20% 10%, rgba(16,185,129,0.25), transparent 60%), radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,0.25), transparent 60%), #0b0f17;
+            background: radial-gradient(1000px 600px at 20% 10%, rgba(16,185,129,0.25), transparent 60%),
+                       radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,0.25), transparent 60%), #0b0f17;
             color: white;
             font-family: system-ui, sans-serif;
         }
@@ -85,9 +83,9 @@
             text-decoration: underline;
         }
 
-            a:hover {
-                color: #34d399;
-            }
+        a:hover {
+            color: #34d399;
+        }
 
         .btn {
             display: inline-flex;
@@ -103,92 +101,85 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.25);
         }
 
-            .btn:hover {
-                background-color: #059669;
-                transform: translateY(-2px);
-            }
+        .btn:hover {
+            background-color: #059669;
+            transform: translateY(-2px);
+        }
     </style>
-</head>
+}
 
-<body style="padding-top: 54px" class="min-h-screen flex flex-col font-sans antialiased">
+<div class="glass rounded-3xl p-8 md:p-10 shadow-xl text-center leading-relaxed">
+    <div class="flex justify-center mb-6">
+        <div class="w-14 h-14 rounded-2xl bg-emerald-500 grid place-items-center shadow-lg text-2xl">@L["Index_Text"]</div>
+    </div>
 
-    <main class="flex-grow max-w-3xl mx-auto px-6 py-16">
-        <div class="glass rounded-3xl p-8 md:p-10 shadow-xl text-center leading-relaxed">
+    <h1 class="text-3xl md:text-4xl font-bold mb-4">
+        @L["Index_Playlist_Generator_f_r_Spotify_Lieblingssongs_au"]
+    </h1>
 
-            <div class="flex justify-center mb-6">
-                <div class="w-14 h-14 rounded-2xl bg-emerald-500 grid place-items-center shadow-lg text-2xl">@L["Index_Text"]</div>
-            </div>
+    <p class="text-white/80 mb-6">
+        @L["Index_Mit_diesem_kostenlosen_Online_Tool_kannst_du_aut"]
+        <strong>@L["Index_Lieblingssongs"]</strong> @L["Index_oder"]
+        <strong>@L["Index_meistgeh_rten_Tracks"]</strong> @L["Index_erstellen_direkt_ber_die_offizielle_Spotify_Web_"]
+    </p>
 
-            <h1 class="text-3xl md:text-4xl font-bold mb-4">
-                @L["Index_Playlist_Generator_f_r_Spotify_Lieblingssongs_au"]
-            </h1>
+    <div class="mt-8 mb-8">
+        <a href="/Home/Login" class="btn">@L["Index_Mit_Spotify_verbinden"]</a>
+    </div>
 
-            <p class="text-white/80 mb-6">
-                @L["Index_Mit_diesem_kostenlosen_Online_Tool_kannst_du_aut"]
-                <strong>@L["Index_Lieblingssongs"]</strong> @L["Index_oder"]
-                <strong>@L["Index_meistgeh_rten_Tracks"]</strong> @L["Index_erstellen_direkt_ber_die_offizielle_Spotify_Web_"]
-            </p>
+    <section class="text-white/70 text-sm max-w-lg mx-auto">
+        <h2 class="text-xl font-semibold mb-2">@L["Index_Was_dieses_Tool_kann"]</h2>
+        <ul class="list-disc text-left text-white/80 mt-6 space-y-2 mx-auto max-w-md pl-16">
+            <li>@L["Index_Zuf_llige_Playlists_aus_Lieblingssongs_generiere"]</li>
+            <li>@L["Index_Lieblingssongs_in_Originalreihenfolge_klonen"]</li>
+            <li>@L["Index_Empfehlungen_basierend_auf_deinem_H_rverhalten"]</li>
+        </ul>
 
-            <div class="mt-8 mb-8">
-                <a href="/Home/Login" class="btn">@L["Index_Mit_Spotify_verbinden"]</a>
-            </div>
+        <div class="flex justify-center gap-4 mt-8 mb-4">
+            <button id="btnPlexConnect"
+                    class="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold shadow-md hover:from-yellow-500 hover:to-orange-600 transition-all duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                @L["SpotifyToPlex_Title"]
+            </button>
 
-            <section class="text-white/70 text-sm max-w-lg mx-auto">
-                <h2 class="text-xl font-semibold mb-2">@L["Index_Was_dieses_Tool_kann"]</h2>
-                <ul class="list-disc text-left text-white/80 mt-6 space-y-2 mx-auto max-w-md pl-16">
-                    <li>@L["Index_Zuf_llige_Playlists_aus_Lieblingssongs_generiere"]</li>
-                    <li>@L["Index_Lieblingssongs_in_Originalreihenfolge_klonen"]</li>
-                    <li>@L["Index_Empfehlungen_basierend_auf_deinem_H_rverhalten"]</li>
-                </ul>
-
-                <div class="flex justify-center gap-4 mt-8 mb-4">
-                    <button id="btnPlexConnect"
-                            class="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold shadow-md hover:from-yellow-500 hover:to-orange-600 transition-all duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                        @L["SpotifyToPlex_Title"]
-                    </button>
-
-                    <button id="btnPlexDirect"
-                            class="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold shadow-md hover:from-yellow-500 hover:to-orange-600 transition-all duration-200">
-                        @L["Index_Plex_Direct_Download_Button"]
-                    </button>
-                </div>
-            </section>
-
-            <section class="mt-10 text-white/80 text-sm leading-relaxed">
-                <h2 class="text-xl font-semibold mb-3">@L["Index_Wie_funktioniert_der_Spotify_Playlist_Generator"]</h2>
-                <p>@L["Index_Nach_dem_Login_mit_deinem_Spotify_Konto_greift_d"]</p>
-                <p class="mt-3">
-                    @L["Index_Der_Dienst_wird_von"] <strong>@L["Index_InetConnector"]</strong> @L["Index_betrieben_und_nutzt_ausschlie_lich_offizielle_Sp"]
-                </p>
-            </section>
-
-            <div class="mt-12 glass rounded-2xl p-6 md:p-8 shadow-inner">
-                <h2 class="text-2xl font-semibold mb-3">@L["Index_Unterst_tze_das_Projekt"]</h2>
-                <p class="text-white/80 mb-4">@L["Index_Gef_llt_dir_dieses_Tool_Unterst_tze_die_Weiteren"]</p>
-                <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
-                   target="_blank" rel="noopener" class="btn mb-6">
-                    @L["Index_Jetzt_ber_PayPal_spenden"]
-                </a>
-                <div class="flex flex-col items-center justify-center">
-                    <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
-                       target="_blank" rel="noopener" class="inline-block transition-transform hover:scale-105">
-                        <img src="/QR-Code.png" alt="@L["Attr_Index_PayPal_QR_Code"]"
-                             class="w-36 h-36 rounded-2xl border border-white/20 shadow-md hover:border-emerald-400 hover:shadow-emerald-400/20 transition-all" />
-                    </a>
-                    <p class="text-sm text-white/70 mt-3">@L["Index_Scanne_den_QR_Code_zum_Spenden"]</p>
-                </div>
-            </div>
+            <button id="btnPlexDirect"
+                    class="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold shadow-md hover:from-yellow-500 hover:to-orange-600 transition-all duration-200">
+                @L["Index_Plex_Direct_Download_Button"]
+            </button>
         </div>
-    </main>
+    </section>
 
-    @await Html.PartialAsync("Footer")
+    <section class="mt-10 text-white/80 text-sm leading-relaxed">
+        <h2 class="text-xl font-semibold mb-3">@L["Index_Wie_funktioniert_der_Spotify_Playlist_Generator"]</h2>
+        <p>@L["Index_Nach_dem_Login_mit_deinem_Spotify_Konto_greift_d"]</p>
+        <p class="mt-3">
+            @L["Index_Der_Dienst_wird_von"] <strong>@L["Index_InetConnector"]</strong> @L["Index_betrieben_und_nutzt_ausschlie_lich_offizielle_Sp"]
+        </p>
+    </section>
 
+    <div class="mt-12 glass rounded-2xl p-6 md:p-8 shadow-inner">
+        <h2 class="text-2xl font-semibold mb-3">@L["Index_Unterst_tze_das_Projekt"]</h2>
+        <p class="text-white/80 mb-4">@L["Index_Gef_llt_dir_dieses_Tool_Unterst_tze_die_Weiteren"]</p>
+        <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
+           target="_blank" rel="noopener" class="btn mb-6">
+            @L["Index_Jetzt_ber_PayPal_spenden"]
+        </a>
+        <div class="flex flex-col items-center justify-center">
+            <a href="https://www.paypal.com/donate/?hosted_button_id=ZH7VMENE4XQ3G"
+               target="_blank" rel="noopener" class="inline-block transition-transform hover:scale-105">
+                <img src="/QR-Code.png" alt="@L["Attr_Index_PayPal_QR_Code"]"
+                     class="w-36 h-36 rounded-2xl border border-white/20 shadow-md hover:border-emerald-400 hover:shadow-emerald-400/20 transition-all" />
+            </a>
+            <p class="text-sm text-white/70 mt-3">@L["Index_Scanne_den_QR_Code_zum_Spenden"]</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
     <script src="/js/plex-login.js"></script>
     <script src="/js/plex-direct-flow.js"></script>
-
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const plexConnectBtn = document.getElementById("btnPlexConnect");
@@ -202,6 +193,4 @@
             }
         });
     </script>
-
-</body>
-</html>
+}
