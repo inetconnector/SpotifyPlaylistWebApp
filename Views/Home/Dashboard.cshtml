@@ -188,6 +188,13 @@
                 @L["Dashboard_Jede_Aktion_erstellt_eine_neue_Playlist_in_deine"]<br />
                 @L["Dashboard_Die_Erstellung_erfolgt_im_Hintergrund_und_dauert"]
             </p>
+
+            <div class="pt-8 text-center">
+                <a href="/Home/Index"
+                   class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-lg transition-all duration-200">
+                    ⬅️ @L["Button_BackToHome"]
+                </a>
+            </div>
         </div>
     </main>
 
@@ -307,6 +314,8 @@
             startCooldownTicker();
         });
     </script>
+
+    @await Html.PartialAsync("Footer")
 
 </body>
 </html>
