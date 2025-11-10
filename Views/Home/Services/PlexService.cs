@@ -336,9 +336,9 @@ public class PlexService
     /// <summary>
     ///     Get all saved ("Liked") tracks of the user.
     /// </summary>
-    public async Task<List<(string Title, string Artist)>> GetSpotifyLikedTracksAsync(SpotifyClient spotify)
+    public async Task<List<(string Title, string Artist, string Album)>> GetSpotifyLikedTracksAsync(SpotifyClient spotify)
     {
-        var tracks = new List<(string Title, string Artist)>();
+        var tracks = new List<(string Title, string Artist, string Album)>();
         var page = await spotify.Library.GetTracks(new LibraryTracksRequest { Limit = 50 });
 
         while (true)
@@ -349,7 +349,8 @@ public class PlexService
                 if (t == null) continue;
 
                 var artist = t.Artists.FirstOrDefault()?.Name ?? "";
-                tracks.Add((t.Name, artist));
+                var album = t.Album?.Name ?? "";
+                tracks.Add((t.Name, artist, album));
             }
 
             if (string.IsNullOrEmpty(page.Next)) break;
@@ -363,14 +364,14 @@ public class PlexService
     // ============================================================
     // 🔸 Fetch all tracks from a Spotify playlist (Title + Artist)
     // ============================================================
-    public async Task<List<(string Title, string Artist)>> GetSpotifyPlaylistTracksAsync(SpotifyClient spotify,
+    public async Task<List<(string Title, string Artist, string Album)>> GetSpotifyPlaylistTracksAsync(SpotifyClient spotify,
         string playlistId)
     {
         // ✅ Handle pseudo-ID for liked songs
         if (playlistId == "#LikedSongs#")
             return await GetSpotifyLikedTracksAsync(spotify);
 
-        var tracks = new List<(string Title, string Artist)>();
+        var tracks = new List<(string Title, string Artist, string Album)>();
         var page = await spotify.Playlists.GetItems(playlistId);
 
         while (true)
@@ -379,7 +380,8 @@ public class PlexService
                 if (item.Track is FullTrack t)
                 {
                     var artist = t.Artists.FirstOrDefault()?.Name ?? "";
-                    tracks.Add((t.Name, artist));
+                    var album = t.Album?.Name ?? "";
+                    tracks.Add((t.Name, artist, album));
                 }
 
             if (string.IsNullOrEmpty(page.Next)) break;
@@ -742,7 +744,7 @@ public class PlexService
                      .OrderBy(x => x.artist)
                      .ThenBy(x => x.album)
                      .ThenBy(x => x.title))
-            writer.WriteLine($"{entry.artist};{entry.album};{entry.title}");
+            writer.WriteLine($"{playlistName};{entry.artist};{entry.album};{entry.title}");
 
         writer.Flush();
         return ms.ToArray();
@@ -827,14 +829,16 @@ public class PlexService
         // ============================================================
         // 🔎 Suche in Plex: liefert RatingKey + SectionKey + MachineId
         // ============================================================
-        var matches = await SearchTracksOnPlexAsync(plexBaseUrl, plexToken, searchCandidates);
+        var matches = await SearchTracksOnPlexAsync(plexBaseUrl, plexToken,
+            searchCandidates.Select(t => (t.Title, t.Artist)).ToList());
 
         var found = matches.Where(m => m.RatingKey != null).ToList();
         var foundKeys = found.Select(m => m.RatingKey!).ToList();
 
         var newlyMissing = matches
-            .Where(m => m.RatingKey == null)
-            .Select(m => $"{m.Artist} — {m.Title}")
+            .Select((m, index) => (Match: m, Candidate: searchCandidates[index]))
+            .Where(x => x.Match.RatingKey == null)
+            .Select(x => FormatMissingEntry(x.Candidate.Artist, x.Candidate.Title, x.Candidate.Album))
             .ToList();
 
         // Merge old + new missing and deduplicate

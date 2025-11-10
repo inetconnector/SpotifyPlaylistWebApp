@@ -235,7 +235,7 @@ namespace SpotifyPlaylistWebApp.Controllers
                 const int batchSize = 1;
                 var matchedKeys = new List<string>();
 
-                foreach (var (title, artist) in tracks)
+                foreach (var (title, artist, album) in tracks)
                 {
                     if (processed.Contains($"{artist}—{title}"))
                         continue;
@@ -255,7 +255,7 @@ namespace SpotifyPlaylistWebApp.Controllers
                     else
                     {
                         missing++;
-                        missingList.Add((artist, title, null));
+                        missingList.Add((artist, title, album));
                         await plex.SendSseAsync(exportId, $"❌ {L["SpotifyToPlex_MissingTrack"]}: {artist} — {title}");
                     }
 
@@ -604,7 +604,7 @@ namespace SpotifyPlaylistWebApp.Controllers
                     var matchedKeys = new List<string>();
                     int added = 0, failed = 0, missing = 0, total = tracks.Count;
 
-                    foreach (var (title, artist) in tracks)
+                    foreach (var (title, artist, album) in tracks)
                     {
                         if (processed.Contains($"{artist}—{title}"))
                             continue;
@@ -621,7 +621,7 @@ namespace SpotifyPlaylistWebApp.Controllers
                         else
                         {
                             missing++;
-                            missingList.Add((artist, title, null));
+                            missingList.Add((artist, title, album));
                         }
 
                         if (matchedKeys.Count >= batchSize)
