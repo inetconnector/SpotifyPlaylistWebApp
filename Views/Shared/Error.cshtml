@@ -1,5 +1,4 @@
 @inject IStringLocalizer<SharedResource> L
-@using System.Globalization
 @using Microsoft.Extensions.Localization
 @using SpotifyPlaylistWebApp
 @model SpotifyPlaylistWebApp.Controllers.ErrorViewModel
@@ -10,9 +9,9 @@
 }
 
 @section Styles {
-<script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 
-<style>
+    <style>
     .error-page {
         background: radial-gradient(800px 600px at 20% 10%, rgba(16,185,129,0.25), transparent 60%),
                     radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,0.25), transparent 60%),

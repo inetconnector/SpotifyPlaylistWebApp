@@ -645,7 +645,7 @@ public class PlexService
         client.DefaultRequestHeaders.Add("X-Plex-Device", "InetConnector Cloud");
         client.DefaultRequestHeaders.Add("X-Plex-Device-Name", "SpotifyToPlex WebApp");
 
-        for (int i = 0; i < total; i += chunkSize)
+        for (var i = 0; i < total; i += chunkSize)
         {
             var batch = keys.Skip(i).Take(chunkSize).ToList();
             var uris = batch.Select(k =>
@@ -657,7 +657,8 @@ public class PlexService
                 $"?uri={Uri.EscapeDataString(uriString)}" +
                 $"&type=audio&X-Plex-Token={Uri.EscapeDataString(plexToken)}";
 
-            Console.WriteLine($"[Plex AddTracks] ➕ Adding {batch.Count} tracks ({i + 1}–{i + batch.Count} of {total}) …");
+            Console.WriteLine(
+                $"[Plex AddTracks] ➕ Adding {batch.Count} tracks ({i + 1}–{i + batch.Count} of {total}) …");
 
             var req = new HttpRequestMessage(HttpMethod.Put, url);
             var res = await client.SendAsync(req);
@@ -677,13 +678,14 @@ public class PlexService
 
             // Optional: progress event back to browser (if using SSE)
             if (!string.IsNullOrEmpty(exportId))
-            {
                 try
                 {
                     await SendSseAsync(exportId, $"progress:{processed}:0:{total}");
                 }
-                catch { /* ignore SSE errors */ }
-            }
+                catch
+                {
+                    /* ignore SSE errors */
+                }
 
             // tiny delay avoids Plex rate-limit throttling
             await Task.Delay(200);
@@ -954,6 +956,7 @@ public class PlexService
         var xml = await _http.GetStringAsync($"{plexBaseUrl}/playlists/all?X-Plex-Token={plexToken}");
         return xml;
     }
+
     // ============================================================
     // 🔸 Create new Plex playlist (clean + fixed version)
     // ============================================================
@@ -998,6 +1001,7 @@ public class PlexService
         Console.WriteLine($"[Plex] Created playlist '{name}' key={key}");
         return key;
     }
+
     // ============================================================
     // 🔸 Auto-clean old missing cache entries (>1 day)
     // ============================================================
@@ -1041,7 +1045,8 @@ public class PlexService
         if (removed.Count > 0)
         {
             SaveMissingCacheToFile();
-            Console.WriteLine($"[Plex Cache] 🧹 Cleaned {removed.Count} old or duplicate entries (>1d): {string.Join(", ", removed)}");
+            Console.WriteLine(
+                $"[Plex Cache] 🧹 Cleaned {removed.Count} old or duplicate entries (>1d): {string.Join(", ", removed)}");
         }
     }
 
@@ -1085,5 +1090,4 @@ public class PlexService
         if (_missingCache.Remove(key))
             SaveMissingCacheForServer(plexServerId);
     }
-
 }

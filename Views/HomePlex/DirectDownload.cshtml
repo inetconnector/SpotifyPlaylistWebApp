@@ -1,8 +1,7 @@
-@using System.Collections.Generic
 @using System.Globalization
+@using System.Text.Json
 @using Microsoft.Extensions.Localization
 @using SpotifyPlaylistWebApp
-@using System.Text.Json
 @inject IStringLocalizer<SharedResource> L
 
 @{
@@ -29,30 +28,30 @@
 }
 
 @section HeadContent {
-    <meta name="description" content="@L["Meta_Description"]" />
-    <meta name="keywords" content="@L["Meta_Keywords"]" />
-    <meta name="author" content="InetConnector" />
-    <meta name="robots" content="index, follow" />
+    <meta name="description" content="@L["Meta_Description"]"/>
+    <meta name="keywords" content="@L["Meta_Keywords"]"/>
+    <meta name="author" content="InetConnector"/>
+    <meta name="robots" content="index, follow"/>
 
-    <meta property="og:locale" content="@(isGerman ? "de_DE" : "en_US")" />
-    <meta property="og:title" content="@L["DirectDownload_PageTitle"]" />
-    <meta property="og:description" content="@L["OG_Description"]" />
-    <meta property="og:image" content="https://playlists.inetconnector.com/preview.jpg" />
-    <meta property="og:url" content="@(isGerman ? "https://playlists.inetconnector.com/de" : "https://playlists.inetconnector.com/en")" />
-    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="@(isGerman ? "de_DE" : "en_US")"/>
+    <meta property="og:title" content="@L["DirectDownload_PageTitle"]"/>
+    <meta property="og:description" content="@L["OG_Description"]"/>
+    <meta property="og:image" content="https://playlists.inetconnector.com/preview.jpg"/>
+    <meta property="og:url" content="@(isGerman ? "https://playlists.inetconnector.com/de" : "https://playlists.inetconnector.com/en")"/>
+    <meta property="og:type" content="website"/>
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="@L["DirectDownload_PageTitle"]" />
-    <meta name="twitter:description" content="@L["Twitter_Description"]" />
-    <meta name="twitter:image" content="https://playlists.inetconnector.com/preview.jpg" />
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="@L["DirectDownload_PageTitle"]"/>
+    <meta name="twitter:description" content="@L["Twitter_Description"]"/>
+    <meta name="twitter:image" content="https://playlists.inetconnector.com/preview.jpg"/>
 
-    <link rel="canonical" href="@(isGerman ? "https://playlists.inetconnector.com/de" : "https://playlists.inetconnector.com/en")" />
-    <link rel="alternate" href="https://playlists.inetconnector.com/de" hreflang="de" />
-    <link rel="alternate" href="https://playlists.inetconnector.com/en" hreflang="en" />
-    <link rel="alternate" href="https://playlists.inetconnector.com/es" hreflang="es" />
+    <link rel="canonical" href="@(isGerman ? "https://playlists.inetconnector.com/de" : "https://playlists.inetconnector.com/en")"/>
+    <link rel="alternate" href="https://playlists.inetconnector.com/de" hreflang="de"/>
+    <link rel="alternate" href="https://playlists.inetconnector.com/en" hreflang="en"/>
+    <link rel="alternate" href="https://playlists.inetconnector.com/es" hreflang="es"/>
 
-    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-    <link rel="sitemap" type="application/xml" title="@L["Attr_Index_Sitemap"]" href="/sitemap.xml" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
+    <link rel="sitemap" type="application/xml" title="@L["Attr_Index_Sitemap"]" href="/sitemap.xml"/>
 }
 
 @section Styles {
@@ -151,7 +150,7 @@
                                 <option>@L["DirectDownload_LoadPlaylists"]…</option>
                             </select>
                             <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
                         </div>
                         <button type="button"
