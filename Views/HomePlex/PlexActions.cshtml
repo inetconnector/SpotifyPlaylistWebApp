@@ -11,182 +11,171 @@
                     ?? new List<SelectListItem>();
     var hasPlex = !string.IsNullOrEmpty(Context.Session.GetString("PlexAuthToken"));
     var hasSpotify = !string.IsNullOrEmpty(Context.Session.GetString("SpotifyAccessToken"));
+    ViewData["BodyClass"] = "min-h-screen bg-gradient-to-b from-[#0b0f17] to-[#141a27] text-white font-sans";
 }
 
-<!DOCTYPE html>
-<html lang="@CultureInfo.CurrentUICulture.Name">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+@section Styles {
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>@ViewData["Title"]</title>
-</head>
-
-<body class="min-h-screen bg-gradient-to-b from-[#0b0f17] to-[#141a27] text-white font-sans">
-
-    <div class="max-w-xl mx-auto mt-16 p-8 bg-white/5 rounded-3xl shadow-xl backdrop-blur-sm text-center">
-
-        <div class="flex justify-center mb-4">
-            <img src="/images/plex-spotify.svg" alt="@L["SpotifyToPlex_LogoAlt"]"
-                 class="h-20 w-auto mx-auto drop-shadow-[0_0_8px_rgba(255,160,0,0.4)]"
-                 style="max-height:80px;" />
-        </div>
-
-        <h1 class="text-3xl font-bold mb-3">@L["SpotifyToPlex_Title"]</h1>
-        <p class="text-gray-300 mb-8">@L["PlexActions_SyncSpotifyPlaylistsWithPlex"]</p>
-
-        @if (!hasPlex)
-        {
-            <div class="bg-red-600/30 border border-red-500 rounded-lg p-3 mb-4">
-                ⚠️ @L["SpotifyToPlex_TokenExpired"]
-            </div>
-            <a href="/HomePlex/GetPlexPin"
-               class="inline-block px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg text-white font-semibold hover:brightness-110">
-                🔐 @L["SpotifyToPlex_OpenPlexLogin"]
-            </a>
-        }
-        else if (!hasSpotify)
-        {
-            <div class="bg-yellow-600/20 border border-yellow-500 rounded-lg p-3 mb-4">
-                🎧 @L["SpotifyToPlex_Info"]
-            </div>
-            <a href="/Home/Login?returnUrl=/HomePlex/SpotifyToPlex"
-               class="inline-block px-4 py-2 bg-gradient-to-r from-green-400 to-emerald-600 rounded-lg text-black font-semibold hover:brightness-110">
-                🎵 @L["Index_Mit_Spotify_verbinden"]
-            </a>
-        }
-        else if (playlists.Count == 0)
-        {
-            <p class="text-gray-400 mb-6">@L["SpotifyToPlex_Waiting"]</p>
-            <div class="animate-spin h-6 w-6 border-2 border-t-transparent border-orange-500 rounded-full mx-auto"></div>
-        }
-        else
-        {
-            <div class="text-left mb-6">
-                <label for="playlistSelect" class="block text-sm text-gray-400 mb-2">
-                    @L["SpotifyToPlex_SelectPlaylist"]
-                </label>
-                <div class="flex space-x-2">
-                    <select id="playlistSelect" name="playlistId"
-                            class="flex-1 bg-gray-800 border border-gray-700 rounded-lg p-2 w-full focus:ring-2 focus:ring-orange-500">
-                        @foreach (var item in playlists)
-                        {
-                            <option value="@item.Value">@item.Text</option>
-                        }
-                    </select>
-
-                    <button type="button" id="btnShowPlaylist"
-                            class="px-3 bg-orange-500 hover:brightness-110 rounded-lg text-white font-bold text-lg shadow-lg"
-                            title="@L["SpotifyToPlex_ShowPlaylist"]">
-                        ?
-                    </button>
-                </div>
-            </div>
-
-            <button type="button" id="btnLiveExport"
-                    class="w-full py-3.5 bg-gradient-to-r from-green-400 to-emerald-600 text-black font-semibold rounded-xl shadow hover:brightness-110 mb-3">
-                ⚡ @L["SpotifyToPlex_LiveExport"]
-            </button>
-
-            <button type="button" id="btnLiveExportAll"
-                    class="w-full py-3.5 bg-gradient-to-r from-blue-400 to-blue-700 text-white font-semibold rounded-xl shadow hover:brightness-110 mb-3">
-                🌐 @L["SpotifyToPlex_LiveExportAll"]
-            </button>
-
-            <hr class="my-8 border-gray-700">
-
-            <div class="text-left mb-6">
-                <label for="plexSelect" class="block text-sm text-gray-400 mb-2">
-                    @L["PlexActions_PlexPlaylists_Title"]
-                </label>
-
-                <div class="flex space-x-2">
-                    <select id="plexSelect"
-                            class="flex-1 bg-gray-800 border border-gray-700 rounded-lg p-2 w-full focus:ring-2 focus:ring-orange-500">
-                        <option>@L["PlexActions_LoadingPlexPlaylists"]...</option>
-                    </select>
-
-                    <button type="button" id="btnShowPlexPlaylist"
-                            class="px-3 bg-orange-500 hover:brightness-110 rounded-lg text-white font-bold text-lg shadow-lg"
-                            title="@L["SpotifyToPlex_ShowPlaylist"]">
-                        ?
-                    </button>
-
-                    <button type="button" id="btnRenamePlex"
-                            class="px-3 bg-blue-500 hover:brightness-110 rounded-lg text-white font-bold text-lg shadow-lg"
-                            title="@L["SpotifyToPlex_RenamePlaylist"]">
-                        ✏️
-                    </button>
-
-                    <button type="button" id="btnDeletePlex"
-                            class="px-3 bg-red-600 hover:brightness-110 rounded-lg text-white font-bold text-lg shadow-lg"
-                            title="@L["SpotifyToPlex_DeletePlaylist"]">
-                        🗑️
-                    </button>
-                </div>
-            </div>
-
-            <form method="post" action="/HomePlex/DisconnectPlex">
-                @Html.AntiForgeryToken()
-                <button type="submit"
-                        class="w-full py-3.5 bg-gradient-to-r from-gray-600 to-gray-800 text-white font-semibold rounded-xl shadow hover:brightness-110">
-                    🗑️ @L["PlexActions_Disconnect"]
-                </button>
-            </form>
-        }
-    </div>
-
-    <!-- ======================= Playlist Modal ======================= -->
-    <div id="playlistModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-        <div class="bg-gray-900 p-6 rounded-2xl shadow-2xl max-w-lg w-full text-left text-white">
-            <h2 class="text-xl font-semibold mb-3">@L["SpotifyToPlex_PlaylistContent"]</h2>
-            <div id="playlistTracks" class="max-h-96 overflow-y-auto space-y-1 text-sm text-gray-300 mb-4"></div>
-            <button id="closeModal"
-                    class="w-full py-2 bg-gradient-to-r from-gray-700 to-gray-800 rounded-lg hover:brightness-110">
-                @L["SpotifyToPlex_Ok"]
-            </button>
-        </div>
-    </div>
-
-    <!-- ======================= Live Export Modal ======================= -->
-    <div id="liveExportModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-        <div class="bg-gray-900 p-6 rounded-2xl shadow-2xl max-w-2xl w-full text-left text-white">
-            <h2 class="text-xl font-semibold mb-1">🎧 @L["SpotifyToPlex_LiveExportStatus"]</h2>
-            <div id="liveNow" class="text-sm text-gray-300 mb-2"></div>
-            <div id="liveLog" class="max-h-96 overflow-y-auto text-sm font-mono bg-black/40 rounded-lg p-3 mb-3"></div>
-            <div id="liveProgress" class="text-gray-300 text-sm mb-2">@L["SpotifyToPlex_Initializing"]</div>
-            <div class="w-full bg-gray-700 rounded-full h-2 mb-4">
-                <div id="liveBar" class="bg-orange-500 h-2 rounded-full transition-all duration-200" style="width:0%;"></div>
-            </div>
-            <div id="liveSummary" class="hidden text-sm text-gray-200 mb-3"></div>
-            <div id="downloadMissingContainer" class="hidden mb-4 text-center">
-                <a id="btnDownloadMissing" href="/HomePlex/DownloadMissing"
-                   class="inline-block px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg font-semibold shadow hover:brightness-110">
-                    📥 @L["SpotifyToPlex_DownloadMissingCsv"]
-                </a>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-                <button id="btnCloseLive" class="py-2 bg-gradient-to-r from-gray-700 to-gray-800 rounded-lg hover:brightness-110">
-                    @L["SpotifyToPlex_Ok"]
-                </button>
-                <button id="btnStopLive" class="py-2 bg-gradient-to-r from-rose-600 to-red-700 rounded-lg hover:brightness-110">
-                    ⏹ @L["SpotifyToPlex_Stop"]
-                </button>
-            </div>
-        </div>
-    </div>
-
     <style>
         #liveExportModal {
             transition: opacity 0.4s ease;
         }
     </style>
+}
 
-    <!-- ======================= SCRIPT ======================= -->
+<div class="max-w-xl mx-auto mt-16 p-8 bg-white/5 rounded-3xl shadow-xl backdrop-blur-sm text-center">
+    <div class="flex justify-center mb-4">
+        <img src="/images/plex-spotify.svg" alt="@L["SpotifyToPlex_LogoAlt"]"
+             class="h-20 w-auto mx-auto drop-shadow-[0_0_8px_rgba(255,160,0,0.4)]"
+             style="max-height:80px;" />
+    </div>
+
+    <h1 class="text-3xl font-bold mb-3">@L["SpotifyToPlex_Title"]</h1>
+    <p class="text-gray-300 mb-8">@L["PlexActions_SyncSpotifyPlaylistsWithPlex"]</p>
+
+    @if (!hasPlex)
+    {
+        <div class="bg-red-600/30 border border-red-500 rounded-lg p-3 mb-4">
+            ⚠️ @L["SpotifyToPlex_TokenExpired"]
+        </div>
+        <a href="/HomePlex/GetPlexPin"
+           class="inline-block px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg text-white font-semibold hover:brightness-110">
+            🔐 @L["SpotifyToPlex_OpenPlexLogin"]
+        </a>
+    }
+    else if (!hasSpotify)
+    {
+        <div class="bg-yellow-600/20 border border-yellow-500 rounded-lg p-3 mb-4">
+            🎧 @L["SpotifyToPlex_Info"]
+        </div>
+        <a href="/Home/Login?returnUrl=/HomePlex/SpotifyToPlex"
+           class="inline-block px-4 py-2 bg-gradient-to-r from-green-400 to-emerald-600 rounded-lg text-black font-semibold hover:brightness-110">
+            🎵 @L["Index_Mit_Spotify_verbinden"]
+        </a>
+    }
+    else if (playlists.Count == 0)
+    {
+        <p class="text-gray-400 mb-6">@L["SpotifyToPlex_Waiting"]</p>
+        <div class="animate-spin h-6 w-6 border-2 border-t-transparent border-orange-500 rounded-full mx-auto"></div>
+    }
+    else
+    {
+        <div class="text-left mb-6">
+            <label for="playlistSelect" class="block text-sm text-gray-400 mb-2">
+                @L["SpotifyToPlex_SelectPlaylist"]
+            </label>
+            <div class="flex space-x-2">
+                <select id="playlistSelect" name="playlistId"
+                        class="flex-1 bg-gray-800 border border-gray-700 rounded-lg p-2 w-full focus:ring-2 focus:ring-orange-500">
+                    @foreach (var item in playlists)
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                </select>
+
+                <button type="button" id="btnShowPlaylist"
+                        class="px-3 bg-orange-500 hover:brightness-110 rounded-lg text-white font-bold text-lg shadow-lg"
+                        title="@L["SpotifyToPlex_ShowPlaylist"]">
+                    ?
+                </button>
+            </div>
+        </div>
+
+        <button type="button" id="btnLiveExport"
+                class="w-full py-3.5 bg-gradient-to-r from-green-400 to-emerald-600 text-black font-semibold rounded-xl shadow hover:brightness-110 mb-3">
+            ⚡ @L["SpotifyToPlex_LiveExport"]
+        </button>
+
+        <button type="button" id="btnLiveExportAll"
+                class="w-full py-3.5 bg-gradient-to-r from-blue-400 to-blue-700 text-white font-semibold rounded-xl shadow hover:brightness-110 mb-3">
+            🌐 @L["SpotifyToPlex_LiveExportAll"]
+        </button>
+
+        <hr class="my-8 border-gray-700">
+
+        <div class="text-left mb-6">
+            <label for="plexSelect" class="block text-sm text-gray-400 mb-2">
+                @L["PlexActions_PlexPlaylists_Title"]
+            </label>
+
+            <div class="flex space-x-2">
+                <select id="plexSelect"
+                        class="flex-1 bg-gray-800 border border-gray-700 rounded-lg p-2 w-full focus:ring-2 focus:ring-orange-500">
+                    <option>@L["PlexActions_LoadingPlexPlaylists"]...</option>
+                </select>
+
+                <button type="button" id="btnShowPlexPlaylist"
+                        class="px-3 bg-orange-500 hover:brightness-110 rounded-lg text-white font-bold text-lg shadow-lg"
+                        title="@L["SpotifyToPlex_ShowPlaylist"]">
+                    ?
+                </button>
+
+                <button type="button" id="btnRenamePlex"
+                        class="px-3 bg-blue-500 hover:brightness-110 rounded-lg text-white font-bold text-lg shadow-lg"
+                        title="@L["SpotifyToPlex_RenamePlaylist"]">
+                    ✏️
+                </button>
+
+                <button type="button" id="btnDeletePlex"
+                        class="px-3 bg-red-600 hover:brightness-110 rounded-lg text-white font-bold text-lg shadow-lg"
+                        title="@L["SpotifyToPlex_DeletePlaylist"]">
+                    🗑️
+                </button>
+            </div>
+        </div>
+
+        <form method="post" action="/HomePlex/DisconnectPlex">
+            @Html.AntiForgeryToken()
+            <button type="submit"
+                    class="w-full py-3.5 bg-gradient-to-r from-gray-600 to-gray-800 text-white font-semibold rounded-xl shadow hover:brightness-110">
+                🗑️ @L["PlexActions_Disconnect"]
+            </button>
+        </form>
+    }
+</div>
+
+<div id="playlistModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div class="bg-gray-900 p-6 rounded-2xl shadow-2xl max-w-lg w-full text-left text-white">
+        <h2 class="text-xl font-semibold mb-3">@L["SpotifyToPlex_PlaylistContent"]</h2>
+        <div id="playlistTracks" class="max-h-96 overflow-y-auto space-y-1 text-sm text-gray-300 mb-4"></div>
+        <button id="closeModal"
+                class="w-full py-2 bg-gradient-to-r from-gray-700 to-gray-800 rounded-lg hover:brightness-110">
+            @L["SpotifyToPlex_Ok"]
+        </button>
+    </div>
+</div>
+
+<div id="liveExportModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div class="bg-gray-900 p-6 rounded-2xl shadow-2xl max-w-2xl w-full text-left text-white">
+        <h2 class="text-xl font-semibold mb-1">🎧 @L["SpotifyToPlex_LiveExportStatus"]</h2>
+        <div id="liveNow" class="text-sm text-gray-300 mb-2"></div>
+        <div id="liveLog" class="max-h-96 overflow-y-auto text-sm font-mono bg-black/40 rounded-lg p-3 mb-3"></div>
+        <div id="liveProgress" class="text-gray-300 text-sm mb-2">@L["SpotifyToPlex_Initializing"]</div>
+        <div class="w-full bg-gray-700 rounded-full h-2 mb-4">
+            <div id="liveBar" class="bg-orange-500 h-2 rounded-full transition-all duration-200" style="width:0%;"></div>
+        </div>
+        <div id="liveSummary" class="hidden text-sm text-gray-200 mb-3"></div>
+        <div id="downloadMissingContainer" class="hidden mb-4 text-center">
+            <a id="btnDownloadMissing" href="/HomePlex/DownloadMissing"
+               class="inline-block px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg font-semibold shadow hover:brightness-110">
+                📥 @L["SpotifyToPlex_DownloadMissingCsv"]
+            </a>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+            <button id="btnCloseLive" class="py-2 bg-gradient-to-r from-gray-700 to-gray-800 rounded-lg hover:brightness-110">
+                @L["SpotifyToPlex_Ok"]
+            </button>
+            <button id="btnStopLive" class="py-2 bg-gradient-to-r from-rose-600 to-red-700 rounded-lg hover:brightness-110">
+                ⏹ @L["SpotifyToPlex_Stop"]
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
     <script>
         let liveEvt = null;
 
-        // ---- Localization JSON ----
         const T = {
             Starting: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_Starting"].Value)),
             Added: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_Added"].Value)),
@@ -207,7 +196,6 @@
             DeleteConfirm: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_DeleteConfirm"].Value))
         };
 
-        // ---- DOM Ready ----
         document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("closeModal")?.addEventListener("click", () => {
                 document.getElementById("playlistModal")?.classList.add("hidden");
@@ -246,7 +234,6 @@
             loadPlexPlaylistsDropdown();
         });
 
-        // ---- Playlist Modal Logic ----
         document.addEventListener("click", async ev => {
             const id = ev.target.id;
 
@@ -333,7 +320,6 @@
             }
         });
 
-        // ---- Live Export Logic ----
         function startLiveExport(playlistId, playlistName) {
             const modal = document.getElementById("liveExportModal");
             const log = document.getElementById("liveLog");
@@ -409,6 +395,4 @@
             }
         }
     </script>
-
-</body>
-</html>
+}

@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Linq;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
@@ -39,13 +40,20 @@ public class HomeController : Controller
         _localizer = localizer;
         _config = config;
 
-        _clientId = _config["Spotify:ClientId"]
-                    ?? Environment.GetEnvironmentVariable("SPOTIFY_CLIENT_ID")
-                    ?? throw new InvalidOperationException("Spotify ClientId fehlt.");
+        _clientId = FirstNonEmpty(
+            _config["Spotify:ClientId"],
+            Environment.GetEnvironmentVariable("SPOTIFY_CLIENT_ID"))
+            ?? throw new InvalidOperationException("Spotify ClientId fehlt.");
 
-        _redirectUri = _config["Spotify:RedirectUri"]
-                       ?? Environment.GetEnvironmentVariable("SPOTIFY_REDIRECT_URI")
-                       ?? throw new InvalidOperationException("Spotify RedirectUri fehlt.");
+        _redirectUri = FirstNonEmpty(
+            _config["Spotify:RedirectUri"],
+            Environment.GetEnvironmentVariable("SPOTIFY_REDIRECT_URI"))
+            ?? throw new InvalidOperationException("Spotify RedirectUri fehlt.");
+
+        static string? FirstNonEmpty(params string?[] values)
+        {
+            return values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
+        }
     }
 
     // ============================

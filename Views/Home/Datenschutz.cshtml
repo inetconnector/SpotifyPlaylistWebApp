@@ -1,27 +1,19 @@
 @using System.Globalization
 @using Microsoft.Extensions.Localization
 @using SpotifyPlaylistWebApp
-@await Html.PartialAsync("LanguageSwitcher")
 @inject IStringLocalizer<SharedResource> L
 @{
     Layout = "Layout";
     ViewData["Title"] = L["Datenschutz_PageTitle"];
+    ViewData["BodyClass"] = "min-h-screen font-sans antialiased";
 }
-<!doctype html>
-<html lang="@CultureInfo.CurrentUICulture.Name">
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>@L["Datenschutz_Datenschutzerkl_rung_InetConnector_Playlist_Gene"]</title>
 
-    <meta name="description" content="@L["Datenschutz_MetaDescription"]"/>
-    <meta name="keywords" content="@L["Datenschutz_MetaKeywords"]"/>
-    <meta name="robots" content="index, follow"/>
-    <link rel="canonical" href="https://playlists.inetconnector.com/Home/Datenschutz"/>
+@section HeadContent {
+    <meta name="description" content="@L["Datenschutz_MetaDescription"]" />
+    <meta name="keywords" content="@L["Datenschutz_MetaKeywords"]" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://playlists.inetconnector.com/Home/Datenschutz" />
 
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- ✅ Strukturierte Daten für Google -->
     <script type="application/ld+json">
         {
           "@@context": "https://schema.org",
@@ -43,10 +35,15 @@
           }
         }
     </script>
+}
 
+@section Styles {
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            background: radial-gradient(1000px 600px at 20% 10%, rgba(16,185,129,0.25), transparent 60%), radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,0.25), transparent 60%), #0b0f17;
+            background: radial-gradient(1000px 600px at 20% 10%, rgba(16,185,129,0.25), transparent 60%),
+                        radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,0.25), transparent 60%),
+                        #0b0f17;
             color: white;
             font-family: system-ui, sans-serif;
         }
@@ -62,24 +59,20 @@
             text-decoration: underline;
         }
 
-            a:hover {
-                color: #34d399;
-            }
+        a:hover {
+            color: #34d399;
+        }
     </style>
-</head>
+}
 
-<body class="min-h-screen font-sans antialiased">
-<header class="max-w-5xl mx-auto px-6 pt-10">
+<div class="max-w-5xl mx-auto px-6 pt-10">
     <div class="flex items-center gap-3">
-        <div>
-            <div class="text-sm uppercase tracking-wider text-white/70">@L["Datenschutz_Datenschutz"]</div>
-        </div>
+        <div class="text-sm uppercase tracking-wider text-white/70">@L["Datenschutz_Datenschutz"]</div>
     </div>
-</header>
+</div>
 
-<main class="max-w-4xl mx-auto px-6 py-14">
+<div class="max-w-4xl mx-auto px-6 py-14">
     <div class="glass rounded-3xl p-8 md:p-10 shadow-xl leading-relaxed text-white/90">
-
         <h1 class="text-3xl md:text-4xl font-bold mb-4">@L["Datenschutz_Datenschutzerkl_rung"]</h1>
         <p>
             <strong>@L["Datenschutz_Letzte_Aktualisierung"]</strong> @L["Datenschutz_Oktober_2025"]
@@ -112,68 +105,25 @@
         <h2 class="text-2xl font-semibold mt-10 mb-2">@L["Datenschutz_Spenden_ber_PayPal"]</h2>
         <p>
             @L["Datenschutz_F_r_freiwillige_Spenden_wird_der_Dienst_PayPal_g"]
-            <a href="https://www.paypal.com/de/webapps/mpp/ua/privacy-full"
-               target="_blank" rel="noopener">
+            <a href="https://www.paypal.com/de/webapps/mpp/ua/privacy-full" target="_blank" rel="noopener">
                 @L["Datenschutz_www_paypal_com_privacy"]
             </a>@L["Datenschutz_Text"]
         </p>
 
         <h2 class="text-2xl font-semibold mt-10 mb-2">@L["Datenschutz_Verantwortlich"]</h2>
         <p>
-            @L["Datenschutz_Verantwortlich_f_r_den_Betrieb_dieser_Anwendung_"]
-            <strong>@L["Datenschutz_playlists_inetconnector_com"]</strong>@L["Datenschutz_Text"]<br/>
-            @L["Datenschutz_Bei_Fragen_oder_Anliegen_zum_Datenschutz_kannst_"]
+            @L["Datenschutz_Verantwortliche_Stelle"]<br />
+            @L["Datenschutz_Daniel_Frede"]<br />
+            @L["Datenschutz_Bismarckstrasse_6e"]<br />
+            @L["Datenschutz_97209_Veitsh_chheim"]<br />
+            @L["Datenschutz_Deutschland"]
         </p>
 
-        <h2 class="text-2xl font-semibold mt-10 mb-2">@L["Datenschutz_Rechtliches"]</h2>
-        <p>
-            @L["Datenschutz_Diese_App_steht_in_keiner_offiziellen_Verbindung"]
-        </p>
+        <hr class="my-8 border-white/20" />
 
-        <hr class="my-10 border-white/20"/>
-
-        <h2 class="text-2xl font-semibold mb-2">@L["Datenschutz_Allgemeine_Hinweise_DSGVO"]</h2>
-        <p>
-            @L["Datenschutz_Verantwortlich_im_Sinne_der_Datenschutzgesetze"]
-        </p>
-        <p class="mt-2">
-            <strong>@L["Datenschutz_Daniel_Frede"]</strong><br>
-            @L["Datenschutz_Bismarckstr_6"]<br>
-            @L["Datenschutz_97209_Veitsh_chheim"]<br>
-            @L["Datenschutz_E_Mail_info_at_inetconnector_com"]
-        </p>
-
-        <p class="mt-6">
-            @L["Datenschutz_Beim_Besuch_dieser_Website_werden_lediglich_die_"]
-        </p>
-
-        <p class="mt-4">
-            @L["Datenschutz_Es_werden_keine_Cookies_keine_Tracking_Tools_und"]
-        </p>
-
-        <p class="mt-4">
-            @L["Datenschutz_Du_hast_gem_Art_15_ff_DSGVO_jederzeit_das_Recht_"]
-        </p>
-
-        <!-- Optional: Google Analytics (DSGVO-konform, vorbereitet) -->
-        <!--
-        <h2 class="text-2xl font-semibold mt-10 mb-2">@L["Datenschutz_Google_Analytics_optional"]</h2>
-        <p>
-            @L["Datenschutz_Diese_Website_kann_optional_Google_Analytics_4_v"]
-        </p>
-        -->
-
-        <p class="mt-6 text-sm text-white/70">
-            @L["Datenschutz_Stand_15_Oktober_2025"]
-        </p>
-
-        <hr class="my-10 border-white/20"/>
-
-        <!-- 🔗 Interne Linkstruktur -->
-        <div class="text-sm text-center text-white/70 space-x-3">
-            <a href="/" class="underline hover:text-white">@L["Datenschutz_Startseite"]</a> @L["Datenschutz_Text"]
-            <a href="/Home/Dashboard" class="underline hover:text-white">@L["Datenschutz_Dashboard"]</a> @L["Datenschutz_Text"]
-            <a href="/Home/Impressum" class="underline hover:text-white">@L["Datenschutz_Impressum"]</a>
+        <div class="text-sm text-white/70 flex flex-wrap gap-4">
+            <a href="/Home/Impressum" class="underline hover:text-white">@L["Datenschutz_Zum_Impressum"]</a>
+            <a href="/Home/Terms" class="underline hover:text-white">@L["Datenschutz_Zu_den_Nutzungsbedingungen"]</a>
         </div>
 
         <div class="mt-12 text-center">
@@ -183,8 +133,4 @@
             </a>
         </div>
     </div>
-</main>
-
-@await Html.PartialAsync("Footer")
-</body>
-</html>
+</div>

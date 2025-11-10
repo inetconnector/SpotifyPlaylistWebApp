@@ -4,87 +4,118 @@
 @using SpotifyPlaylistWebApp
 @model SpotifyPlaylistWebApp.Controllers.ErrorViewModel
 @{
-    Layout = null;
+    Layout = "Layout";
+    ViewData["Title"] = L["Error_Fehler_InetConnector_Playlist_Generator"];
+    ViewData["BodyClass"] = "error-page";
 }
 
-<!doctype html>
-<html lang="@CultureInfo.CurrentUICulture.Name">
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>@L["Error_Fehler_InetConnector_Playlist_Generator"]</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            background: radial-gradient(800px 600px at 20% 10%, rgba(16,185,129,0.25), transparent 60%), radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,0.25), transparent 60%), #0b0f17;
-            color: white;
-            font-family: system-ui, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
+@section Styles {
+<script src="https://cdn.tailwindcss.com"></script>
 
-        .glass {
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 1.5rem;
-            box-shadow: 0 0 25px rgba(0,0,0,0.5);
-            max-width: 600px;
-            width: 90%;
-            padding: 2.5rem;
-            text-align: center;
-        }
-
-        h1 {
-            font-size: 1.75rem;
-            margin-bottom: 1rem;
-            color: #f87171;
-        }
-
-        pre {
-            text-align: left;
-            background: rgba(255,255,255,0.05);
-            padding: 1rem;
-            border-radius: 0.75rem;
-            overflow-x: auto;
-            max-height: 200px;
-            font-size: 0.8rem;
-            color: #fcd34d;
-        }
-
-        a {
-            color: #10b981;
-            text-decoration: underline;
-        }
-
-            a:hover {
-                color: #34d399;
-            }
-    </style>
-</head>
-<body>
-@await Html.PartialAsync("LanguageSwitcher")
-<div class="glass">
-    <h1>@L["Error_Ein_Fehler_ist_aufgetreten"]</h1>
-    <p class="mb-4">
-        @L["Error_Pfad"] <strong>@Model.Path</strong>
-    </p>
-    <p class="mb-6">@Model.Message</p>
-
-    @if (!string.IsNullOrWhiteSpace(Model.StackTrace))
-    {
-        <details class="mb-4">
-            <summary class="cursor-pointer text-white/70 hover:text-white">@L["Error_Details_anzeigen"]</summary>
-            <pre>@Model.StackTrace</pre>
-        </details>
+<style>
+    .error-page {
+        background: radial-gradient(800px 600px at 20% 10%, rgba(16,185,129,0.25), transparent 60%),
+                    radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,0.25), transparent 60%),
+                    #0b0f17;
+        color: white;
+        font-family: system-ui, sans-serif;
+        min-height: 100vh;
     }
 
-    <a href="/Home/Dashboard" class="inline-block mt-3 px-6 py-3 bg-emerald-500 rounded-xl text-white hover:bg-emerald-600 no-underline">
-        @L["Error_Zur_ck_zum_Dashboard"]
-    </a>
+    .error-page main {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        max-width: none;
+        width: 100%;
+        margin: 0;
+        padding: 80px 16px;
+        box-sizing: border-box;
+    }
+
+    .error-page .error-glass {
+        background: rgba(255,255,255,0.08);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 1.5rem;
+        box-shadow: 0 0 25px rgba(0,0,0,0.5);
+        max-width: 600px;
+        width: min(90vw, 600px);
+        padding: 2.5rem;
+        text-align: center;
+    }
+
+    .error-page .error-title {
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
+        color: #f87171;
+    }
+
+    .error-page .error-details {
+        text-align: left;
+        background: rgba(255,255,255,0.05);
+        padding: 1rem;
+        border-radius: 0.75rem;
+        overflow-x: auto;
+        max-height: 200px;
+        font-size: 0.8rem;
+        color: #fcd34d;
+    }
+
+    .error-page a {
+        color: #10b981;
+        text-decoration: underline;
+    }
+
+    .error-page a:hover {
+        color: #34d399;
+    }
+
+    .error-page details summary {
+        cursor: pointer;
+        color: rgba(255,255,255,0.7);
+    }
+
+    .error-page details summary:hover {
+        color: white;
+    }
+
+    .error-page .error-back {
+        display: inline-block;
+        margin-top: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        background: #10B981;
+        color: #fff;
+        border-radius: 1rem;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background 0.2s ease;
+    }
+
+    .error-page .error-back:hover {
+        background: #059669;
+    }
+</style>
+}
+
+<div class="error-wrapper w-full flex justify-center">
+    <div class="error-glass">
+        <h1 class="error-title">@L["Error_Ein_Fehler_ist_aufgetreten"]</h1>
+        <p class="mb-4">
+            @L["Error_Pfad"] <strong>@Model.Path</strong>
+        </p>
+        <p class="mb-6">@Model.Message</p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.StackTrace))
+        {
+            <details class="mb-4">
+                <summary>@L["Error_Details_anzeigen"]</summary>
+                <pre class="error-details">@Model.StackTrace</pre>
+            </details>
+        }
+
+        <a href="/Home/Dashboard" class="error-back">
+            @L["Error_Zur_ck_zum_Dashboard"]
+        </a>
+    </div>
 </div>
-</body>
-</html>

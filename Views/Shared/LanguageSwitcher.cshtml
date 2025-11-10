@@ -6,7 +6,7 @@
     var returnUrl = HttpContextAccessor.HttpContext?.Request?.Path + HttpContextAccessor.HttpContext?.Request?.QueryString;
 }
 
-<div class="lc-switch" role="group" aria-label="Language switcher">
+<div class="lc-switch" role="group">
     <a href="/Language/SetLanguage?culture=de-DE&returnUrl=@returnUrl"
        class="lc-btn @(current == "de-DE" ? "active" : "")"
        aria-current="@(current == "de-DE" ? "true" : "false")"
@@ -34,39 +34,45 @@
 
 <style>
 .lc-switch {
-    position: fixed;
-    top: 10px;
-    right: 20px;
     display: flex;
     gap: .5rem;
     align-items: center;
-    z-index: 999;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
 }
+
 .lc-btn {
     display: inline-flex;
     align-items: center;
     gap: .35rem;
-    padding: .35rem .6rem;
-    border-radius: .5rem;
-    border: 1px solid #bbb;
+    padding: .4rem .75rem;
+    border-radius: .65rem;
+    border: 1px solid rgba(255,255,255,.35);
     color: #fff;
     text-decoration: none;
-    background: rgba(255,255,255,.05);
-    backdrop-filter: saturate(140%);
-    transition: transform .08s ease, background .2s ease, border-color .2s ease;
-}
-.lc-btn:hover {
     background: rgba(255,255,255,.12);
+    backdrop-filter: saturate(140%);
+    font-weight: 500;
+    transition: transform .08s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
 }
+
+.lc-btn:hover {
+    background: rgba(255,255,255,.24);
+    border-color: rgba(255,255,255,.55);
+    box-shadow: 0 4px 16px rgba(15,32,39,.35);
+}
+
 .lc-btn.active {
-    border-color: #fff;
-    background: rgba(255,255,255,.22);
-    font-weight: 600;
+    border-color: rgba(255,255,255,.85);
+    background: rgba(255,255,255,.32);
+    font-weight: 700;
 }
+
 .flag {
     font-size: 1rem;
     line-height: 1;
 }
+
 .label {
     font-size: .9rem;
 }
