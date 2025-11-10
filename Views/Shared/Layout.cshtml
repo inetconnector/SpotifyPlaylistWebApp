@@ -10,18 +10,75 @@
     <title>@ViewData["Title"] - @L["Layout_TitleSuffix"]</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <style>
-        body { background: radial-gradient(circle at top left, #0f2027, #203a43, #2c5364); color: #fff; font-family: system-ui, sans-serif; margin: 0; }
-        main { max-width: 1000px; margin: 0 auto; padding: 80px 20px 40px; }
-        header { position: fixed; top: 10px; right: 20px; z-index: 100; }
+        body {
+            background: radial-gradient(circle at top left, #0f2027, #203a43, #2c5364);
+            color: #fff;
+            font-family: system-ui, sans-serif;
+            margin: 0;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 100px 20px 40px;
+        }
+
+        .site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            gap: 16px;
+            z-index: 100;
+            background: linear-gradient(90deg, rgba(15, 32, 39, 0.85), rgba(44, 83, 100, 0.75));
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .site-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.9rem;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            color: #fff;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.08);
+            transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .site-home:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.16);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .site-header nav {
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body>
-<header>
-    <partial name="LanguageSwitcher"/>
+<header class="site-header">
+    <a class="site-home" href="/">
+        <span aria-hidden="true">🏠</span>
+        <span>@L["Button_BackToHome"]</span>
+    </a>
+    <nav aria-label="Language switcher">
+        <partial name="LanguageSwitcher"/>
+    </nav>
 </header>
 <main role="main" class="pb-3">
     @RenderBody()
 </main>
+
+<partial name="Footer" />
 
 <div id="toast-root" style="position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:9999;"></div>
 <script>
