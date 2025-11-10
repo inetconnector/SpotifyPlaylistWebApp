@@ -6,6 +6,7 @@ using SpotifyAPI.Web;
 using SpotifyPlaylistWebApp.Services;
 using System.Text.Json;
 using System.Xml;
+using System.Linq;
 
 namespace SpotifyPlaylistWebApp.Controllers
 {
@@ -402,6 +403,42 @@ namespace SpotifyPlaylistWebApp.Controllers
             catch (Exception ex)
             {
                 return Content($"Error: {ex.Message}");
+            }
+        }
+
+        // ==============================================================
+        // 🔸 AJAX: Get tracks of a Spotify playlist
+        // ==============================================================
+        [HttpGet("GetPlaylistTracks")]
+        public async Task<IActionResult> GetPlaylistTracks([FromServices] PlexService plex, string playlistId)
+        {
+            try
+            {
+                var spotifyToken = HttpContext.Session.GetString(SessionSpotifyTokenKey);
+
+                if (string.IsNullOrWhiteSpace(spotifyToken))
+                    return Json(new { success = false, message = _localizer["SpotifyToPlex_TokenExpired"].Value });
+
+                if (string.IsNullOrWhiteSpace(playlistId))
+                    return Json(new { success = false, message = _localizer["SpotifyToPlex_LoadError"].Value });
+
+                var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault(spotifyToken));
+                var tracks = await plex.GetSpotifyPlaylistTracksAsync(spotify, playlistId);
+
+                var result = tracks
+                    .Select(t => new { title = t.Title, artist = t.Artist, album = t.Album })
+                    .ToList();
+
+                return Json(new { success = true, tracks = result });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[GetPlaylistTracks] " + ex);
+                return Json(new
+                {
+                    success = false,
+                    message = $"{_localizer["SpotifyToPlex_LoadError"].Value}: {ex.Message}"
+                });
             }
         }
 
