@@ -43,23 +43,19 @@ public class HomeController : Controller
         _clientId = FirstNonEmpty(
             _config["Spotify:ClientId"],
             Environment.GetEnvironmentVariable("SPOTIFY_CLIENT_ID"))
-            ?? throw new InvalidOperationException("Spotify ClientId fehlt.");
+            ?? throw new InvalidOperationException("Spotify ClientId is missing. Add SPOTIFY_CLIENT_ID to environment variables");
 
         _redirectUri = FirstNonEmpty(
             _config["Spotify:RedirectUri"],
             Environment.GetEnvironmentVariable("SPOTIFY_REDIRECT_URI"))
-            ?? throw new InvalidOperationException("Spotify RedirectUri fehlt.");
+            ?? throw new InvalidOperationException("Spotify RedirectUri is missing. Add SPOTIFY_REDIRECT_URI to environment variables");
 
         static string? FirstNonEmpty(params string?[] values)
         {
             return values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
         }
     }
-
-    // ============================
-    // 🔸 Grundseiten
-    // ============================
-
+     
     public IActionResult Index()
     {
         return View();
