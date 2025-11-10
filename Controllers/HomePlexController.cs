@@ -468,6 +468,7 @@ namespace SpotifyPlaylistWebApp.Controllers
                     var found = await plex.SearchTracksOnPlexAsync(baseUrl, plexToken,
                         new List<(string Title, string Artist)> { (title, artist) });
                     var match = found.FirstOrDefault();
+                    var shouldReportProgress = false;
 
                     if (!string.IsNullOrEmpty(match.RatingKey))
                     {
@@ -1020,6 +1021,7 @@ namespace SpotifyPlaylistWebApp.Controllers
                         var found = await plex.SearchTracksOnPlexAsync(baseUrl, plexToken,
                             new List<(string Title, string Artist)> { (title, artist) });
                         var match = found.FirstOrDefault();
+                        var shouldReportProgress = false;
 
                         if (!string.IsNullOrEmpty(match.RatingKey))
                         {
