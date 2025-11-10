@@ -327,6 +327,8 @@
             const progress = document.getElementById("liveProgress");
             const summary = document.getElementById("liveSummary");
             const now = document.getElementById("liveNow");
+            const downloadContainer = document.getElementById("downloadMissingContainer");
+            const downloadLink = document.getElementById("btnDownloadMissing");
 
             modal.classList.remove("hidden");
             log.innerHTML = "";
@@ -334,6 +336,11 @@
             progress.textContent = T.Starting;
             summary.classList.add("hidden");
             now.textContent = "";
+            downloadContainer?.classList.add("hidden");
+            if (downloadLink) {
+                downloadLink.href = "/HomePlex/DownloadMissing";
+                downloadLink.removeAttribute("download");
+            }
 
             if (liveEvt) try { liveEvt.close(); } catch {}
             liveEvt = new EventSource(`/HomePlex/ExportOneLive?playlistId=${encodeURIComponent(playlistId)}&playlistName=${encodeURIComponent(playlistName)}`);
@@ -355,8 +362,16 @@
                     progress.innerHTML = `<b>${T.Done}</b>`;
                     summary.classList.remove("hidden");
                     summary.innerHTML = `✅ ${added} ${T.Added} | ❌ ${miss} ${T.Missing} | ⚠️ ${fail} failed | 🎵 ${total} ${T.Total}`;
-                    if (+miss > 0)
-                        document.getElementById("downloadMissingContainer")?.classList.remove("hidden");
+                    if (+miss > 0) {
+                        downloadContainer?.classList.remove("hidden");
+                        if (downloadLink) {
+                            const params = new URLSearchParams({ playlistName });
+                            downloadLink.href = `/HomePlex/DownloadMissing?${params.toString()}`;
+                            downloadLink.setAttribute("download", buildMissingFileName(playlistName));
+                        }
+                    } else {
+                        downloadContainer?.classList.add("hidden");
+                    }
                     try { liveEvt.close(); } catch {}
                     liveEvt = null;
                     return;
@@ -375,6 +390,12 @@
             const log = document.getElementById("liveLog");
             log.innerHTML += html + "<br/>";
             log.scrollTop = log.scrollHeight;
+        }
+
+        function buildMissingFileName(name) {
+            const cleaned = (name || "playlist").replace(/[\\/:*?"<>|]+/g, "_").trim();
+            const finalName = cleaned || "playlist";
+            return `${finalName}_missing.csv`;
         }
 
         async function loadPlexPlaylistsDropdown() {

@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Localization;
 using SpotifyAPI.Web;
 using SpotifyPlaylistWebApp.Services;
+using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Xml;
 
@@ -345,11 +347,46 @@ namespace SpotifyPlaylistWebApp.Controllers
                 // Eintrag löschen und Cache speichern
                 plex.RemoveMissingEntry(machineId, playlistName);
 
-                return File(csv, "text/csv", $"{playlistName}_missing.csv");
+                var safeFileName = SanitizeFileName(playlistName);
+                return File(csv, "text/csv", $"{safeFileName}_missing.csv");
             }
             catch (Exception ex)
             {
                 return Content($"Error while exporting missing list: {ex.Message}", "text/plain");
+            }
+        }
+
+        [HttpGet("GetPlaylistTracks")]
+        public async Task<IActionResult> GetPlaylistTracks(
+            [FromServices] PlexService plex,
+            [FromServices] IStringLocalizer<SharedResource> L,
+            string playlistId)
+        {
+            try
+            {
+                var spotifyToken = HttpContext.Session.GetString(SessionSpotifyTokenKey);
+
+                if (string.IsNullOrEmpty(spotifyToken))
+                    return Json(new { success = false, message = L["SpotifyToPlex_TokenExpired"].Value });
+
+                if (string.IsNullOrWhiteSpace(playlistId))
+                    return Json(new { success = false, message = L["Job_Error_Preparation"].Value });
+
+                var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault(spotifyToken));
+                var tracks = await plex.GetSpotifyPlaylistTracksAsync(spotify, playlistId);
+                var result = tracks.Select(t => new { title = t.Title, artist = t.Artist }).ToList();
+
+                return Json(new { success = true, tracks = result });
+            }
+            catch (APIException apiEx)
+            {
+                Console.WriteLine("[GetPlaylistTracks:Spotify] " + apiEx);
+                return Json(new { success = false, message = apiEx.Message });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[GetPlaylistTracks] " + ex);
+                return Json(new { success = false, message = $"{L["SpotifyToPlex_LoadError"].Value}: {ex.Message}" });
             }
         }
 
@@ -815,6 +852,14 @@ namespace SpotifyPlaylistWebApp.Controllers
                     });
 
             return new JsonResult(cache);
+        }
+
+        private static string SanitizeFileName(string? playlistName)
+        {
+            var candidate = string.IsNullOrWhiteSpace(playlistName) ? "playlist" : playlistName;
+            var invalid = Path.GetInvalidFileNameChars();
+            var sanitized = new string(candidate.Select(ch => invalid.Contains(ch) ? '_' : ch).ToArray()).Trim();
+            return string.IsNullOrWhiteSpace(sanitized) ? "playlist" : sanitized;
         }
     }
 }
