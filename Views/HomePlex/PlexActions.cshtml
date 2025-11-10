@@ -102,6 +102,11 @@
                 🌐 @L["SpotifyToPlex_LiveExportAll"]
             </button>
 
+            <button type="button" id="btnLiveStatus"
+                    class="w-full py-3.5 bg-gradient-to-r from-slate-500 to-slate-700 text-white font-semibold rounded-xl shadow hover:brightness-110 mb-8">
+                📊 @L["SpotifyToPlex_LiveExportStatus"]
+            </button>
+
             <hr class="my-8 border-gray-700">
 
             <div class="text-left mb-6">
@@ -208,6 +213,8 @@
             LoadError: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_LoadError"].Value)),
             ExportStopped: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_ExportStopped"].Value)),
             NowExporting: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_NowExporting"].Value)),
+            Cancelling: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_Cancelling"].Value)),
+            NoLiveExport: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_NoLiveExport"].Value)),
             RenamePrompt: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_RenamePrompt"].Value)),
             RenamedOk: @Html.Raw(JsonSerializer.Serialize(L["SpotifyToPlex_RenamePlaylist"].Value + " – OK")),
             RenameError: @Html.Raw(JsonSerializer.Serialize(L["Job_Error_Preparation"].Value)),
@@ -222,20 +229,23 @@
                 document.getElementById("playlistModal")?.classList.add("hidden");
             });
 
-            document.getElementById("btnStopLive")?.addEventListener("click", () => {
-                if (liveEvt) {
-                    try { liveEvt.close(); } catch {}
-                    liveEvt = null;
-                    appendLiveLog("<div class='text-red-400'>⏹ Export stopped by user.</div>");
-                    document.getElementById("liveProgress").textContent = T.ExportStopped;
-                    document.getElementById("liveNow").textContent = "";
+            document.getElementById("btnStopLive")?.addEventListener("click", async () => {
+                try {
+                    const res = await fetch("/HomePlex/CancelLiveExport", { method: "POST" });
+                    const data = await res.json();
+                    if (data.success) {
+                        appendLiveLog(`⏹ ${T.Cancelling}`, null, "stopping");
+                    } else if (data.message) {
+                        appendLiveLog(`❌ ${data.message}`, null, "error");
+                    }
+                } catch {
+                    appendLiveLog(`❌ ${T.LoadError}`, null, "error");
                 }
             });
 
             document.getElementById("btnCloseLive")?.addEventListener("click", () => {
                 document.getElementById("liveExportModal")?.classList.add("hidden");
-                try { liveEvt?.close(); } catch {}
-                liveEvt = null;
+                closeLiveStream();
             });
 
             document.getElementById("btnLiveExport")?.addEventListener("click", () => {
@@ -244,12 +254,18 @@
                 const id = sel.value;
                 let name = sel.options[sel.selectedIndex].text;
                 name = name.replace(/\s*\([^)]*\)\s*$/g, "");
-                startLiveExport(id, name);
+                openLiveExportModal();
+                connectLiveStream(`/HomePlex/ExportOneLive?playlistId=${encodeURIComponent(id)}&playlistName=${encodeURIComponent(name)}`);
             });
 
             document.getElementById("btnLiveExportAll")?.addEventListener("click", () => {
-                const evt = new EventSource("/HomePlex/ExportAllLive");
-                evt.onmessage = e => appendLiveLog(e.data);
+                openLiveExportModal();
+                connectLiveStream("/HomePlex/ExportAllLive");
+            });
+
+            document.getElementById("btnLiveStatus")?.addEventListener("click", () => {
+                openLiveExportModal();
+                connectLiveStream("/HomePlex/LiveExportStream");
             });
 
             loadPlexPlaylistsDropdown();
@@ -343,7 +359,7 @@
         });
 
         // ---- Live Export Logic ----
-        function startLiveExport(playlistId, playlistName) {
+        function openLiveExportModal() {
             const modal = document.getElementById("liveExportModal");
             const log = document.getElementById("liveLog");
             const bar = document.getElementById("liveBar");
@@ -356,48 +372,160 @@
             bar.style.width = "0%";
             progress.textContent = T.Starting;
             summary.classList.add("hidden");
+            summary.innerHTML = "";
             now.textContent = "";
+            document.getElementById("downloadMissingContainer")?.classList.add("hidden");
+        }
 
-            if (liveEvt) try { liveEvt.close(); } catch {}
-            liveEvt = new EventSource(`/HomePlex/ExportOneLive?playlistId=${encodeURIComponent(playlistId)}&playlistName=${encodeURIComponent(playlistName)}`);
-
-            liveEvt.onmessage = e => {
-                const data = e.data || "";
-                if (data.startsWith("✅")) return appendLiveLog(`<div class='text-green-400'>${data}</div>`);
-                if (data.startsWith("❌")) return appendLiveLog(`<div class='text-red-400'>${data}</div>`);
-                if (data.startsWith("progress:")) {
-                    const [, added, miss, total] = data.split(":");
-                    const pct = total > 0 ? Math.round(((+added + +miss) / +total) * 100) : 0;
-                    bar.style.width = pct + "%";
-                    progress.textContent = `✅ ${added} ${T.Added}   ❌ ${miss} ${T.Missing}   (${pct}%)`;
-                    return;
-                }
-                if (data.startsWith("done:")) {
-                    const [, added, miss, fail, total] = data.split(":");
-                    bar.style.width = "100%";
-                    progress.innerHTML = `<b>${T.Done}</b>`;
-                    summary.classList.remove("hidden");
-                    summary.innerHTML = `✅ ${added} ${T.Added} | ❌ ${miss} ${T.Missing} | ⚠️ ${fail} failed | 🎵 ${total} ${T.Total}`;
-                    if (+miss > 0)
-                        document.getElementById("downloadMissingContainer")?.classList.remove("hidden");
-                    try { liveEvt.close(); } catch {}
-                    liveEvt = null;
-                    return;
-                }
-                appendLiveLog(data);
-            };
-
-            liveEvt.onerror = () => {
-                appendLiveLog("<div class='text-red-400'>❌ " + T.ConnectionLost + "</div>");
+        function closeLiveStream() {
+            if (liveEvt) {
                 try { liveEvt.close(); } catch {}
                 liveEvt = null;
+            }
+        }
+
+        function connectLiveStream(url) {
+            closeLiveStream();
+            liveEvt = new EventSource(url);
+            liveEvt.onmessage = handleLiveEvent;
+            liveEvt.onerror = () => {
+                appendLiveLog(`❌ ${T.ConnectionLost}`, null, "error");
+                closeLiveStream();
             };
         }
 
-        function appendLiveLog(html) {
+        function handleLiveEvent(evt) {
+            if (!evt?.data) return;
+            try {
+                const payload = JSON.parse(evt.data);
+                processLiveEvent(payload);
+            } catch {
+                appendLiveLog(evt.data, null, "log");
+            }
+        }
+
+        function processLiveEvent(payload) {
+            if (!payload) return;
+            const type = (payload.type || payload.Type || "log").toLowerCase();
+            const data = payload.data || payload.Data || {};
+            const message = payload.message || payload.Message || "";
+            const timestamp = payload.timestamp || payload.Timestamp || null;
+
+            if (message) appendLiveLog(message, timestamp, type);
+
+            switch (type) {
+                case "progress":
+                    updateProgress(data);
+                    break;
+                case "summary":
+                    showSummary(data);
+                    break;
+                case "playlist-progress":
+                    updatePlaylistProgress(data);
+                    break;
+                case "status":
+                    updateStatus(data);
+                    break;
+                case "all-complete":
+                    showSummary(data);
+                    updateStatus(data);
+                    break;
+                case "stopped":
+                case "stopping":
+                    showSummary(data);
+                    updateStatus(data);
+                    break;
+                case "error":
+                    updateStatus(data);
+                    break;
+            }
+
+            if (data && (data.added !== undefined || data.Added !== undefined ||
+                data.missing !== undefined || data.Missing !== undefined ||
+                data.failed !== undefined || data.Failed !== undefined)) {
+                updateProgress(data);
+            }
+        }
+
+        function appendLiveLog(message, timestamp, type = "log") {
             const log = document.getElementById("liveLog");
-            log.innerHTML += html + "<br/>";
+            if (!log) return;
+
+            const row = document.createElement("div");
+            const baseClass = type === "error" ? "text-red-400" :
+                type === "stopped" || type === "stopping" ? "text-amber-300" :
+                    type === "summary" ? "text-green-400" : "text-gray-200";
+            row.className = `${baseClass} flex items-start gap-2`;
+
+            const timeSpan = document.createElement("span");
+            timeSpan.className = "text-gray-500 shrink-0";
+            const date = timestamp ? new Date(timestamp) : new Date();
+            if (!Number.isNaN(date.getTime()))
+                timeSpan.textContent = `[${date.toLocaleTimeString()}]`;
+            else
+                timeSpan.textContent = "";
+
+            const textSpan = document.createElement("span");
+            textSpan.textContent = message;
+
+            row.appendChild(timeSpan);
+            row.appendChild(textSpan);
+            log.appendChild(row);
             log.scrollTop = log.scrollHeight;
+        }
+
+        function updateProgress(data) {
+            const bar = document.getElementById("liveBar");
+            const progress = document.getElementById("liveProgress");
+            if (!bar || !progress || !data) return;
+
+            const total = Number(data.total ?? data.Total ?? 0);
+            const added = Number(data.added ?? data.Added ?? 0);
+            const missing = Number(data.missing ?? data.Missing ?? 0);
+            const failed = Number(data.failed ?? data.Failed ?? 0);
+            const pct = total > 0 ? Math.min(100, Math.round(((added + missing + failed) / total) * 100)) : 0;
+
+            bar.style.width = `${pct}%`;
+            progress.textContent = `${pct}% · ✅ ${added} ${T.Added} | ❌ ${missing} ${T.Missing} | ⚠️ ${failed}`;
+        }
+
+        function updatePlaylistProgress(data) {
+            const now = document.getElementById("liveNow");
+            if (!now || !data) return;
+
+            const completed = data.completedPlaylists ?? data.CompletedPlaylists ?? 0;
+            const total = data.totalPlaylists ?? data.TotalPlaylists ?? 0;
+            const playlist = data.playlist ?? data.Playlist ?? "";
+
+            const aggregate = total ? ` (${completed}/${total})` : "";
+            now.textContent = playlist ? `${playlist}${aggregate}` : (total ? `${completed}/${total}` : "");
+        }
+
+        function updateStatus(data) {
+            if (!data) return;
+            updatePlaylistProgress(data);
+
+            const statusValue = data.status ?? data.Status;
+            const running = data.isRunning ?? data.IsRunning;
+            if (statusValue === "idle" && !running) {
+                closeLiveStream();
+            }
+        }
+
+        function showSummary(data) {
+            const summary = document.getElementById("liveSummary");
+            if (!summary) return;
+
+            const added = Number(data?.added ?? data?.Added ?? 0);
+            const missing = Number(data?.missing ?? data?.Missing ?? 0);
+            const failed = Number(data?.failed ?? data?.Failed ?? 0);
+            const total = Number(data?.total ?? data?.Total ?? 0);
+
+            summary.classList.remove("hidden");
+            summary.innerHTML = `✅ ${added} ${T.Added} | ❌ ${missing} ${T.Missing} | ⚠️ ${failed} | 🎵 ${total} ${T.Total}`;
+
+            if (missing > 0)
+                document.getElementById("downloadMissingContainer")?.classList.remove("hidden");
         }
 
         async function loadPlexPlaylistsDropdown() {

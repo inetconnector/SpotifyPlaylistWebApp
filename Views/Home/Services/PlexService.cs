@@ -1,9 +1,13 @@
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using System.Linq;
+using System.Threading;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Localization;
 using SpotifyAPI.Web;
@@ -33,8 +37,125 @@ public class PlexService
     // ============================================================
     // 🔸 SSE (Server-Sent Events) Support for live export feedback
     // ============================================================
-    private static readonly ConcurrentDictionary<string, StreamWriter> _sseStreams = new();
+    private static readonly ConcurrentDictionary<string, ConcurrentDictionary<Guid, StreamWriter>> _sseStreams = new();
+    private static readonly ConcurrentDictionary<string, LiveExportState> _liveExports = new();
+    private static readonly JsonSerializerOptions _sseJsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
     private readonly MissingCacheStore _cacheStore;
+
+    public class LiveExportEvent
+    {
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public string Type { get; set; } = "log";
+        public string Message { get; set; } = string.Empty;
+        public Dictionary<string, object?>? Data { get; set; }
+            = null;
+
+        public LiveExportEvent Clone()
+        {
+            return new LiveExportEvent
+            {
+                Timestamp = Timestamp,
+                Type = Type,
+                Message = Message,
+                Data = Data != null
+                    ? new Dictionary<string, object?>(Data)
+                    : null
+            };
+        }
+    }
+
+    public class LiveExportSnapshot
+    {
+        public string? ExportId { get; set; }
+        public string Status { get; set; } = "idle";
+        public bool IsRunning { get; set; }
+        public DateTime? Started { get; set; }
+        public DateTime? Finished { get; set; }
+        public string? CurrentPlaylist { get; set; }
+        public int TotalPlaylists { get; set; }
+        public int CompletedPlaylists { get; set; }
+        public int Added { get; set; }
+        public int Missing { get; set; }
+        public int Failed { get; set; }
+        public int TotalTracks { get; set; }
+        public string? LastMessage { get; set; }
+        public List<LiveExportEvent> Log { get; set; } = new();
+    }
+
+    public class LiveExportState
+    {
+        public LiveExportState(string sessionId, string mode)
+        {
+            SessionId = sessionId;
+            Mode = mode;
+            ExportId = Guid.NewGuid().ToString("N");
+            Cancellation = new CancellationTokenSource();
+            Started = DateTime.UtcNow;
+        }
+
+        public string SessionId { get; }
+        public string Mode { get; private set; }
+        public string ExportId { get; }
+        public CancellationTokenSource Cancellation { get; private set; }
+        public DateTime Started { get; private set; }
+        public DateTime? Finished { get; set; }
+        public string Status { get; set; } = "running";
+        public string? CurrentPlaylist { get; set; }
+        public int TotalPlaylists { get; set; }
+        public int CompletedPlaylists { get; set; }
+        public int Added { get; set; }
+        public int Missing { get; set; }
+        public int Failed { get; set; }
+        public int TotalTracks { get; set; }
+        public string? LastMessage { get; set; }
+        public List<LiveExportEvent> Log { get; } = new();
+
+        public bool IsRunning =>
+            Status.Equals("running", StringComparison.OrdinalIgnoreCase) &&
+            !Cancellation.IsCancellationRequested;
+
+        public void Reset(string mode)
+        {
+            Cancellation.Dispose();
+            Mode = mode;
+            Cancellation = new CancellationTokenSource();
+            Log.Clear();
+            Added = Missing = Failed = 0;
+            CompletedPlaylists = 0;
+            TotalPlaylists = 0;
+            TotalTracks = 0;
+            CurrentPlaylist = null;
+            LastMessage = null;
+            Status = "running";
+            Started = DateTime.UtcNow;
+            Finished = null;
+        }
+
+        public LiveExportSnapshot ToSnapshot()
+        {
+            return new LiveExportSnapshot
+            {
+                ExportId = ExportId,
+                Status = Status,
+                IsRunning = IsRunning,
+                Started = Started,
+                Finished = Finished,
+                CurrentPlaylist = CurrentPlaylist,
+                TotalPlaylists = TotalPlaylists,
+                CompletedPlaylists = CompletedPlaylists,
+                Added = Added,
+                Missing = Missing,
+                Failed = Failed,
+                TotalTracks = TotalTracks,
+                LastMessage = LastMessage,
+                Log = Log.Select(e => e.Clone()).ToList()
+            };
+        }
+    }
 
     private readonly HttpClient _http;
     private readonly IStringLocalizer<SharedResource> _localizer;
@@ -61,32 +182,58 @@ public class PlexService
         if (string.IsNullOrEmpty(exportId))
             return;
 
-        if (_sseStreams.TryGetValue(exportId, out var writer))
-            try
+        if (_sseStreams.TryGetValue(exportId, out var clients))
+        {
+            foreach (var kvp in clients.ToArray())
             {
-                await writer.WriteAsync($"data: {message}\n\n");
-                await writer.FlushAsync();
+                var clientId = kvp.Key;
+                var writer = kvp.Value;
+
+                try
+                {
+                    await writer.WriteAsync($"data: {message}\n\n");
+                    await writer.FlushAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[SSE] ❌ Failed to send message: {ex.Message}");
+
+                    if (clients.TryRemove(clientId, out var failedWriter))
+                        try
+                        {
+                            failedWriter.Dispose();
+                        }
+                        catch
+                        {
+                            /* ignored */
+                        }
+                }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[SSE] ❌ Failed to send message: {ex.Message}");
-            }
+
+            if (clients.IsEmpty)
+                _sseStreams.TryRemove(exportId, out _);
+        }
     }
 
     /// <summary>
     ///     Registers a new SSE stream for a given export session.
     /// </summary>
-    public static void RegisterSseStream(string exportId, StreamWriter writer)
+    public static Guid RegisterSseStream(string exportId, StreamWriter writer)
     {
-        _sseStreams[exportId] = writer;
+        var clientId = Guid.NewGuid();
+        var bucket = _sseStreams.GetOrAdd(exportId, _ => new ConcurrentDictionary<Guid, StreamWriter>());
+        bucket[clientId] = writer;
+        return clientId;
     }
 
     /// <summary>
     ///     Unregisters and closes an SSE stream after export completes.
     /// </summary>
-    public static void UnregisterSseStream(string exportId)
+    public static void UnregisterSseStream(string exportId, Guid clientId)
     {
-        if (_sseStreams.TryRemove(exportId, out var writer))
+        if (_sseStreams.TryGetValue(exportId, out var bucket) &&
+            bucket.TryRemove(clientId, out var writer))
+        {
             try
             {
                 writer.Dispose();
@@ -95,6 +242,157 @@ public class PlexService
             {
                 /* ignored */
             }
+
+            if (bucket.IsEmpty)
+                _sseStreams.TryRemove(exportId, out _);
+        }
+    }
+
+    public static bool TryBeginLiveExport(string sessionId, string mode,
+        out LiveExportState state, out string? activeExportId)
+    {
+        if (string.IsNullOrWhiteSpace(sessionId))
+            throw new ArgumentException("sessionId must not be empty.", nameof(sessionId));
+
+        if (_liveExports.TryGetValue(sessionId, out var existing))
+        {
+            lock (existing)
+            {
+                if (existing.IsRunning)
+                {
+                    state = existing;
+                    activeExportId = existing.ExportId;
+                    return false;
+                }
+            }
+
+            _liveExports.TryRemove(sessionId, out _);
+        }
+
+        state = new LiveExportState(sessionId, mode);
+        _liveExports[sessionId] = state;
+        activeExportId = null;
+        return true;
+    }
+
+    public static bool HasActiveExport(string sessionId)
+    {
+        if (_liveExports.TryGetValue(sessionId, out var state))
+        {
+            lock (state)
+            {
+                return state.IsRunning;
+            }
+        }
+
+        return false;
+    }
+
+    public static void UpdateLiveExport(string sessionId, Action<LiveExportState> updater)
+    {
+        if (updater == null)
+            return;
+
+        if (_liveExports.TryGetValue(sessionId, out var state))
+            lock (state)
+            {
+                updater(state);
+            }
+    }
+
+    private static void AppendLiveEvent(string sessionId, LiveExportEvent evt)
+    {
+        if (_liveExports.TryGetValue(sessionId, out var state))
+            lock (state)
+            {
+                state.LastMessage = evt.Message;
+                state.Log.Add(evt);
+
+                const int maxLogEntries = 250;
+                if (state.Log.Count > maxLogEntries)
+                    state.Log.RemoveRange(0, state.Log.Count - maxLogEntries);
+            }
+    }
+
+    public static void CompleteLiveExport(string sessionId, string status, string? finalMessage = null)
+    {
+        if (_liveExports.TryGetValue(sessionId, out var state))
+            lock (state)
+            {
+                state.Status = status;
+                state.Finished = DateTime.UtcNow;
+                if (!string.IsNullOrWhiteSpace(finalMessage))
+                    state.LastMessage = finalMessage;
+            }
+    }
+
+    public static bool TryCancelLiveExport(string sessionId, out string? exportId)
+    {
+        exportId = null;
+
+        if (_liveExports.TryGetValue(sessionId, out var state))
+        {
+            lock (state)
+            {
+                if (!state.IsRunning)
+                    return false;
+
+                if (!state.Cancellation.IsCancellationRequested)
+                    state.Cancellation.Cancel();
+
+                state.Status = "cancelling";
+                exportId = state.ExportId;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static LiveExportSnapshot GetLiveExportSnapshot(string sessionId)
+    {
+        if (_liveExports.TryGetValue(sessionId, out var state))
+        {
+            lock (state)
+            {
+                return state.ToSnapshot();
+            }
+        }
+
+        return new LiveExportSnapshot
+        {
+            Status = "idle",
+            IsRunning = false,
+            Log = new List<LiveExportEvent>()
+        };
+    }
+
+    public async Task PublishLiveEventAsync(string sessionId, string exportId, string type,
+        string message, Dictionary<string, object?>? data = null)
+    {
+        var payload = data != null
+            ? new Dictionary<string, object?>(data)
+            : null;
+
+        var evt = new LiveExportEvent
+        {
+            Timestamp = DateTime.UtcNow,
+            Type = string.IsNullOrWhiteSpace(type) ? "log" : type,
+            Message = message ?? string.Empty,
+            Data = payload
+        };
+
+        AppendLiveEvent(sessionId, evt);
+
+        var json = JsonSerializer.Serialize(new
+        {
+            evt.Type,
+            evt.Message,
+            Data = evt.Data,
+            evt.Timestamp
+        }, _sseJsonOptions);
+
+        await SendSseAsync(exportId, json);
     }
 
 
