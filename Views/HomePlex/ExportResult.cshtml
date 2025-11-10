@@ -4,7 +4,7 @@
 @using SpotifyPlaylistWebApp
 @inject IStringLocalizer<SharedResource> L
 @{
-    Layout = "Layout";
+    Layout = null;
     ViewData["Title"] = L["SpotifyToPlex_ExportTitle"];
 
     var data = TempData["ExportOneResult"]?.ToString();
@@ -36,9 +36,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <script src="https://cdn.tailwindcss.com"></script>
     <title>@ViewData["Title"]</title>
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+        }
+    </style>
 </head>
 
 <body class="min-h-screen bg-gradient-to-b from-[#0b0f17] to-[#141a27] text-white font-sans">
+
+    @await Html.PartialAsync("LanguageSwitcher")
 
 <div class="max-w-xl mx-auto mt-16 p-8 bg-white/5 rounded-3xl shadow-xl backdrop-blur-sm text-center">
 
@@ -75,6 +84,8 @@
         </button>
     </form>
 </div>
+
+    @await Html.PartialAsync("Footer")
 
 </body>
 </html>
