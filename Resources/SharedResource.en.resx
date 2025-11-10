@@ -855,6 +855,18 @@ Third-party contributions are marked as such. Duplication, processing, distribut
   <data name="SpotifyToPlex_ExportStopped" xml:space="preserve">
   <value>Export stopped.</value>
 </data>
+  <data name="SpotifyToPlex_Cancelling" xml:space="preserve">
+    <value>Stopping live export…</value>
+  </data>
+  <data name="SpotifyToPlex_NoLiveExport" xml:space="preserve">
+    <value>No live export is active.</value>
+  </data>
+  <data name="SpotifyToPlex_ExportAlreadyRunning" xml:space="preserve">
+    <value>A live export is already running.</value>
+  </data>
+  <data name="SpotifyToPlex_AlreadyInPlex" xml:space="preserve">
+    <value>Already in Plex playlist</value>
+  </data>
   <data name="SpotifyToPlex_SyncAll" xml:space="preserve">
     <value>Sync all playlists</value>
   </data>

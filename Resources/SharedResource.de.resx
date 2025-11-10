@@ -873,6 +873,18 @@
   <data name="SpotifyToPlex_ExportStopped" xml:space="preserve">
   <value>Export abgebrochen.</value>
 </data>
+  <data name="SpotifyToPlex_Cancelling" xml:space="preserve">
+    <value>Live-Export wird beendet…</value>
+  </data>
+  <data name="SpotifyToPlex_NoLiveExport" xml:space="preserve">
+    <value>Kein Live-Export aktiv.</value>
+  </data>
+  <data name="SpotifyToPlex_ExportAlreadyRunning" xml:space="preserve">
+    <value>Ein Live-Export läuft bereits.</value>
+  </data>
+  <data name="SpotifyToPlex_AlreadyInPlex" xml:space="preserve">
+    <value>Bereits in Plex-Playlist</value>
+  </data>
   <data name="SpotifyToPlex_SyncAll" xml:space="preserve">
     <value>Alle Playlists synchronisieren</value>
   </data>

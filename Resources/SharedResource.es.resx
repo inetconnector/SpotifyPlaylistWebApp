@@ -805,6 +805,18 @@ Por lo tanto, no podemos asumir ninguna responsabilidad por estos contenidos ext
   <data name="SpotifyToPlex_ExportStopped" xml:space="preserve">
     <value>Exportación cancelada.</value>
   </data>
+  <data name="SpotifyToPlex_Cancelling" xml:space="preserve">
+    <value>Deteniendo la exportación en vivo…</value>
+  </data>
+  <data name="SpotifyToPlex_NoLiveExport" xml:space="preserve">
+    <value>No hay ninguna exportación en vivo activa.</value>
+  </data>
+  <data name="SpotifyToPlex_ExportAlreadyRunning" xml:space="preserve">
+    <value>Ya hay una exportación en vivo en curso.</value>
+  </data>
+  <data name="SpotifyToPlex_AlreadyInPlex" xml:space="preserve">
+    <value>Ya está en la lista de reproducción de Plex</value>
+  </data>
   <data name="SpotifyToPlex_SyncAll" xml:space="preserve">
     <value>Sincronizar todas las listas</value>
   </data>

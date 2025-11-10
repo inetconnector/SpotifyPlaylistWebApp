@@ -7,6 +7,8 @@ using SpotifyPlaylistWebApp.Services;
 using System.Text.Json;
 using System.Xml;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace SpotifyPlaylistWebApp.Controllers
 {
@@ -20,12 +22,169 @@ namespace SpotifyPlaylistWebApp.Controllers
             public string? Token { get; set; }
         }
 
+        [HttpGet("LiveExportStatus")]
+        public IActionResult LiveExportStatus()
+        {
+            var sessionId = HttpContext.Session.Id;
+            var snapshot = PlexService.GetLiveExportSnapshot(sessionId);
+
+            return Json(new
+            {
+                snapshot.ExportId,
+                snapshot.Status,
+                snapshot.IsRunning,
+                snapshot.Started,
+                snapshot.Finished,
+                snapshot.CurrentPlaylist,
+                snapshot.TotalPlaylists,
+                snapshot.CompletedPlaylists,
+                snapshot.Added,
+                snapshot.Missing,
+                snapshot.Failed,
+                snapshot.TotalTracks,
+                snapshot.LastMessage,
+                Log = snapshot.Log.Select(evt => new
+                {
+                    evt.Timestamp,
+                    evt.Type,
+                    evt.Message,
+                    evt.Data
+                }).ToList()
+            });
+        }
+
+        [HttpPost("CancelLiveExport")]
+        public async Task<IActionResult> CancelLiveExport([FromServices] PlexService plex)
+        {
+            var sessionId = HttpContext.Session.Id;
+
+            if (PlexService.TryCancelLiveExport(sessionId, out var exportId) &&
+                !string.IsNullOrEmpty(exportId))
+            {
+                await plex.PublishLiveEventAsync(sessionId, exportId, "stopping",
+                    $"⏹ {_localizer["SpotifyToPlex_Cancelling"].Value}");
+
+                return Json(new { success = true });
+            }
+
+            return Json(new
+            {
+                success = false,
+                message = _localizer["SpotifyToPlex_NoLiveExport"].Value
+            });
+        }
+
+        [HttpGet("LiveExportStream")]
+        public async Task LiveExportStream()
+        {
+            Response.ContentType = "text/event-stream";
+            Response.Headers.Add("Cache-Control", "no-cache");
+
+            await using var writer = new StreamWriter(Response.Body);
+
+            var sessionId = HttpContext.Session.Id;
+            var snapshot = PlexService.GetLiveExportSnapshot(sessionId);
+
+            if (string.IsNullOrEmpty(snapshot.ExportId))
+            {
+                var payload = JsonSerializer.Serialize(new
+                {
+                    type = "status",
+                    status = snapshot.Status,
+                    message = _localizer["SpotifyToPlex_NoLiveExport"].Value,
+                    data = new
+                    {
+                        snapshot.Status,
+                        snapshot.IsRunning,
+                        snapshot.TotalPlaylists,
+                        snapshot.CompletedPlaylists,
+                        snapshot.Added,
+                        snapshot.Missing,
+                        snapshot.Failed
+                    }
+                });
+
+                await writer.WriteAsync($"data: {payload}\n\n");
+                await writer.FlushAsync();
+                return;
+            }
+
+            var exportId = snapshot.ExportId;
+            var registrationId = PlexService.RegisterSseStream(exportId, writer);
+
+            try
+            {
+                var statusPayload = JsonSerializer.Serialize(new
+                {
+                    type = "status",
+                    status = snapshot.Status,
+                    snapshot.IsRunning,
+                    snapshot.CurrentPlaylist,
+                    snapshot.TotalPlaylists,
+                    snapshot.CompletedPlaylists,
+                    snapshot.Added,
+                    snapshot.Missing,
+                    snapshot.Failed,
+                    snapshot.TotalTracks,
+                    snapshot.LastMessage,
+                    snapshot.Started,
+                    snapshot.Finished
+                });
+
+                await writer.WriteAsync($"data: {statusPayload}\n\n");
+                await writer.FlushAsync();
+
+                foreach (var evt in snapshot.Log)
+                {
+                    var json = JsonSerializer.Serialize(new
+                    {
+                        evt.Type,
+                        evt.Message,
+                        evt.Data,
+                        evt.Timestamp
+                    });
+
+                    await writer.WriteAsync($"data: {json}\n\n");
+                    await writer.FlushAsync();
+                }
+
+                try
+                {
+                    await Task.Delay(TimeSpan.FromMinutes(30), HttpContext.RequestAborted);
+                }
+                catch (TaskCanceledException)
+                {
+                }
+            }
+            finally
+            {
+                PlexService.UnregisterSseStream(exportId, registrationId);
+            }
+        }
+
         private const string SessionSpotifyTokenKey = "SpotifyAccessToken";
         private readonly IStringLocalizer<SharedResource> _localizer;
 
         public HomePlexController(IStringLocalizer<SharedResource> localizer)
         {
             _localizer = localizer;
+        }
+
+        private static string NormalizePlexPlaylistTitle(string? title)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+                return string.Empty;
+
+            var clean = title.Trim();
+            clean = Regex.Replace(clean, @"_Spotify_\d{4}-\d{2}-\d{2}$", string.Empty,
+                RegexOptions.IgnoreCase);
+            clean = Regex.Replace(clean, @"\s*\([^)]*\)\s*$", string.Empty);
+            return clean.Trim();
+        }
+
+        private static string BuildTrackKey(string artist, string title)
+        {
+            return $"{(artist ?? string.Empty).Trim()}—{(title ?? string.Empty).Trim()}";
         }
 
 
@@ -157,65 +316,116 @@ namespace SpotifyPlaylistWebApp.Controllers
             string playlistId,
             string playlistName)
         {
-            var exportId = Guid.NewGuid().ToString();
             Response.ContentType = "text/event-stream";
             Response.Headers.Add("Cache-Control", "no-cache");
 
             await using var writer = new StreamWriter(Response.Body);
-            PlexService.RegisterSseStream(exportId, writer);
 
             var plexToken = HttpContext.Session.GetString("PlexAuthToken");
             var spotifyToken = HttpContext.Session.GetString("SpotifyAccessToken");
 
             if (string.IsNullOrWhiteSpace(plexToken) || string.IsNullOrWhiteSpace(spotifyToken))
             {
-                await plex.SendSseAsync(exportId, $"❌ {L["SpotifyToPlex_TokenExpired"]}");
+                var payload = JsonSerializer.Serialize(new
+                {
+                    type = "error",
+                    message = _localizer["SpotifyToPlex_TokenExpired"].Value
+                });
+
+                await writer.WriteAsync($"data: {payload}\n\n");
+                await writer.FlushAsync();
                 return;
             }
 
-            var (baseUrl, defaultMachineId) = await plex.DiscoverServerAsync(plexToken);
+            var sessionId = HttpContext.Session.Id;
+
+            if (!PlexService.TryBeginLiveExport(sessionId, "single", out var liveState,
+                    out var activeExportId))
+            {
+                var payload = JsonSerializer.Serialize(new
+                {
+                    type = "error",
+                    message = _localizer["SpotifyToPlex_ExportAlreadyRunning"].Value,
+                    data = new { exportId = activeExportId }
+                });
+
+                await writer.WriteAsync($"data: {payload}\n\n");
+                await writer.FlushAsync();
+                return;
+            }
+
+            var exportId = liveState.ExportId;
+            var registrationId = PlexService.RegisterSseStream(exportId, writer);
+            var cancellation = liveState.Cancellation;
+            string baseUrl = string.Empty;
+            string defaultMachineId = string.Empty;
+
             var missingList = new List<(string Artist, string Title, string? Album)>();
 
             try
             {
-
                 var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault(spotifyToken));
                 var tracks = await plex.GetSpotifyPlaylistTracksAsync(spotify, playlistId);
 
-                await plex.SendSseAsync(exportId,
-                    $"{L["SpotifyToPlex_Exporting"]}: '{playlistName}' ({tracks.Count} {L["SpotifyToPlex_Tracks"]})");
+                PlexService.UpdateLiveExport(sessionId, state =>
+                {
+                    state.TotalPlaylists = 1;
+                    state.CurrentPlaylist = playlistName;
+                    state.TotalTracks = tracks.Count;
+                });
+
+                await plex.PublishLiveEventAsync(sessionId, exportId, "status",
+                    string.Format(L["SpotifyToPlex_Exporting"].Value, playlistName),
+                    new Dictionary<string, object?>
+                    {
+                        ["playlist"] = playlistName,
+                        ["totalTracks"] = tracks.Count
+                    });
+
+                (baseUrl, defaultMachineId) = await plex.DiscoverServerAsync(plexToken);
+                plex.LoadMissingCacheForServer(defaultMachineId);
 
                 var existing = await plex.GetPlexPlaylistsAsync(baseUrl, plexToken);
+                var normalizedName = NormalizePlexPlaylistTitle(playlistName);
                 var old = existing.FirstOrDefault(p =>
-                    p.Title.Equals(playlistName, StringComparison.OrdinalIgnoreCase));
+                    NormalizePlexPlaylistTitle(p.Title)
+                        .Equals(normalizedName, StringComparison.OrdinalIgnoreCase));
 
                 string plexPlaylistKey;
 
                 if (!string.IsNullOrEmpty(old.RatingKey))
                 {
                     plexPlaylistKey = old.RatingKey;
-                    await plex.SendSseAsync(exportId, $"♻️ {L["SpotifyToPlex_Continuing"]}: {playlistName}");
+                    await plex.PublishLiveEventAsync(sessionId, exportId, "log",
+                        $"♻️ {L["SpotifyToPlex_Continuing"].Value}: {playlistName}");
                 }
                 else
                 {
-                    await plex.SendSseAsync(exportId, $"🪄 {L["SpotifyToPlex_CreatingPlaylist"]}: {playlistName}");
+                    await plex.PublishLiveEventAsync(sessionId, exportId, "log",
+                        $"🪄 {L["SpotifyToPlex_CreatingPlaylist"].Value}: {playlistName}");
                     plexPlaylistKey = await plex.CreatePlaylistAsync(baseUrl, plexToken, playlistName);
                     if (string.IsNullOrEmpty(plexPlaylistKey))
                     {
-                        await plex.SendSseAsync(exportId, "❌ ERROR Could not create Plex playlist.");
+                        await plex.PublishLiveEventAsync(sessionId, exportId, "error",
+                            "❌ Could not create Plex playlist.");
+                        PlexService.CompleteLiveExport(sessionId, "failed",
+                            "Could not create Plex playlist");
                         return;
                     }
                 }
 
-                int failed = 0, added = 0, missing = 0, total = tracks.Count;
+                var existingTracks = await plex.GetPlaylistTracksAsync(baseUrl, plexToken, plexPlaylistKey);
+                var existingTrackSet = new HashSet<string>(
+                    existingTracks.Select(t => BuildTrackKey(t.Artist, t.Title)),
+                    StringComparer.OrdinalIgnoreCase);
 
                 var oldCache = PlexService.GetMissingCacheSnapshot();
                 var processed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
                 if (oldCache.TryGetValue(playlistName, out var cached))
                 {
-                    await plex.SendSseAsync(exportId,
-                        $"📄 {L["SpotifyToPlex_Continuing"]}: {cached.Items.Count} cached entries found");
+                    await plex.PublishLiveEventAsync(sessionId, exportId, "log",
+                        $"📄 {L["SpotifyToPlex_Continuing"].Value}: {cached.Items.Count} cached entries");
 
                     foreach (var entry in cached.Items)
                     {
@@ -224,24 +434,36 @@ namespace SpotifyPlaylistWebApp.Controllers
                         {
                             var artist = parts[0].Trim();
                             var title = parts.Last().Trim();
-                            processed.Add($"{artist}—{title}");
+                            var key = BuildTrackKey(artist, title);
+                            processed.Add(key);
                             missingList.Add((artist, title, parts.Length > 2 ? parts[1].Trim() : null));
                         }
                     }
                 }
 
-                // ============================================================
-                // 🔸 Batch-wise export (keep 1 to be safe with Plex)
-                // ============================================================
                 const int batchSize = 1;
+                int failed = 0, added = 0, missing = 0, total = tracks.Count;
                 var matchedKeys = new List<string>();
 
                 foreach (var (title, artist, album) in tracks)
                 {
-                    if (processed.Contains($"{artist}—{title}"))
+                    if (cancellation.IsCancellationRequested)
+                        break;
+
+                    var trackKey = BuildTrackKey(artist, title);
+                    if (processed.Contains(trackKey))
                         continue;
 
-                    await plex.SendSseAsync(exportId, $"🔍 {L["SpotifyToPlex_Searching"]}: {artist} — {title}");
+                    if (existingTrackSet.Contains(trackKey))
+                    {
+                        processed.Add(trackKey);
+                        await plex.PublishLiveEventAsync(sessionId, exportId, "log",
+                            $"ℹ️ {L["SpotifyToPlex_AlreadyInPlex"].Value}: {artist} — {title}");
+                        continue;
+                    }
+
+                    await plex.PublishLiveEventAsync(sessionId, exportId, "log",
+                        $"🔍 {L["SpotifyToPlex_Searching"].Value}: {artist} — {title}");
 
                     var found = await plex.SearchTracksOnPlexAsync(baseUrl, plexToken,
                         new List<(string Title, string Artist)> { (title, artist) });
@@ -250,15 +472,41 @@ namespace SpotifyPlaylistWebApp.Controllers
                     if (!string.IsNullOrEmpty(match.RatingKey))
                     {
                         matchedKeys.Add(match.RatingKey);
+                        existingTrackSet.Add(trackKey);
+                        processed.Add(trackKey);
                         added++;
-                        await plex.SendSseAsync(exportId, $"✅ {L["SpotifyToPlex_Found"]}: {artist} — {title}");
+                        await plex.PublishLiveEventAsync(sessionId, exportId, "log",
+                            $"✅ {L["SpotifyToPlex_Found"].Value}: {artist} — {title}");
                     }
                     else
                     {
                         missing++;
+                        processed.Add(trackKey);
                         missingList.Add((artist, title, album));
-                        await plex.SendSseAsync(exportId, $"❌ {L["SpotifyToPlex_MissingTrack"]}: {artist} — {title}");
+                        await plex.PublishLiveEventAsync(sessionId, exportId, "log",
+                            $"❌ {L["SpotifyToPlex_MissingTrack"].Value}: {artist} — {title}");
                     }
+
+                    PlexService.UpdateLiveExport(sessionId, state =>
+                    {
+                        state.Added = added;
+                        state.Missing = missing;
+                        state.Failed = failed;
+                        state.TotalTracks = total;
+                    });
+
+                    var progressData = new Dictionary<string, object?>
+                    {
+                        ["added"] = added,
+                        ["missing"] = missing,
+                        ["failed"] = failed,
+                        ["total"] = total,
+                        ["playlist"] = playlistName,
+                        ["completedPlaylists"] = 0,
+                        ["totalPlaylists"] = 1
+                    };
+
+                    await plex.PublishLiveEventAsync(sessionId, exportId, "progress", string.Empty, progressData);
 
                     if (matchedKeys.Count >= batchSize)
                     {
@@ -267,15 +515,12 @@ namespace SpotifyPlaylistWebApp.Controllers
                             matchedKeys, defaultMachineId, exportId);
 
                         matchedKeys.Clear();
-                        await plex.SendSseAsync(exportId, $"progress:{added}:{missing}:{total}");
                     }
 
                     PlexService.UpdateMissingCache(playlistName, missingList);
-                    PlexService.SaveMissingCacheToFile();
                 }
 
-                // send remaining batch
-                if (matchedKeys.Count > 0)
+                if (!cancellation.IsCancellationRequested && matchedKeys.Count > 0)
                 {
                     await plex.AddTracksToPlaylistAsync(
                         baseUrl, plexToken, plexPlaylistKey,
@@ -284,18 +529,56 @@ namespace SpotifyPlaylistWebApp.Controllers
 
                 PlexService.UpdateMissingCache(playlistName, missingList);
                 PlexService.SaveMissingCacheToFile();
-                await plex.SendSseAsync(exportId, $"done:{added}:{missing}:{failed}:{total}");
+
+                var summaryData = new Dictionary<string, object?>
+                {
+                    ["added"] = added,
+                    ["missing"] = missing,
+                    ["failed"] = failed,
+                    ["total"] = total,
+                    ["playlist"] = playlistName
+                };
+
+                if (cancellation.IsCancellationRequested)
+                {
+                    PlexService.UpdateLiveExport(sessionId, state =>
+                    {
+                        state.CompletedPlaylists = 0;
+                        state.Added = added;
+                        state.Missing = missing;
+                        state.Failed = failed;
+                    });
+                    await plex.PublishLiveEventAsync(sessionId, exportId, "stopped",
+                        $"⏹ {L["SpotifyToPlex_ExportStopped"].Value}", summaryData);
+                    PlexService.CompleteLiveExport(sessionId, "cancelled",
+                        L["SpotifyToPlex_ExportStopped"].Value);
+                }
+                else
+                {
+                    PlexService.UpdateLiveExport(sessionId, state =>
+                    {
+                        state.CompletedPlaylists = 1;
+                        state.Added = added;
+                        state.Missing = missing;
+                        state.Failed = failed;
+                        state.TotalPlaylists = 1;
+                    });
+                    await plex.PublishLiveEventAsync(sessionId, exportId, "summary",
+                        $"✅ {L["SpotifyToPlex_Done"].Value}: {playlistName}", summaryData);
+                    PlexService.CompleteLiveExport(sessionId, "completed",
+                        $"{playlistName}: {added} added");
+                }
             }
             catch (Exception ex)
             {
-                await plex.SendSseAsync(exportId, $"❌ ERROR {ex.Message}");
+                await plex.PublishLiveEventAsync(sessionId, exportId, "error", $"❌ ERROR {ex.Message}");
+                PlexService.CompleteLiveExport(sessionId, "failed", ex.Message);
                 PlexService.SaveMissingCacheToFile();
             }
             finally
             {
                 try
                 {
-                    await plex.SendSseAsync(exportId, $"⚠️ {L["SpotifyToPlex_ExportAbortedOrFinished"]}");
                     await writer.FlushAsync();
                 }
                 catch
@@ -303,8 +586,10 @@ namespace SpotifyPlaylistWebApp.Controllers
                     Console.WriteLine("[ExportOneLive] SSE client disconnected before flush.");
                 }
 
-                plex.SaveMissingCacheForServer(defaultMachineId);
-                PlexService.UnregisterSseStream(exportId);
+                if (!string.IsNullOrEmpty(defaultMachineId))
+                    plex.SaveMissingCacheForServer(defaultMachineId);
+
+                PlexService.UnregisterSseStream(exportId, registrationId);
                 PlexService.SaveMissingCacheToFile();
             }
         }
@@ -562,68 +847,138 @@ namespace SpotifyPlaylistWebApp.Controllers
             [FromServices] PlexService plex,
             [FromServices] IStringLocalizer<SharedResource> L)
         {
-            var exportId = Guid.NewGuid().ToString();
             Response.ContentType = "text/event-stream";
             Response.Headers.Add("Cache-Control", "no-cache");
 
             await using var writer = new StreamWriter(Response.Body);
-            PlexService.RegisterSseStream(exportId, writer);
 
             var plexToken = HttpContext.Session.GetString("PlexAuthToken");
             var spotifyToken = HttpContext.Session.GetString("SpotifyAccessToken");
 
             if (plexToken == null || spotifyToken == null)
             {
-                await plex.SendSseAsync(exportId, $"❌ {L["SpotifyToPlex_TokenExpired"]}");
+                var payload = JsonSerializer.Serialize(new
+                {
+                    type = "error",
+                    message = _localizer["SpotifyToPlex_TokenExpired"].Value
+                });
+
+                await writer.WriteAsync($"data: {payload}\n\n");
+                await writer.FlushAsync();
                 return;
             }
+
+            var sessionId = HttpContext.Session.Id;
+
+            if (!PlexService.TryBeginLiveExport(sessionId, "all", out var liveState,
+                    out var activeExportId))
+            {
+                var payload = JsonSerializer.Serialize(new
+                {
+                    type = "error",
+                    message = _localizer["SpotifyToPlex_ExportAlreadyRunning"].Value,
+                    data = new { exportId = activeExportId }
+                });
+
+                await writer.WriteAsync($"data: {payload}\n\n");
+                await writer.FlushAsync();
+                return;
+            }
+
+            var exportId = liveState.ExportId;
+            var registrationId = PlexService.RegisterSseStream(exportId, writer);
+            var cancellation = liveState.Cancellation;
+            string baseUrl = string.Empty;
+            string defaultMachineId = string.Empty;
 
             try
             {
                 var spotify = new SpotifyClient(SpotifyClientConfig.CreateDefault(spotifyToken));
-                var (baseUrl, defaultMachineId) = await plex.DiscoverServerAsync(plexToken);
+                (baseUrl, defaultMachineId) = await plex.DiscoverServerAsync(plexToken);
                 plex.LoadMissingCacheForServer(defaultMachineId);
 
                 var playlists = await plex.GetAllSpotifyPlaylistsAsync(spotify);
                 var totalPlaylists = playlists.Count;
                 int processedPlaylists = 0;
+                int totalAddedAll = 0, totalMissingAll = 0, totalFailedAll = 0;
 
-                // kein Sprachwort "playlists" anhängen -> rein numerisch + Start-Text
-                await plex.SendSseAsync(exportId, $"🎧 {L["SpotifyToPlex_Starting"]}: {totalPlaylists}");
+                PlexService.UpdateLiveExport(sessionId, state =>
+                {
+                    state.TotalPlaylists = totalPlaylists;
+                    state.CompletedPlaylists = 0;
+                    state.CurrentPlaylist = null;
+                });
+
+                await plex.PublishLiveEventAsync(sessionId, exportId, "status",
+                    $"🎧 {L["SpotifyToPlex_Starting"].Value}: {totalPlaylists}",
+                    new Dictionary<string, object?> { ["totalPlaylists"] = totalPlaylists });
 
                 foreach (var item in playlists)
                 {
+                    if (cancellation.IsCancellationRequested)
+                        break;
+
                     processedPlaylists++;
                     var playlistId = item.Value;
                     var playlistName = item.Text;
                     var missingList = new List<(string Artist, string Title, string? Album)>();
 
-                    await plex.SendSseAsync(exportId, $"🎵 {L["SpotifyToPlex_Exporting"]}: {playlistName}");
+                    PlexService.UpdateLiveExport(sessionId, state =>
+                    {
+                        state.CurrentPlaylist = playlistName;
+                        state.CompletedPlaylists = processedPlaylists - 1;
+                    });
+
+                    await plex.PublishLiveEventAsync(sessionId, exportId, "status",
+                        $"🎵 {L["SpotifyToPlex_Exporting"].Value}: {playlistName}",
+                        new Dictionary<string, object?>
+                        {
+                            ["playlist"] = playlistName,
+                            ["completedPlaylists"] = processedPlaylists - 1,
+                            ["totalPlaylists"] = totalPlaylists
+                        });
 
                     var existing = await plex.GetPlexPlaylistsAsync(baseUrl, plexToken);
+                    var normalizedName = NormalizePlexPlaylistTitle(playlistName);
                     var old = existing.FirstOrDefault(p =>
-                        p.Title.Equals(playlistName, StringComparison.OrdinalIgnoreCase));
+                        NormalizePlexPlaylistTitle(p.Title)
+                            .Equals(normalizedName, StringComparison.OrdinalIgnoreCase));
 
                     string plexPlaylistKey;
                     if (!string.IsNullOrEmpty(old.RatingKey))
                     {
                         plexPlaylistKey = old.RatingKey;
-                        await plex.SendSseAsync(exportId, $"♻️ {L["SpotifyToPlex_Continuing"]}: {playlistName}");
+                        await plex.PublishLiveEventAsync(sessionId, exportId, "log",
+                            $"♻️ {L["SpotifyToPlex_Continuing"].Value}: {playlistName}");
                     }
                     else
                     {
+                        await plex.PublishLiveEventAsync(sessionId, exportId, "log",
+                            $"🪄 {L["SpotifyToPlex_CreatingPlaylist"].Value}: {playlistName}");
                         plexPlaylistKey = await plex.CreatePlaylistAsync(baseUrl, plexToken, playlistName);
-                        await plex.SendSseAsync(exportId, $"🪄 {L["SpotifyToPlex_CreatingPlaylist"]}: {playlistName}");
+                        if (string.IsNullOrEmpty(plexPlaylistKey))
+                        {
+                            await plex.PublishLiveEventAsync(sessionId, exportId, "error",
+                                "❌ Could not create Plex playlist.");
+                            PlexService.CompleteLiveExport(sessionId, "failed",
+                                "Could not create Plex playlist");
+                            return;
+                        }
                     }
 
                     var tracks = await plex.GetSpotifyPlaylistTracksAsync(spotify, playlistId);
+                    var existingTracks = await plex.GetPlaylistTracksAsync(baseUrl, plexToken, plexPlaylistKey);
+                    var existingTrackSet = new HashSet<string>(
+                        existingTracks.Select(t => BuildTrackKey(t.Artist, t.Title)),
+                        StringComparer.OrdinalIgnoreCase);
+
                     var oldCache = PlexService.GetMissingCacheSnapshot();
                     var processed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
                     if (oldCache.TryGetValue(playlistName, out var cached))
                     {
-                        await plex.SendSseAsync(exportId,
-                            $"📄 {L["SpotifyToPlex_Continuing"]}: {cached.Items.Count} cached entries");
+                        await plex.PublishLiveEventAsync(sessionId, exportId, "log",
+                            $"📄 {L["SpotifyToPlex_Continuing"].Value}: {cached.Items.Count} cached entries");
                         foreach (var entry in cached.Items)
                         {
                             var parts = entry.Split('—');
@@ -631,7 +986,8 @@ namespace SpotifyPlaylistWebApp.Controllers
                             {
                                 var artist = parts[0].Trim();
                                 var title = parts.Last().Trim();
-                                processed.Add($"{artist}—{title}");
+                                var key = BuildTrackKey(artist, title);
+                                processed.Add(key);
                                 missingList.Add((artist, title, parts.Length > 2 ? parts[1].Trim() : null));
                             }
                         }
@@ -639,12 +995,27 @@ namespace SpotifyPlaylistWebApp.Controllers
 
                     const int batchSize = 1;
                     var matchedKeys = new List<string>();
-                    int added = 0, failed = 0, missing = 0, total = tracks.Count;
+                    int added = 0, missing = 0, failed = 0, total = tracks.Count;
 
                     foreach (var (title, artist, album) in tracks)
                     {
-                        if (processed.Contains($"{artist}—{title}"))
+                        if (cancellation.IsCancellationRequested)
+                            break;
+
+                        var trackKey = BuildTrackKey(artist, title);
+                        if (processed.Contains(trackKey))
                             continue;
+
+                        if (existingTrackSet.Contains(trackKey))
+                        {
+                            processed.Add(trackKey);
+                            await plex.PublishLiveEventAsync(sessionId, exportId, "log",
+                                $"ℹ️ {L["SpotifyToPlex_AlreadyInPlex"].Value}: {artist} — {title}");
+                            continue;
+                        }
+
+                        await plex.PublishLiveEventAsync(sessionId, exportId, "log",
+                            $"🔍 {L["SpotifyToPlex_Searching"].Value}: {artist} — {title}");
 
                         var found = await plex.SearchTracksOnPlexAsync(baseUrl, plexToken,
                             new List<(string Title, string Artist)> { (title, artist) });
@@ -653,13 +1024,41 @@ namespace SpotifyPlaylistWebApp.Controllers
                         if (!string.IsNullOrEmpty(match.RatingKey))
                         {
                             matchedKeys.Add(match.RatingKey);
+                            existingTrackSet.Add(trackKey);
+                            processed.Add(trackKey);
                             added++;
+                            await plex.PublishLiveEventAsync(sessionId, exportId, "log",
+                                $"✅ {L["SpotifyToPlex_Found"].Value}: {artist} — {title}");
                         }
                         else
                         {
                             missing++;
+                            processed.Add(trackKey);
                             missingList.Add((artist, title, album));
+                            await plex.PublishLiveEventAsync(sessionId, exportId, "log",
+                                $"❌ {L["SpotifyToPlex_MissingTrack"].Value}: {artist} — {title}");
                         }
+
+                        var progressData = new Dictionary<string, object?>
+                        {
+                            ["added"] = added,
+                            ["missing"] = missing,
+                            ["failed"] = failed,
+                            ["total"] = total,
+                            ["playlist"] = playlistName,
+                            ["completedPlaylists"] = processedPlaylists - 1,
+                            ["totalPlaylists"] = totalPlaylists
+                        };
+
+                        await plex.PublishLiveEventAsync(sessionId, exportId, "progress", string.Empty, progressData);
+
+                        PlexService.UpdateLiveExport(sessionId, state =>
+                        {
+                            state.Added = totalAddedAll + added;
+                            state.Missing = totalMissingAll + missing;
+                            state.Failed = totalFailedAll + failed;
+                            state.TotalTracks = total;
+                        });
 
                         if (matchedKeys.Count >= batchSize)
                         {
@@ -667,13 +1066,12 @@ namespace SpotifyPlaylistWebApp.Controllers
                                 baseUrl, plexToken, plexPlaylistKey,
                                 matchedKeys, defaultMachineId, exportId);
                             matchedKeys.Clear();
-                            await plex.SendSseAsync(exportId, $"progress:{added}:{missing}:{total}");
                         }
 
                         PlexService.UpdateMissingCache(playlistName, missingList);
                     }
 
-                    if (matchedKeys.Count > 0)
+                    if (!cancellation.IsCancellationRequested && matchedKeys.Count > 0)
                     {
                         await plex.AddTracksToPlaylistAsync(
                             baseUrl, plexToken, plexPlaylistKey,
@@ -682,18 +1080,81 @@ namespace SpotifyPlaylistWebApp.Controllers
 
                     PlexService.UpdateMissingCache(playlistName, missingList);
                     PlexService.SaveMissingCacheToFile();
-                    await plex.SendSseAsync(exportId, $"done:{added}:{missing}:{failed}:{total}");
 
-                    await plex.SendSseAsync(exportId,
-                        $"✅ {L["SpotifyToPlex_Done"]}: {playlistName} ({added} added, {missing} missing)");
-                    await plex.SendSseAsync(exportId, $"progressPlaylists:{processedPlaylists}:{totalPlaylists}");
+                    totalAddedAll += added;
+                    totalMissingAll += missing;
+                    totalFailedAll += failed;
+
+                    var playlistSummary = new Dictionary<string, object?>
+                    {
+                        ["added"] = added,
+                        ["missing"] = missing,
+                        ["failed"] = failed,
+                        ["total"] = total,
+                        ["playlist"] = playlistName,
+                        ["completedPlaylists"] = processedPlaylists,
+                        ["totalPlaylists"] = totalPlaylists
+                    };
+
+                    if (cancellation.IsCancellationRequested)
+                    {
+                        await plex.PublishLiveEventAsync(sessionId, exportId, "stopped",
+                            $"⏹ {L["SpotifyToPlex_ExportStopped"].Value}", playlistSummary);
+                        PlexService.UpdateLiveExport(sessionId, state =>
+                        {
+                            state.CompletedPlaylists = processedPlaylists;
+                            state.Added = totalAddedAll;
+                            state.Missing = totalMissingAll;
+                            state.Failed = totalFailedAll;
+                        });
+                        break;
+                    }
+
+                    await plex.PublishLiveEventAsync(sessionId, exportId, "summary",
+                        $"✅ {L["SpotifyToPlex_Done"].Value}: {playlistName}", playlistSummary);
+
+                    PlexService.UpdateLiveExport(sessionId, state =>
+                    {
+                        state.CompletedPlaylists = processedPlaylists;
+                        state.Added = totalAddedAll;
+                        state.Missing = totalMissingAll;
+                        state.Failed = totalFailedAll;
+                        state.TotalTracks = total;
+                    });
+
+                    await plex.PublishLiveEventAsync(sessionId, exportId, "playlist-progress", string.Empty,
+                        new Dictionary<string, object?>
+                        {
+                            ["completedPlaylists"] = processedPlaylists,
+                            ["totalPlaylists"] = totalPlaylists
+                        });
                 }
 
-                await plex.SendSseAsync(exportId, $"🎉 {L["SpotifyToPlex_AllPlaylistsExported"]}");
+                if (cancellation.IsCancellationRequested)
+                {
+                    PlexService.CompleteLiveExport(sessionId, "cancelled",
+                        L["SpotifyToPlex_ExportStopped"].Value);
+                }
+                else
+                {
+                    await plex.PublishLiveEventAsync(sessionId, exportId, "all-complete",
+                        $"🎉 {L["SpotifyToPlex_AllPlaylistsExported"].Value}",
+                        new Dictionary<string, object?>
+                        {
+                            ["processed"] = processedPlaylists,
+                            ["total"] = totalPlaylists,
+                            ["added"] = totalAddedAll,
+                            ["missing"] = totalMissingAll,
+                            ["failed"] = totalFailedAll
+                        });
+                    PlexService.CompleteLiveExport(sessionId, "completed",
+                        L["SpotifyToPlex_AllPlaylistsExported"].Value);
+                }
             }
             catch (Exception ex)
             {
-                await plex.SendSseAsync(exportId, $"❌ ERROR {ex.Message}");
+                await plex.PublishLiveEventAsync(sessionId, exportId, "error", $"❌ ERROR {ex.Message}");
+                PlexService.CompleteLiveExport(sessionId, "failed", ex.Message);
                 PlexService.SaveMissingCacheToFile();
             }
             finally
@@ -704,9 +1165,14 @@ namespace SpotifyPlaylistWebApp.Controllers
                 }
                 catch
                 {
+                    Console.WriteLine("[ExportAllLive] Completed SSE stream.");
                 }
 
-                PlexService.UnregisterSseStream(exportId);
+                if (!string.IsNullOrEmpty(defaultMachineId))
+                    plex.SaveMissingCacheForServer(defaultMachineId);
+
+                PlexService.UnregisterSseStream(exportId, registrationId);
+                PlexService.SaveMissingCacheToFile();
                 Console.WriteLine("[ExportAllLive] Completed SSE stream.");
             }
         }
