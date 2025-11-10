@@ -1,3 +1,4 @@
+@using System
 @using System.Globalization
 @using Microsoft.Extensions.Localization
 @using SpotifyPlaylistWebApp
@@ -59,15 +60,27 @@
 
         .site-header nav {
             flex-shrink: 0;
+            margin-left: auto;
+            display: flex;
+            align-items: center;
         }
     </style>
 </head>
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var hideHomeShortcut = string.Equals(currentController, "Home", StringComparison.OrdinalIgnoreCase)
+        && string.Equals(currentAction, "Index", StringComparison.OrdinalIgnoreCase);
+}
 <body>
 <header class="site-header">
-    <a class="site-home" href="/">
-        <span aria-hidden="true">🏠</span>
-        <span>@L["Button_BackToHome"]</span>
-    </a>
+    @if (!hideHomeShortcut)
+    {
+        <a class="site-home" href="/">
+            <span aria-hidden="true">🏠</span>
+            <span>@L["Button_BackToHome"]</span>
+        </a>
+    }
     <nav aria-label="Language switcher">
         <partial name="LanguageSwitcher"/>
     </nav>
