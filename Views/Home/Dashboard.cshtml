@@ -4,112 +4,110 @@
 @inject IStringLocalizer<SharedResource> L
 @inject IJsonHelper Json
 @{
-    Layout = null;
+    Layout = "Layout";
+    ViewData["Title"] = L["Dashboard_Dashboard_InetConnector_Playlist_Generator_nutzt"];
+    ViewData["BodyClass"] = "dashboard-page";
     var user = ViewBag?.User as string;
     if (string.IsNullOrWhiteSpace(user))
     {
         user = L["Dashboard_DefaultUserName"];
     }
 }
-<!doctype html>
-<html lang="@CultureInfo.CurrentUICulture.Name">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>@L["Dashboard_Dashboard_InetConnector_Playlist_Generator_nutzt"]</title>
-    <script src="https://cdn.tailwindcss.com"></script>
 
-    <style>
-        body {
-            background: radial-gradient(1000px 600px at 20% 10%, rgba(16,185,129,0.25), transparent 60%), radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,0.25), transparent 60%), #0b0f17;
-            color: white;
-            font-family: system-ui, sans-serif;
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+    .dashboard-page {
+        background: radial-gradient(1000px 600px at 20% 10%, rgba(16,185,129,0.25), transparent 60%),
+                    radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,0.25), transparent 60%),
+                    #0b0f17;
+        color: white;
+        font-family: system-ui, sans-serif;
+    }
+
+    .dashboard-page .glass {
+        background: rgba(255,255,255,0.08);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .dashboard-page .btn {
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        width: 9rem;
+        height: 9rem;
+        border-radius: 1.1rem;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: white;
+        text-decoration: none;
+        background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.1));
+        border: 1px solid rgba(255,255,255,0.15);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 0 12px rgba(16,185,129,0.25);
+        transition: all 0.25s ease;
+    }
+
+    .dashboard-page .btn:hover {
+        background: linear-gradient(145deg, rgba(16,185,129,0.28), rgba(99,102,241,0.22));
+        transform: translateY(-3px) scale(1.03);
+        box-shadow: 0 0 26px rgba(16,185,129,0.4);
+    }
+
+    .dashboard-page .btn span.icon {
+        font-size: 1.9rem;
+        filter: drop-shadow(0 0 6px rgba(16,185,129,0.55));
+    }
+
+    .dashboard-page .status-text {
+        font-size: 0.8rem;
+        color: #9CA3AF;
+        margin-top: 0.2rem;
+    }
+
+    .dashboard-page .status-ready {
+        color: #10B981;
+    }
+
+    .dashboard-page .status-wait {
+        color: #F59E0B;
+    }
+
+    @@keyframes dashboard-fade-in-up {
+        from {
+            opacity: 0;
+            transform: translateY(15px);
         }
 
-        .glass {
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.12);
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
+    }
 
-        .btn {
-            position: relative;
-            display: inline-flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 0.35rem;
-            width: 9rem;
-            height: 9rem;
-            border-radius: 1.1rem;
-            font-size: 1.05rem;
-            font-weight: 600;
-            color: white;
-            text-decoration: none;
-            background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.1));
-            border: 1px solid rgba(255,255,255,0.15);
-            backdrop-filter: blur(8px);
-            box-shadow: 0 0 12px rgba(16,185,129,0.25);
-            transition: all 0.25s ease;
-        }
+    .dashboard-page .fade-in {
+        animation: dashboard-fade-in-up 0.8s ease forwards;
+    }
 
-            .btn:hover {
-                background: linear-gradient(145deg, rgba(16,185,129,0.28), rgba(99,102,241,0.22));
-                transform: translateY(-3px) scale(1.03);
-                box-shadow: 0 0 26px rgba(16,185,129,0.4);
-            }
+    .dashboard-page .delay-1 {
+        animation-delay: 0.2s;
+    }
 
-            .btn span.icon {
-                font-size: 1.9rem;
-                filter: drop-shadow(0 0 6px rgba(16,185,129,0.55));
-            }
+    .dashboard-page .delay-2 {
+        animation-delay: 0.4s;
+    }
 
-        .status-text {
-            font-size: 0.8rem;
-            color: #9CA3AF;
-            margin-top: 0.2rem;
-        }
+    .dashboard-page .delay-3 {
+        animation-delay: 0.6s;
+    }
+</style>
 
-        .status-ready {
-            color: #10B981;
-        }
-
-        .status-wait {
-            color: #F59E0B;
-        }
-
-        @@keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .fade-in {
-            animation: fadeInUp 0.8s ease forwards;
-        }
-
-        .delay-1 {
-            animation-delay: 0.2s;
-        }
-
-        .delay-2 {
-            animation-delay: 0.4s;
-        }
-
-        .delay-3 {
-            animation-delay: 0.6s;
-        }
-    </style>
-</head>
-
-<body class="min-h-screen flex flex-col">
-    <main class="flex-grow max-w-4xl mx-auto px-6 py-16">
+<div class="dashboard-shell min-h-screen flex flex-col">
+    <div class="flex-grow max-w-4xl mx-auto px-6 py-16">
         <div class="glass rounded-3xl p-8 md:p-10 shadow-xl text-center">
             <h1 class="text-3xl md:text-4xl font-bold mb-2 fade-in">@string.Format(L["Dashboard_WelcomeUser"], user)</h1>
             <p class="text-white/70 mb-8 fade-in delay-1">
@@ -188,8 +186,11 @@
                 @L["Dashboard_Die_Erstellung_erfolgt_im_Hintergrund_und_dauert"]
             </p>
         </div>
-    </main>
+    </div>
+</div>
 
+@section Scripts
+{
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const playlistSelect = document.getElementById("playlistSelect");
@@ -276,8 +277,8 @@
                     if (until && until > t) {
                         ev.preventDefault();
                         btn.animate(
-                            [{transform:'translateX(0)'},{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'translateX(0)'}],
-                            {duration:250}
+                            [{ transform: 'translateX(0)' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'translateX(0)' }],
+                            { duration: 250 }
                         );
                         return;
                     }
@@ -306,6 +307,4 @@
             startCooldownTicker();
         });
     </script>
-
-</body>
-</html>
+}

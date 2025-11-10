@@ -72,7 +72,7 @@
     var hideHomeShortcut = string.Equals(currentController, "Home", StringComparison.OrdinalIgnoreCase)
         && string.Equals(currentAction, "Index", StringComparison.OrdinalIgnoreCase);
 }
-<body>
+<body class="@(ViewData["BodyClass"] ?? string.Empty)">
 <header class="site-header">
     @if (!hideHomeShortcut)
     {
