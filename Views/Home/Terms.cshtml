@@ -5,20 +5,22 @@
 @{
     Layout = "Layout";
     ViewData["Title"] = L["Terms_PageTitle"];
+    ViewData["BodyClass"] = "min-h-screen font-sans antialiased";
 }
-<!doctype html>
-<html lang="@CultureInfo.CurrentUICulture.Name">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>@L["Terms_Title"]</title>
+
+@section HeadContent {
     <meta name="description" content="@L["Terms_MetaDescription"]" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://playlists.inetconnector.com/Home/Terms" />
+}
+
+@section Styles {
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            background: radial-gradient(1000px 600px at 20% 10%, rgba(16,185,129,0.25), transparent 60%), radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,0.25), transparent 60%), #0b0f17;
+            background: radial-gradient(1000px 600px at 20% 10%, rgba(16,185,129,0.25), transparent 60%),
+                        radial-gradient(900px 600px at 90% 0%, rgba(99,102,241,0.25), transparent 60%),
+                        #0b0f17;
             color: white;
             font-family: system-ui, sans-serif;
         }
@@ -38,16 +40,15 @@
             color: #34d399;
         }
     </style>
-</head>
-<body class="min-h-screen font-sans antialiased">
-<header class="max-w-5xl mx-auto px-6 pt-10">
+}
+
+<div class="max-w-5xl mx-auto px-6 pt-10">
     <div class="flex items-center gap-3">
-        <div>
-            <div class="text-sm uppercase tracking-wider text-white/70">@L["Terms_Title"]</div>
-        </div>
+        <div class="text-sm uppercase tracking-wider text-white/70">@L["Terms_Title"]</div>
     </div>
-</header>
-<main class="flex-grow max-w-3xl mx-auto px-6 py-16">
+</div>
+
+<div class="flex-grow max-w-3xl mx-auto px-6 py-16">
     <div class="glass rounded-3xl p-8 md:p-10 shadow-xl leading-relaxed space-y-6">
         <section>
             <h1 class="text-3xl font-bold mb-6">@L["Terms_Title"]</h1>
@@ -67,7 +68,4 @@
             </a>
         </div>
     </div>
-</main>
-@await Html.PartialAsync("Footer")
-</body>
-</html>
+</div>

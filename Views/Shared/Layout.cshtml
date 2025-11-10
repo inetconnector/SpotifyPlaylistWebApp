@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>@ViewData["Title"] - @L["Layout_TitleSuffix"]</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
+    @RenderSection("HeadContent", required: false)
     <style>
         body {
             background: radial-gradient(circle at top left, #0f2027, #203a43, #2c5364);
@@ -38,6 +39,10 @@
             box-sizing: border-box;
         }
 
+        .site-header--solo {
+            justify-content: flex-end;
+        }
+
         .site-home {
             display: inline-flex;
             align-items: center;
@@ -64,16 +69,25 @@
             display: flex;
             align-items: center;
         }
+
+        .site-header--solo nav {
+            margin-left: 0;
+        }
     </style>
+    @RenderSection("Styles", required: false)
 </head>
-@{
+@{ 
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
     var hideHomeShortcut = string.Equals(currentController, "Home", StringComparison.OrdinalIgnoreCase)
         && string.Equals(currentAction, "Index", StringComparison.OrdinalIgnoreCase);
+    var headerClass = hideHomeShortcut ? "site-header site-header--solo" : "site-header";
+    var bodyClass = Convert.ToString(ViewData["BodyClass"]) ?? string.Empty;
+    var bodyStyle = Convert.ToString(ViewData["BodyStyle"]);
+    var bodyStyleAttribute = string.IsNullOrWhiteSpace(bodyStyle) ? string.Empty : $" style=\"{bodyStyle}\"";
 }
-<body class="@(ViewData["BodyClass"] ?? string.Empty)">
-<header class="site-header">
+<body class="@bodyClass"@Html.Raw(bodyStyleAttribute)>
+<header class="@headerClass">
     @if (!hideHomeShortcut)
     {
         <a class="site-home" href="/">
