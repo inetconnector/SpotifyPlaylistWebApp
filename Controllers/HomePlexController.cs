@@ -246,29 +246,34 @@ namespace SpotifyPlaylistWebApp.Controllers
                     var found = await plex.SearchTracksOnPlexAsync(baseUrl, plexToken,
                         new List<(string Title, string Artist)> { (title, artist) });
                     var match = found.FirstOrDefault();
+                    var shouldReportProgress = false;
 
                     if (!string.IsNullOrEmpty(match.RatingKey))
                     {
                         matchedKeys.Add(match.RatingKey);
                         added++;
                         await plex.SendSseAsync(exportId, $"✅ {L["SpotifyToPlex_Found"]}: {artist} — {title}");
+
+                        if (matchedKeys.Count >= batchSize)
+                        {
+                            await plex.AddTracksToPlaylistAsync(
+                                baseUrl, plexToken, plexPlaylistKey,
+                                matchedKeys, defaultMachineId, exportId);
+
+                            matchedKeys.Clear();
+                            shouldReportProgress = true;
+                        }
                     }
                     else
                     {
                         missing++;
                         missingList.Add((artist, title, album));
+                        shouldReportProgress = true;
                         await plex.SendSseAsync(exportId, $"❌ {L["SpotifyToPlex_MissingTrack"]}: {artist} — {title}");
                     }
 
-                    if (matchedKeys.Count >= batchSize)
-                    {
-                        await plex.AddTracksToPlaylistAsync(
-                            baseUrl, plexToken, plexPlaylistKey,
-                            matchedKeys, defaultMachineId, exportId);
-
-                        matchedKeys.Clear();
+                    if (shouldReportProgress)
                         await plex.SendSseAsync(exportId, $"progress:{added}:{missing}:{total}");
-                    }
 
                     PlexService.UpdateMissingCache(playlistName, missingList);
                     PlexService.SaveMissingCacheToFile();
@@ -649,26 +654,31 @@ namespace SpotifyPlaylistWebApp.Controllers
                         var found = await plex.SearchTracksOnPlexAsync(baseUrl, plexToken,
                             new List<(string Title, string Artist)> { (title, artist) });
                         var match = found.FirstOrDefault();
+                        var shouldReportProgress = false;
 
                         if (!string.IsNullOrEmpty(match.RatingKey))
                         {
                             matchedKeys.Add(match.RatingKey);
                             added++;
+
+                            if (matchedKeys.Count >= batchSize)
+                            {
+                                await plex.AddTracksToPlaylistAsync(
+                                    baseUrl, plexToken, plexPlaylistKey,
+                                    matchedKeys, defaultMachineId, exportId);
+                                matchedKeys.Clear();
+                                shouldReportProgress = true;
+                            }
                         }
                         else
                         {
                             missing++;
                             missingList.Add((artist, title, album));
+                            shouldReportProgress = true;
                         }
 
-                        if (matchedKeys.Count >= batchSize)
-                        {
-                            await plex.AddTracksToPlaylistAsync(
-                                baseUrl, plexToken, plexPlaylistKey,
-                                matchedKeys, defaultMachineId, exportId);
-                            matchedKeys.Clear();
+                        if (shouldReportProgress)
                             await plex.SendSseAsync(exportId, $"progress:{added}:{missing}:{total}");
-                        }
 
                         PlexService.UpdateMissingCache(playlistName, missingList);
                     }
