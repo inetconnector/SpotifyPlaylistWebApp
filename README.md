@@ -1,7 +1,7 @@
 # 🎧 Playlist Web App for Spotify® + Plex Integration — README (v3.4)
 
 ## 🌐 Live Demo
-👉 **https://playlists.inetconnector.com**
+👉 **https://playlist.inetconnector.com**
 
 > ⚠️ **Access note:**  
 > Due to Spotify API policy changes, this demo is available **only for invited testers**.  
